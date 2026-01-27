@@ -14,6 +14,7 @@ function App() {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     // Fetch papers from the backend API
@@ -34,6 +35,15 @@ function App() {
       });
   }, []);
 
+  // Filter papers based on the search term
+  const filteredPapers = papers.filter(paper => {
+    const searchTermLower = searchTerm.toLowerCase();
+    const titleMatch = paper.title.toLowerCase().includes(searchTermLower);
+    const authorsMatch = paper.authors.join(', ').toLowerCase().includes(searchTermLower);
+    const abstractMatch = paper.abstract.toLowerCase().includes(searchTermLower);
+    return titleMatch || authorsMatch || abstractMatch;
+  });
+
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8 font-sans">
       <header className="text-center mb-12">
@@ -41,13 +51,23 @@ function App() {
         <p className="text-xl text-gray-400">An AI-native platform for exploring the frontiers of World Models research.</p>
       </header>
       
+      <div className="mb-12 max-w-2xl mx-auto">
+        <input
+          type="text"
+          placeholder="Search by title, authors, or abstract..."
+          className="w-full px-4 py-3 bg-gray-800 text-white border-2 border-gray-700 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors duration-300"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
       <main>
         {loading && <p className="text-center text-lg text-blue-400">Loading papers...</p>}
         {error && <p className="text-center text-red-500 text-lg">Error: {error}</p>}
         
         {!loading && !error && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {papers.map(paper => (
+            {filteredPapers.map(paper => (
               <div key={paper.id} className="bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col justify-between hover:shadow-cyan-500/50 transition-shadow duration-300">
                 <div>
                   <h2 className="text-2xl font-bold mb-3 text-cyan-400">{paper.title}</h2>
