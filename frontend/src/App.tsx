@@ -17,7 +17,7 @@ function App() {
 
   useEffect(() => {
     // Fetch papers from the backend API
-    fetch('http://localhost:3000/api/papers')
+    fetch('https://world-models-research-hub-backhend.onrender.com/api/papers')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
