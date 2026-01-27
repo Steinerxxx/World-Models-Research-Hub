@@ -53,11 +53,6 @@ app.post('/api/papers', async (req, res) => {
 });
 
 // Start the server
-app.listen(port, async () => {
-  // await createPapersTable(); // Table is now created manually in Supabase
-  console.log(`Backend server is running at http://localhost:${port}`);
-});
-    console.error('Failed to initialize the database:', err);
-    process.exit(1);
-  }
+app.listen(port, () => {
+  console.log(`Backend server is running at port ${port}`);
 });
