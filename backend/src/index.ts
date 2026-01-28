@@ -6,6 +6,7 @@ import {
   getAllPapers,
   query
 } from './database.js';
+import { scrapeArxiv } from './scraper.js';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -49,6 +50,23 @@ app.post('/api/papers', async (req, res) => {
   } catch (err) {
     console.error('Error adding paper:', err);
     res.status(500).json({ message: 'Failed to add paper' });
+  }
+});
+
+// API route to trigger scraper
+app.post('/api/scrape', async (req, res) => {
+  try {
+    const result = await scrapeArxiv();
+    res.json({ 
+      message: 'Scraping completed successfully', 
+      stats: result 
+    });
+  } catch (err) {
+    console.error('Error during scraping:', err);
+    res.status(500).json({ 
+      message: 'Scraping failed', 
+      error: err instanceof Error ? err.message : 'Unknown error' 
+    });
   }
 });
 

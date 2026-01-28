@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ExternalLink, Calendar, Users, Loader2 } from "lucide-react";
+import { Search, ExternalLink, Calendar, Users, Loader2, RefreshCw } from "lucide-react";
 
 // Define the type for a single paper
 interface Paper {
@@ -17,11 +17,12 @@ interface Paper {
 function App() {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    // Fetch papers from the backend API
+  const fetchPapers = () => {
+    setLoading(true);
     fetch('https://world-models-research-hub-backhend.onrender.com/api/papers')
       .then(response => {
         if (!response.ok) {
@@ -37,7 +38,36 @@ function App() {
         setError(error.message);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchPapers();
   }, []);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetch('https://world-models-research-hub-backhend.onrender.com/api/scrape', {
+      method: 'POST',
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch new papers');
+        }
+        return response.json();
+      })
+      .then(() => {
+        // After scraping, fetch the updated list of papers
+        fetchPapers();
+      })
+      .catch(err => {
+        console.error('Error scraping papers:', err);
+        // Still try to fetch papers even if scrape fails, to ensure we show what we have
+        fetchPapers(); 
+      })
+      .finally(() => {
+        setRefreshing(false);
+      });
+  };
 
   // Filter papers based on the search term
   const filteredPapers = papers.filter(paper => {
@@ -59,6 +89,25 @@ function App() {
             <p className="text-xl text-slate-400 max-w-2xl mx-auto">
               An AI-native platform for exploring the frontiers of World Models research.
             </p>
+            <div className="flex justify-center mt-6">
+              <Button 
+                onClick={handleRefresh} 
+                disabled={refreshing || loading}
+                className="bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 hover:border-cyan-500/50 transition-all duration-300"
+              >
+                {refreshing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Fetching Papers...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Fetch Latest Papers
+                  </>
+                )}
+              </Button>
+            </div>
           </header>
           
           <div className="mb-16 max-w-2xl mx-auto relative">

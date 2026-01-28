@@ -12,7 +12,8 @@ interface Paper {
   publication_date: string; 
 }
 
-async function scrapeArxiv(): Promise<void> {
+export async function scrapeArxiv() {
+  const result = { found: 0, added: 0, errors: 0 };
   try {
     console.log('Fetching papers from arXiv...');
     const { data } = await axios.get(ARXIV_URL);
@@ -43,21 +44,25 @@ async function scrapeArxiv(): Promise<void> {
       }
     });
 
+    result.found = papers.length;
     console.log(`Found ${papers.length} papers. Saving to database...`);
 
     for (const paper of papers) {
       try {
         await addPaper(paper);
+        result.added++;
         console.log(`Successfully added paper: ${paper.title}`);
       } catch (error) {
+        result.errors++;
         console.error(`Failed to add paper: ${paper.title}`, error);
       }
     }
 
     console.log('Scraping finished.');
+    return result;
   } catch (error) {
     console.error('An error occurred during scraping:', error);
+    throw error;
   }
 }
 
-scrapeArxiv();
