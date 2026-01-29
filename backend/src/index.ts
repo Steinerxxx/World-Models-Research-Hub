@@ -9,6 +9,7 @@ import {
 } from './database.js';
 import { scrapeArxiv } from './scraper.js';
 import { classifyPaper } from './classifier.js';
+import cron from 'node-cron';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -96,6 +97,17 @@ app.post('/api/reclassify', async (req, res) => {
       message: 'Reclassification failed', 
       error: err instanceof Error ? err.message : 'Unknown error' 
     });
+  }
+});
+
+// Schedule automatic scraping every 6 hours
+cron.schedule('0 */6 * * *', async () => {
+  console.log('Running scheduled scraping task...');
+  try {
+    const result = await scrapeArxiv();
+    console.log('Scheduled scraping completed:', result);
+  } catch (err) {
+    console.error('Scheduled scraping failed:', err);
   }
 });
 
