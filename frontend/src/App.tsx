@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ExternalLink, Calendar, Users, Loader2, RefreshCw, Tag } from "lucide-react";
+import { Search, ExternalLink, Calendar, Users, Loader2, RefreshCw, Tag, ChevronLeft, ChevronRight } from "lucide-react";
 
 // Define the type for a single paper
 interface Paper {
@@ -22,6 +22,10 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 25;
 
   // Extract all unique tags from papers
   const allTags = Array.from(new Set(papers.flatMap(p => p.tags || []))).sort();
@@ -84,6 +88,21 @@ function App() {
     
     return (titleMatch || authorsMatch || abstractMatch) && tagMatch;
   });
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedTag]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredPapers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentPapers = filteredPapers.slice(startIndex, startIndex + itemsPerPage);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans dark">
@@ -172,48 +191,79 @@ function App() {
             )}
             
             {!loading && !error && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredPapers.map(paper => (
-                  <Card key={paper.id} className="bg-slate-900/50 border-slate-800 hover:border-cyan-500/30 transition-all duration-300 hover:shadow-cyan-500/10 hover:shadow-lg flex flex-col group h-full backdrop-blur-sm">
-                    <CardHeader>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {paper.tags?.map(tag => (
-                          <span key={tag} className="px-2 py-0.5 rounded-md bg-cyan-950/50 text-cyan-400 text-xs border border-cyan-900/50 flex items-center">
-                            <Tag className="w-3 h-3 mr-1" />
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                      <CardTitle className="text-xl font-bold text-slate-100 leading-tight group-hover:text-cyan-400 transition-colors">
-                        {paper.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-grow space-y-4">
-                      <div className="flex items-start space-x-2 text-sm text-slate-400">
-                        <Users className="h-4 w-4 mt-1 flex-shrink-0 text-slate-500" />
-                        <span className="line-clamp-2">{paper.authors.join(', ')}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-xs text-slate-500">
-                        <Calendar className="h-3 w-3" />
-                        <span>{new Date(paper.publication_date).toLocaleDateString()}</span>
-                      </div>
-                      <p className="text-slate-300 text-sm leading-relaxed line-clamp-4">
-                        {paper.abstract}
-                      </p>
-                    </CardContent>
-                    <CardFooter className="pt-4 border-t border-slate-800/50">
-                      <Button 
-                        asChild 
-                        className="w-full bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg shadow-cyan-900/20"
-                      >
-                        <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
-                          Read Paper <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {currentPapers.map(paper => (
+                    <Card key={paper.id} className="bg-slate-900/50 border-slate-800 hover:border-cyan-500/30 transition-all duration-300 hover:shadow-cyan-500/10 hover:shadow-lg flex flex-col group h-full backdrop-blur-sm">
+                      <CardHeader>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {paper.tags?.map(tag => (
+                            <span key={tag} className="px-2 py-0.5 rounded-md bg-cyan-950/50 text-cyan-400 text-xs border border-cyan-900/50 flex items-center">
+                              <Tag className="w-3 h-3 mr-1" />
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <CardTitle className="text-xl font-bold text-slate-100 leading-tight group-hover:text-cyan-400 transition-colors">
+                          {paper.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex-grow space-y-4">
+                        <div className="flex items-start space-x-2 text-sm text-slate-400">
+                          <Users className="h-4 w-4 mt-1 flex-shrink-0 text-slate-500" />
+                          <span className="line-clamp-2">{paper.authors.join(', ')}</span>
+                        </div>
+                        <div className="flex items-center space-x-2 text-xs text-slate-500">
+                          <Calendar className="h-3 w-3" />
+                          <span>{new Date(paper.publication_date).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-slate-300 text-sm leading-relaxed line-clamp-4">
+                          {paper.abstract}
+                        </p>
+                      </CardContent>
+                      <CardFooter className="pt-4 border-t border-slate-800/50">
+                        <Button 
+                          asChild 
+                          className="w-full bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg shadow-cyan-900/20"
+                        >
+                          <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
+                            Read Paper <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {filteredPapers.length > itemsPerPage && (
+                  <div className="flex justify-center items-center mt-12 gap-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="bg-slate-900 border-slate-700 text-slate-300 hover:text-cyan-400 hover:border-cyan-500/50"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    
+                    <span className="text-slate-400 text-sm">
+                      Page <span className="text-white font-medium">{currentPage}</span> of <span className="text-white font-medium">{totalPages}</span>
+                    </span>
+
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="bg-slate-900 border-slate-700 text-slate-300 hover:text-cyan-400 hover:border-cyan-500/50"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
             
             {!loading && !error && filteredPapers.length === 0 && (
