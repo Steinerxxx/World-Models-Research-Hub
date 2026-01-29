@@ -39,9 +39,16 @@ export async function addPaper(paper: { title: string; authors: string[]; abstra
   const insertQuery = `
     INSERT INTO papers (title, authors, abstract, url, publication_date, tags)
     VALUES ($1, $2, $3, $4, $5, $6)
-    ON CONFLICT (url) DO NOTHING;
+    ON CONFLICT (url) DO UPDATE SET tags = EXCLUDED.tags;
   `;
   await query(insertQuery, [title, authors, abstract, url, publication_date, tags || []]);
+}
+
+export async function updatePaperTags(id: number, tags: string[]) {
+  const updateQuery = `
+    UPDATE papers SET tags = $1 WHERE id = $2;
+  `;
+  await query(updateQuery, [tags, id]);
 }
 
 export async function getAllPapers() {

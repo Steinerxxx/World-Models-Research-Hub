@@ -4,9 +4,11 @@ import {
   createPapersTable,
   addPaper,
   getAllPapers,
+  updatePaperTags,
   query
 } from './database.js';
 import { scrapeArxiv } from './scraper.js';
+import { classifyPaper } from './classifier.js';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -65,6 +67,33 @@ app.post('/api/scrape', async (req, res) => {
     console.error('Error during scraping:', err);
     res.status(500).json({ 
       message: 'Scraping failed', 
+      error: err instanceof Error ? err.message : 'Unknown error' 
+    });
+  }
+});
+
+// API route to reclassify all existing papers
+app.post('/api/reclassify', async (req, res) => {
+  try {
+    const papers = await getAllPapers();
+    let count = 0;
+    
+    for (const paper of papers) {
+      // Re-run classification logic
+      const tags = classifyPaper(paper.title, paper.abstract);
+      // Update the database record
+      await updatePaperTags(paper.id, tags);
+      count++;
+    }
+    
+    res.json({ 
+      message: 'Reclassification completed successfully', 
+      processed_count: count 
+    });
+  } catch (err) {
+    console.error('Error during reclassification:', err);
+    res.status(500).json({ 
+      message: 'Reclassification failed', 
       error: err instanceof Error ? err.message : 'Unknown error' 
     });
   }
