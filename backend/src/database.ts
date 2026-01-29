@@ -18,21 +18,30 @@ export async function createPapersTable() {
       abstract TEXT,
       publication_date DATE,
       url TEXT UNIQUE NOT NULL,
+      tags TEXT[],
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
   `;
   await query(createTableQuery);
-  console.log('"papers" table created or already exists.');
+
+  // Add tags column if it doesn't exist (migration for existing table)
+  try {
+    await query(`ALTER TABLE papers ADD COLUMN IF NOT EXISTS tags TEXT[]`);
+  } catch (err) {
+    console.log('Column tags might already exist or error adding it:', err);
+  }
+  
+  console.log('"papers" table created or updated.');
 }
 
-export async function addPaper(paper: { title: string; authors: string[]; abstract: string; url: string; publication_date: string; }) {
-  const { title, authors, abstract, url, publication_date } = paper;
+export async function addPaper(paper: { title: string; authors: string[]; abstract: string; url: string; publication_date: string; tags?: string[] }) {
+  const { title, authors, abstract, url, publication_date, tags } = paper;
   const insertQuery = `
-    INSERT INTO papers (title, authors, abstract, url, publication_date)
-    VALUES ($1, $2, $3, $4, $5)
+    INSERT INTO papers (title, authors, abstract, url, publication_date, tags)
+    VALUES ($1, $2, $3, $4, $5, $6)
     ON CONFLICT (url) DO NOTHING;
   `;
-  await query(insertQuery, [title, authors, abstract, url, publication_date]);
+  await query(insertQuery, [title, authors, abstract, url, publication_date, tags || []]);
 }
 
 export async function getAllPapers() {

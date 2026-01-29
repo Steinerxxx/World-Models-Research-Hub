@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { addPaper } from './database.js';
+import { classifyPaper } from './classifier.js';
 
 const ARXIV_URL = 'https://arxiv.org/search/?query="World+Models"&searchtype=all&source=header';
 
@@ -10,6 +11,7 @@ interface Paper {
   abstract: string;
   url: string;
   publication_date: string; 
+  tags?: string[];
 }
 
 export async function scrapeArxiv() {
@@ -34,12 +36,14 @@ export async function scrapeArxiv() {
 
 
       if (title && authors.length > 0 && abstract && pdfLink) {
+        const tags = classifyPaper(title, abstract);
         papers.push({
           title,
           authors,
           abstract,
           url: pdfLink,
-          publication_date
+          publication_date,
+          tags
         });
       }
     });
@@ -51,7 +55,7 @@ export async function scrapeArxiv() {
       try {
         await addPaper(paper);
         result.added++;
-        console.log(`Successfully added paper: ${paper.title}`);
+        console.log(`Successfully added paper: ${paper.title} with tags: ${paper.tags?.join(', ')}`);
       } catch (error) {
         result.errors++;
         console.error(`Failed to add paper: ${paper.title}`, error);

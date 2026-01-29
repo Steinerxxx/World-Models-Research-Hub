@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ExternalLink, Calendar, Users, Loader2, RefreshCw } from "lucide-react";
+import { Search, ExternalLink, Calendar, Users, Loader2, RefreshCw, Tag } from "lucide-react";
 
 // Define the type for a single paper
 interface Paper {
@@ -12,6 +12,7 @@ interface Paper {
   abstract: string;
   publication_date: string;
   url: string;
+  tags?: string[];
 }
 
 function App() {
@@ -20,6 +21,10 @@ function App() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
+  // Extract all unique tags from papers
+  const allTags = Array.from(new Set(papers.flatMap(p => p.tags || []))).sort();
 
   const fetchPapers = () => {
     setLoading(true);
@@ -69,13 +74,15 @@ function App() {
       });
   };
 
-  // Filter papers based on the search term
+  // Filter papers based on the search term and selected tag
   const filteredPapers = papers.filter(paper => {
     const searchTermLower = searchTerm.toLowerCase();
     const titleMatch = paper.title.toLowerCase().includes(searchTermLower);
     const authorsMatch = paper.authors.join(', ').toLowerCase().includes(searchTermLower);
     const abstractMatch = paper.abstract.toLowerCase().includes(searchTermLower);
-    return titleMatch || authorsMatch || abstractMatch;
+    const tagMatch = selectedTag ? paper.tags?.includes(selectedTag) : true;
+    
+    return (titleMatch || authorsMatch || abstractMatch) && tagMatch;
   });
 
   return (
@@ -110,7 +117,7 @@ function App() {
             </div>
           </header>
           
-          <div className="mb-16 max-w-2xl mx-auto relative">
+          <div className="mb-10 max-w-4xl mx-auto space-y-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
               <Input
@@ -121,6 +128,31 @@ function App() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+            
+            {/* Tag Filter */}
+            {allTags.length > 0 && (
+              <div className="flex flex-wrap gap-2 justify-center">
+                <Button
+                  variant={selectedTag === null ? "secondary" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedTag(null)}
+                  className={`rounded-full border-slate-700 ${selectedTag === null ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-slate-900/30 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/50'}`}
+                >
+                  All Topics
+                </Button>
+                {allTags.map(tag => (
+                  <Button
+                    key={tag}
+                    variant={selectedTag === tag ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                    className={`rounded-full border-slate-700 ${selectedTag === tag ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-slate-900/30 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/50'}`}
+                  >
+                    {tag}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
 
           <main>
@@ -144,6 +176,14 @@ function App() {
                 {filteredPapers.map(paper => (
                   <Card key={paper.id} className="bg-slate-900/50 border-slate-800 hover:border-cyan-500/30 transition-all duration-300 hover:shadow-cyan-500/10 hover:shadow-lg flex flex-col group h-full backdrop-blur-sm">
                     <CardHeader>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {paper.tags?.map(tag => (
+                          <span key={tag} className="px-2 py-0.5 rounded-md bg-cyan-950/50 text-cyan-400 text-xs border border-cyan-900/50 flex items-center">
+                            <Tag className="w-3 h-3 mr-1" />
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                       <CardTitle className="text-xl font-bold text-slate-100 leading-tight group-hover:text-cyan-400 transition-colors">
                         {paper.title}
                       </CardTitle>
