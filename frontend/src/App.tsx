@@ -320,6 +320,10 @@ function App() {
               </div>
             )}
           </main>
+          
+          <footer className="text-center text-slate-600 py-8 text-sm">
+            <p>&copy; {new Date().getFullYear()} World Models Research Hub. All rights reserved.</p>
+          </footer>
         </div>
       </div>
     </div>
