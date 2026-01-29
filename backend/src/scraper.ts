@@ -15,15 +15,27 @@ interface Paper {
 }
 
 function parseDate(dateText: string): string {
-  // Regex to match "originally announced Month Year"
+  const months: {[key: string]: number} = {
+      'January': 0, 'February': 1, 'March': 2, 'April': 3, 'May': 4, 'June': 5,
+      'July': 6, 'August': 7, 'September': 8, 'October': 9, 'November': 10, 'December': 11
+  };
+
+  // Try to find "Submitted DD Month, YYYY" first
+  // e.g., "Submitted 28 January, 2026;"
+  const submittedMatch = dateText.match(/Submitted (\d{1,2}) (\w+), (\d{4})/);
+  if (submittedMatch) {
+      const day = parseInt(submittedMatch[1]);
+      const monthStr = submittedMatch[2];
+      const year = parseInt(submittedMatch[3]);
+      const month = months[monthStr] !== undefined ? months[monthStr] : 0;
+      return new Date(Date.UTC(year, month, day)).toISOString().split('T')[0];
+  }
+
+  // Fallback to "originally announced Month Year"
   const match = dateText.match(/originally announced (\w+) (\d{4})/);
   if (match) {
       const monthStr = match[1];
       const year = parseInt(match[2]);
-      const months: {[key: string]: number} = {
-          'January': 0, 'February': 1, 'March': 2, 'April': 3, 'May': 4, 'June': 5,
-          'July': 6, 'August': 7, 'September': 8, 'October': 9, 'November': 10, 'December': 11
-      };
       const month = months[monthStr] !== undefined ? months[monthStr] : 0;
       // Use UTC to ensure date stays stable regardless of server timezone
       return new Date(Date.UTC(year, month, 1)).toISOString().split('T')[0];

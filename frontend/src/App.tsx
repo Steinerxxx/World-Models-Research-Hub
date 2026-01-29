@@ -237,7 +237,7 @@ function App() {
 
                 {/* Pagination Controls */}
                 {filteredPapers.length > itemsPerPage && (
-                  <div className="flex justify-center items-center mt-12 gap-4">
+                  <div className="flex justify-center items-center mt-12 gap-2">
                     <Button
                       variant="outline"
                       size="icon"
@@ -248,9 +248,22 @@ function App() {
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     
-                    <span className="text-slate-400 text-sm">
-                      Page <span className="text-white font-medium">{currentPage}</span> of <span className="text-white font-medium">{totalPages}</span>
-                    </span>
+                    {getPageNumbers().map((page, index) => (
+                      <Button
+                        key={index}
+                        variant={page === currentPage ? "secondary" : "outline"}
+                        size="sm"
+                        onClick={() => typeof page === 'number' && handlePageChange(page)}
+                        disabled={page === '...'}
+                        className={`min-w-[2.5rem] ${
+                          page === currentPage 
+                            ? 'bg-cyan-600 text-white hover:bg-cyan-700 border-cyan-500' 
+                            : 'bg-slate-900 border-slate-700 text-slate-300 hover:text-cyan-400 hover:border-cyan-500/50'
+                        } ${page === '...' ? 'cursor-default hover:bg-slate-900 hover:text-slate-300 hover:border-slate-700' : ''}`}
+                      >
+                        {page}
+                      </Button>
+                    ))}
 
                     <Button
                       variant="outline"
