@@ -11,10 +11,10 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Check local storage or system preference
-    const savedTheme = localStorage.getItem('theme') as Theme;
+    // Always default to dark for now to fix user issue
+    // We can re-enable persistence later if needed, or use a new key
+    const savedTheme = localStorage.getItem('theme-preference') as Theme;
     if (savedTheme) return savedTheme;
-    // Default to dark mode
     return 'dark';
   });
 
@@ -22,7 +22,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    localStorage.setItem('theme', theme);
+    localStorage.setItem('theme-preference', theme);
   }, [theme]);
 
   const toggleTheme = () => {

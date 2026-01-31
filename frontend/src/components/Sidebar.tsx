@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -37,8 +37,24 @@ const ARCHITECTURE_TAGS = [
 
 export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { selectedTag, setSelectedTag } = useFilter();
+
+  // Handle responsive behavior
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const handleResize = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobile(e.matches);
+    };
+    
+    // Initial check
+    handleResize(mediaQuery);
+    
+    // Listen for changes
+    mediaQuery.addEventListener('change', handleResize);
+    return () => mediaQuery.removeEventListener('change', handleResize);
+  }, []);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -46,6 +62,9 @@ export function Sidebar() {
     open: { x: 0, opacity: 1, transition: { type: "spring", stiffness: 300, damping: 30 } },
     closed: { x: "-100%", opacity: 0, transition: { type: "spring", stiffness: 300, damping: 30 } },
   } as const;
+
+  // Determine animation state
+  const animateState = isMobile ? (isOpen ? "open" : "closed") : "open";
 
   return (
     <>
@@ -61,7 +80,7 @@ export function Sidebar() {
 
       {/* Backdrop for mobile */}
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && isMobile && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -75,10 +94,15 @@ export function Sidebar() {
       {/* Sidebar Container */}
       <motion.aside
         initial={false}
-        animate={isOpen ? "open" : "closed"}
+        animate={animateState}
         variants={sidebarVariants}
-        className={`fixed top-0 left-0 h-full bg-background/95 backdrop-blur-md border-r border-border z-40 flex flex-col shadow-2xl md:translate-x-0 md:opacity-100 md:relative md:block ${isOpen ? 'block' : 'hidden'}`}
-        style={{ width: '20rem' }} // Force width
+        // Force style override on desktop to ensure visibility
+        style={{ 
+          width: '20rem',
+          transform: !isMobile ? 'none' : undefined,
+          opacity: !isMobile ? 1 : undefined
+        }}
+        className={`fixed top-0 left-0 h-full bg-background/95 backdrop-blur-md border-r border-border z-40 flex flex-col shadow-2xl md:translate-x-0 md:opacity-100 md:relative md:flex`}
       >
         <div className="p-6 flex items-center justify-between border-b border-border/50">
           <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600">
