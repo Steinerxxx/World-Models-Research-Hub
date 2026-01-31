@@ -77,7 +77,7 @@ export function Sidebar() {
         initial={false}
         animate={isOpen ? "open" : "closed"}
         variants={sidebarVariants}
-        className={`fixed top-0 left-0 h-full w-80 bg-background/95 backdrop-blur-md border-r border-border z-40 flex flex-col shadow-2xl md:relative md:translate-x-0 md:opacity-100 md:block ${isOpen ? 'block' : 'hidden md:block'}`}
+        className={`fixed top-0 left-0 h-full bg-background/95 backdrop-blur-md border-r border-border z-40 flex flex-col shadow-2xl md:translate-x-0 md:opacity-100 md:relative md:block ${isOpen ? 'block' : 'hidden'}`}
         style={{ width: '20rem' }} // Force width
       >
         <div className="p-6 flex items-center justify-between border-b border-border/50">
