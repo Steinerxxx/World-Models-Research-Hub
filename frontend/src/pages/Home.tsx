@@ -100,41 +100,67 @@ export default function Home() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll the main content container to top
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // Fallback
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   // Helper to generate page numbers
   const getPageNumbers = () => {
     const pageNumbers: (number | string)[] = [];
-    const maxVisiblePages = 5;
+    // Always show first, last, current, and neighbors
+    // Logic: 1 ... (current-1) current (current+1) ... total
     
-    if (totalPages <= maxVisiblePages) {
+    // If total pages is small, show all
+    if (totalPages <= 7) {
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i);
       }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 3; i++) {
-          pageNumbers.push(i);
-        }
-        pageNumbers.push('...');
-        pageNumbers.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pageNumbers.push(1);
-        pageNumbers.push('...');
-        for (let i = totalPages - 2; i <= totalPages; i++) {
-          pageNumbers.push(i);
-        }
-      } else {
-        pageNumbers.push(1);
-        pageNumbers.push('...');
-        pageNumbers.push(currentPage - 1);
-        pageNumbers.push(currentPage);
-        pageNumbers.push(currentPage + 1);
-        pageNumbers.push('...');
-        pageNumbers.push(totalPages);
+      return pageNumbers;
+    }
+
+    // Always add first page
+    pageNumbers.push(1);
+
+    // Calculate start and end of middle range
+    let startPage = Math.max(2, currentPage - 1);
+    let endPage = Math.min(totalPages - 1, currentPage + 1);
+
+    // Adjust if near beginning
+    if (currentPage <= 3) {
+      endPage = 4; // Ensure we see at least up to page 4
+    }
+
+    // Adjust if near end
+    if (currentPage >= totalPages - 2) {
+      startPage = totalPages - 3;
+    }
+
+    // Add ellipsis before middle range if needed
+    if (startPage > 2) {
+      pageNumbers.push('...');
+    }
+
+    // Add middle pages
+    for (let i = startPage; i <= endPage; i++) {
+      if (i > 1 && i < totalPages) {
+        pageNumbers.push(i);
       }
     }
+
+    // Add ellipsis after middle range if needed
+    if (endPage < totalPages - 1) {
+      pageNumbers.push('...');
+    }
+
+    // Always add last page
+    pageNumbers.push(totalPages);
+
     return pageNumbers;
   };
 
