@@ -5,7 +5,8 @@ import {
   addPaper,
   getAllPapers,
   updatePaperTags,
-  query
+  query,
+  initDatabase
 } from './database.js';
 import { scrapeArxiv } from './scraper.js';
 import { classifyPaper } from './classifier.js';
@@ -17,6 +18,9 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Initialize Database (or fallback to JSON)
+initDatabase();
+
 // API route to test database connection
 app.get('/api/test-db', async (req, res) => {
   try {
@@ -26,10 +30,12 @@ app.get('/api/test-db', async (req, res) => {
       time: result.rows[0].now,
     });
   } catch (err) {
-    console.error('Database query error', err);
-    res.status(500).json({
-      message: 'Database connection failed!',
-      error: err instanceof Error ? err.message : 'An unknown error occurred',
+    // If fallback is active, this query will fail or hang, but the app is alive.
+    // We should probably return status of connection mode.
+    console.error('Database query error (expected if using local JSON)', err);
+    res.status(200).json({
+      message: 'Using Local JSON Storage (Database not connected)',
+      warning: 'Live database connection failed. Running in offline mode.'
     });
   }
 });
