@@ -223,25 +223,29 @@ export function Sidebar() {
             </Button>
 
             {/* Pagination Settings */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-start gap-3 border-border">
-                  <List className="h-4 w-4" />
-                  {itemsPerPage} per page
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {[10, 25, 50, 100].map((num) => (
-                  <DropdownMenuItem 
-                    key={num}
-                    onClick={() => setItemsPerPage(num)}
-                    className={itemsPerPage === num ? "bg-accent" : ""}
-                  >
-                    {num} papers
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="w-full">
+              <label htmlFor="items-per-page" className="sr-only">Items per page</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <List className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <select
+                  id="items-per-page"
+                  value={itemsPerPage}
+                  onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                  className="w-full h-10 pl-9 pr-3 rounded-md border border-border bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none cursor-pointer"
+                >
+                  {[10, 25, 50, 100].map((num) => (
+                    <option key={num} value={num}>
+                      {num} papers per page
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-xs">
+                  ▼
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </motion.aside>
