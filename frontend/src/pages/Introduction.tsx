@@ -122,19 +122,19 @@ export default function Introduction() {
                   `}
                   initial={{ borderRadius: 12 }}
                 >
-                  <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-lg ${node.color} text-white shadow-lg`}>
+                  <motion.div layout="position" className="flex items-start gap-4">
+                    <motion.div layout="position" className={`p-3 rounded-lg ${node.color} text-white shadow-lg`}>
                       {node.icon}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-foreground text-lg">
+                    </motion.div>
+                    <motion.div layout="position" className="flex-1">
+                      <motion.h3 layout="position" className="font-bold text-foreground text-lg">
                         {node.label}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      </motion.h3>
+                      <motion.p layout="position" className="text-sm text-muted-foreground mt-1">
                         {node.description}
-                      </p>
-                    </div>
-                  </div>
+                      </motion.p>
+                    </motion.div>
+                  </motion.div>
 
                   <AnimatePresence>
                     {selectedNode === node.id && (
