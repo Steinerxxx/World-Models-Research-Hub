@@ -27,6 +27,7 @@ export default function Home() {
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
+  const [inputPage, setInputPage] = useState('');
   // itemsPerPage is now controlled by FilterContext
 
   const fetchPapers = () => {
@@ -107,6 +108,14 @@ export default function Home() {
     } else {
       // Fallback
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleGoToPage = () => {
+    const pageNumber = parseInt(inputPage);
+    if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= totalPages) {
+      handlePageChange(pageNumber);
+      setInputPage('');
     }
   };
 
@@ -316,6 +325,34 @@ export default function Home() {
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
+
+                {/* Jump to Page Input */}
+                <div className="flex items-center gap-2 ml-4 pl-4 border-l border-border/50">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap hidden sm:inline-block">Go to:</span>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={totalPages}
+                    value={inputPage}
+                    onChange={(e) => setInputPage(e.target.value)}
+                    placeholder="#"
+                    className="w-16 h-8 text-center px-1 bg-card/50"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleGoToPage();
+                      }
+                    }}
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleGoToPage}
+                    disabled={!inputPage || parseInt(inputPage) < 1 || parseInt(inputPage) > totalPages}
+                    className="h-8 px-3"
+                  >
+                    Go
+                  </Button>
+                </div>
               </div>
             )}
           </>
