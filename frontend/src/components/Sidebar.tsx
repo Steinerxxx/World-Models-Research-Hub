@@ -39,7 +39,7 @@ export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const { selectedTag, setSelectedTag } = useFilter();
+  const { selectedTag, setSelectedTag, itemsPerPage, setItemsPerPage } = useFilter();
 
   // Handle responsive behavior
   useEffect(() => {
