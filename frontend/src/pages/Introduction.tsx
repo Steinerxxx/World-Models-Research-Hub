@@ -142,14 +142,15 @@ export default function Introduction() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="mt-4 pt-4 border-t border-border/50 overflow-hidden"
+                        className="mt-4 pt-4 border-t border-border/50"
                       >
                         <ul className="grid grid-cols-2 gap-2">
-                          {node.details.map((detail) => (
+                          {node.details.map((detail, idx) => (
                             <motion.li
                               key={detail}
-                              layout="position"
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: idx * 0.1 }}
                               className="flex items-center gap-2 text-sm text-foreground/80"
                             >
                               <div className={`w-1.5 h-1.5 rounded-full ${node.color}`} />
