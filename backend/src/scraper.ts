@@ -44,24 +44,46 @@ function parseDate(dateText: string): string {
   return new Date().toISOString().split('T')[0];
 }
 
-export async function scrapeArxiv() {
+export async function scrapeArxiv(fullBackfill = false) {
   const result = { found: 0, added: 0, errors: 0 };
-  const MAX_RESULTS = 200; // Scrape up to 200 papers
+  const MAX_RESULTS = fullBackfill ? 2000 : 200; // Scrape deeper if backfilling
   const BATCH_SIZE = 50;
+  const CUTOFF_DATE = new Date('2025-01-01');
+
+  // Helper for exponential backoff
+  const fetchWithRetry = async (url: string, retries = 3, delay = 5000) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await axios.get(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          }
+        });
+      } catch (err: any) {
+        if (err.response && err.response.status === 429) {
+          console.warn(`Rate limited (429). Retrying in ${delay/1000}s... (Attempt ${i + 1}/${retries})`);
+          await new Promise(res => setTimeout(res, delay));
+          delay *= 2; // Exponential backoff
+        } else {
+          throw err;
+        }
+      }
+    }
+    throw new Error('Max retries exceeded for arXiv scraping');
+  };
 
   try {
-    for (let start = 0; start < MAX_RESULTS; start += BATCH_SIZE) {
+    let shouldContinue = true;
+
+    for (let start = 0; start < MAX_RESULTS && shouldContinue; start += BATCH_SIZE) {
       console.log(`Fetching papers from arXiv (offset ${start})...`);
       const url = `${BASE_ARXIV_URL}&start=${start}`;
       
-      const { data } = await axios.get(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-      });
+      const { data } = await fetchWithRetry(url);
       const $ = cheerio.load(data);
 
       const rawPapers: { title: string; authors: string[]; abstract: string; pdfLink: string; publication_date: string }[] = [];
+      let foundOldPaper = false;
 
       $('li.arxiv-result').each((_i, el) => {
         const title = $(el).find('p.title').text().trim();
@@ -72,6 +94,13 @@ export async function scrapeArxiv() {
         // Extract publication date
         const publishedText = $(el).find('p.is-size-7').text();
         const publication_date = parseDate(publishedText);
+
+        // Check date cutoff
+        if (new Date(publication_date) < CUTOFF_DATE) {
+            foundOldPaper = true;
+            // Don't stop immediately inside the loop, just don't add it if we want strict filtering.
+            // But usually we just want to stop fetching *next* pages.
+        }
 
         if (title && authors.length > 0 && abstract && pdfLink) {
           rawPapers.push({
@@ -84,22 +113,43 @@ export async function scrapeArxiv() {
         }
       });
 
-      const papers: Paper[] = [];
-      for (const raw of rawPapers) {
-        const tags = await classifyPaper(raw.title, raw.abstract);
-        papers.push({
-          title: raw.title,
-          authors: raw.authors,
-          abstract: raw.abstract,
-          url: raw.pdfLink,
-          publication_date: raw.publication_date,
-          tags
-        });
+      if (foundOldPaper && !fullBackfill) {
+        // If we found an old paper and we are NOT doing a full backfill (just normal hourly scrape),
+        // we can probably stop, assuming results are sorted by date.
+        // But arXiv search results might not be perfectly strict, so let's just use the flag to stop *next* batch.
+        // Actually, if we are sorted by date descending, once we hit < 2025, all subsequent papers are old.
+        shouldContinue = false;
       }
 
+      // If we are doing a full backfill, we want to keep going until we are SURE we passed Jan 2025.
+      if (foundOldPaper && fullBackfill) {
+         // If we see papers older than 2025, we can stop fetching more pages.
+         shouldContinue = false;
+      }
+      
+      const papers: Paper[] = [];
+      for (const raw of rawPapers) {
+        // Double check date before adding
+        if (new Date(raw.publication_date) >= CUTOFF_DATE) {
+            const tags = await classifyPaper(raw.title, raw.abstract);
+            papers.push({
+            title: raw.title,
+            authors: raw.authors,
+            abstract: raw.abstract,
+            url: raw.pdfLink,
+            publication_date: raw.publication_date,
+            tags
+            });
+        }
+      }
+
+      if (papers.length === 0 && !shouldContinue) {
+        break; 
+      }
+      
       if (papers.length === 0) {
-        console.log('No more papers found.');
-        break;
+         console.log('No more papers found.');
+         break;
       }
 
       result.found += papers.length;

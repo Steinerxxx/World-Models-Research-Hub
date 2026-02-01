@@ -106,8 +106,8 @@ app.post('/api/reclassify', async (req, res) => {
   }
 });
 
-// Schedule automatic scraping every 6 hours
-cron.schedule('0 */6 * * *', async () => {
+// Schedule automatic scraping every hour
+cron.schedule('0 * * * *', async () => {
   console.log('Running scheduled scraping task...');
   try {
     const result = await scrapeArxiv();
