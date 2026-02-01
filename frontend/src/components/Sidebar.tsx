@@ -30,8 +30,8 @@ const SUBJECT_TAGS = [
 ];
 
 const ARCHITECTURE_TAGS = [
-  'Transformer', 
-  'Diffusion', 
+  'Transformers', 
+  'Diffusion Models', 
   'RNN', 
   'State Space Models'
 ];

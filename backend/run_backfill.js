@@ -1,5 +1,25 @@
 import { scrapeArxiv } from './dist/scraper.js';
 import { initDatabase } from './dist/database.js';
+import fs from 'fs';
+import util from 'util';
+
+const logFile = fs.createWriteStream('backfill_debug.log', { flags: 'w' });
+const logStdout = process.stdout;
+
+console.log = function(d) { //
+  logFile.write(util.format(d) + '\n');
+  logStdout.write(util.format(d) + '\n');
+};
+
+console.error = function(d) { //
+  logFile.write(util.format(d) + '\n');
+  logStdout.write(util.format(d) + '\n');
+};
+
+console.warn = function(d) { //
+  logFile.write(util.format(d) + '\n');
+  logStdout.write(util.format(d) + '\n');
+};
 
 async function backfill() {
     console.log("Starting backfill for 2025 papers...");

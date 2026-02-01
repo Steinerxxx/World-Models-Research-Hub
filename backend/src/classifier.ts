@@ -112,6 +112,24 @@ export async function classifyPaper(title: string, abstract: string): Promise<st
     tags.add('Diffusion Models');
   }
 
+  if (
+    text.includes('rnn') ||
+    text.includes('recurrent neural network') ||
+    text.includes('lstm') ||
+    text.includes('gru')
+  ) {
+    tags.add('RNN');
+  }
+
+  if (
+    text.includes('state space model') ||
+    text.includes('ssm') ||
+    text.includes('mamba') ||
+    text.includes('s4')
+  ) {
+    tags.add('State Space Models');
+  }
+
   // --- 2. AI-Based Classification (Enhancement) ---
   // If we have very few tags, or specific complex categories, let's ask AI.
   // For now, let's ALWAYS ask AI to enrich the tags, but merge them with our rule-based ones.
