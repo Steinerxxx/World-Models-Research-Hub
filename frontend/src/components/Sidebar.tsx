@@ -59,11 +59,6 @@ export function Sidebar() {
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
-  const sidebarVariants = {
-    open: { x: 0, opacity: 1, transition: { type: "spring", stiffness: 300, damping: 30 } },
-    closed: { x: "-100%", opacity: 0, transition: { type: "spring", stiffness: 300, damping: 30 } },
-  } as const;
-
   // Determine animation state
   const animateState = isOpen ? "open" : "closed";
 

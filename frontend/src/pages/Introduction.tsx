@@ -5,11 +5,8 @@ import {
   X, 
   Monitor, 
   Server, 
-  Cpu, 
   Cloud, 
-  Globe, 
   Database, 
-  Zap,
   Code2
 } from 'lucide-react';
 
