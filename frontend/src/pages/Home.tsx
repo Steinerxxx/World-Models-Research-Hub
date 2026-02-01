@@ -169,12 +169,12 @@ export default function Home() {
       <header className="mb-8 space-y-4">
         <div className="flex flex-col items-center justify-center gap-6 text-center">
           <div className="px-4 md:px-0">
-            <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-600">
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-600">
               World Models Research Hub
             </h1>
-            <p className="text-muted-foreground mt-2">
-            Tracking the latest advancements in World Models and Model-Based RL (v1.11)
-          </p>
+            <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto">
+              Tracking the latest advancements in World Models and Model-Based RL (v1.12)
+            </p>
           </div>
           
           <Button 
