@@ -173,7 +173,7 @@ export default function Home() {
               World Models Research Hub
             </h1>
             <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto">
-              Tracking the latest advancements in World Models and Model-Based RL (v1.16)
+              Tracking the latest advancements in World Models and Model-Based RL (v1.17)
             </p>
           </div>
           
