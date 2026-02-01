@@ -166,30 +166,24 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <header className="text-center mb-10 space-y-4">
-        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-foreground bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600">
-          World Models Research Hub
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          An AI-native platform for exploring the frontiers of World Models research.
-        </p>
-        <div className="flex justify-center mt-6">
+      <header className="mb-8 space-y-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-600">
+              World Models Research Hub
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Tracking the latest advancements in World Models and Model-Based RL (v1.2)
+            </p>
+          </div>
           <Button 
             onClick={handleRefresh} 
-            disabled={refreshing || loading}
-            className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-all duration-300"
+            disabled={refreshing}
+            variant="outline"
+            className="gap-2"
           >
-            {refreshing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Fetching Papers...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Fetch Latest Papers
-              </>
-            )}
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh Data'}
           </Button>
         </div>
       </header>
