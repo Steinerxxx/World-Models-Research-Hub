@@ -109,7 +109,7 @@ export default function Introduction() {
             <p className="text-muted-foreground mb-6">
               Click on any node below to explore the technologies powering this platform.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
               {techNodes.map((node) => (
                 <motion.div
                   key={node.id}
