@@ -173,7 +173,7 @@ export default function Home() {
               World Models Research Hub
             </h1>
             <p className="text-muted-foreground mt-2">
-            Tracking the latest advancements in World Models and Model-Based RL (v1.4)
+            Tracking the latest advancements in World Models and Model-Based RL (v1.5)
           </p>
           </div>
           <Button 

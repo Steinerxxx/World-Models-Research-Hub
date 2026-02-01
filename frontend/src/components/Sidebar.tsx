@@ -11,7 +11,8 @@ import {
   Moon, 
   Tag, 
   Layers, 
-  Cpu 
+  Cpu,
+  List
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
