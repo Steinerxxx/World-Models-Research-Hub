@@ -91,7 +91,7 @@ export default function Home() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedTag]);
+  }, [searchTerm, selectedTag, itemsPerPage]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredPapers.length / itemsPerPage);

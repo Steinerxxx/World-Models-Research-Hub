@@ -199,11 +199,13 @@ export function Sidebar() {
         </div>
 
         {/* Settings Footer */}
-        <div className="p-4 border-t border-border/50 bg-background/50 backdrop-blur-sm">
+        <div className="p-4 border-t border-border/50 bg-background/50 backdrop-blur-sm space-y-3">
           <div className="space-y-1">
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-2 flex items-center gap-2">
               <Settings className="h-3 w-3" /> Settings
             </h3>
+            
+            {/* Theme Toggle */}
             <Button
               variant="outline"
               className="w-full justify-start gap-3 border-border"
@@ -219,6 +221,27 @@ export function Sidebar() {
                 </>
               )}
             </Button>
+
+            {/* Pagination Settings */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full justify-start gap-3 border-border">
+                  <List className="h-4 w-4" />
+                  {itemsPerPage} per page
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {[10, 25, 50, 100].map((num) => (
+                  <DropdownMenuItem 
+                    key={num}
+                    onClick={() => setItemsPerPage(num)}
+                    className={itemsPerPage === num ? "bg-accent" : ""}
+                  >
+                    {num} papers
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </motion.aside>

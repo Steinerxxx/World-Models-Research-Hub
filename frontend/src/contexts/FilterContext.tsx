@@ -5,6 +5,8 @@ interface FilterContextType {
   setSearchTerm: (term: string) => void;
   selectedTag: string | null;
   setSelectedTag: (tag: string | null) => void;
+  itemsPerPage: number;
+  setItemsPerPage: (num: number) => void;
 }
 
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
@@ -12,9 +14,26 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 export function FilterProvider({ children }: { children: React.ReactNode }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  // Default to 25 items per page, persisting in localStorage could be a nice touch
+  const [itemsPerPage, setItemsPerPage] = useState(() => {
+    const saved = localStorage.getItem('itemsPerPage');
+    return saved ? parseInt(saved, 10) : 25;
+  });
+
+  const handleSetItemsPerPage = (num: number) => {
+    setItemsPerPage(num);
+    localStorage.setItem('itemsPerPage', num.toString());
+  };
 
   return (
-    <FilterContext.Provider value={{ searchTerm, setSearchTerm, selectedTag, setSelectedTag }}>
+    <FilterContext.Provider value={{ 
+      searchTerm, 
+      setSearchTerm, 
+      selectedTag, 
+      setSelectedTag,
+      itemsPerPage,
+      setItemsPerPage: handleSetItemsPerPage
+    }}>
       {children}
     </FilterContext.Provider>
   );
