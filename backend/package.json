@@ -24,11 +24,14 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@types/node-cron": "^3.0.11",
     "axios": "^1.13.2",
     "cheerio": "^1.2.0",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "node-cron": "^4.2.1",
+    "openai": "^6.17.0",
     "pg": "^8.17.2"
   }
 }

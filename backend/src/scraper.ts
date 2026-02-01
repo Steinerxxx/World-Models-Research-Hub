@@ -61,7 +61,7 @@ export async function scrapeArxiv() {
       });
       const $ = cheerio.load(data);
 
-      const papers: Paper[] = [];
+      const rawPapers: { title: string; authors: string[]; abstract: string; pdfLink: string; publication_date: string }[] = [];
 
       $('li.arxiv-result').each((_i, el) => {
         const title = $(el).find('p.title').text().trim();
@@ -74,17 +74,28 @@ export async function scrapeArxiv() {
         const publication_date = parseDate(publishedText);
 
         if (title && authors.length > 0 && abstract && pdfLink) {
-          const tags = classifyPaper(title, abstract);
-          papers.push({
+          rawPapers.push({
             title,
             authors,
             abstract,
-            url: pdfLink,
-            publication_date,
-            tags
+            pdfLink,
+            publication_date
           });
         }
       });
+
+      const papers: Paper[] = [];
+      for (const raw of rawPapers) {
+        const tags = await classifyPaper(raw.title, raw.abstract);
+        papers.push({
+          title: raw.title,
+          authors: raw.authors,
+          abstract: raw.abstract,
+          url: raw.pdfLink,
+          publication_date: raw.publication_date,
+          tags
+        });
+      }
 
       if (papers.length === 0) {
         console.log('No more papers found.');

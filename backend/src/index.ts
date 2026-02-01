@@ -81,7 +81,7 @@ app.post('/api/reclassify', async (req, res) => {
     
     for (const paper of papers) {
       // Re-run classification logic
-      const tags = classifyPaper(paper.title, paper.abstract);
+      const tags = await classifyPaper(paper.title, paper.abstract);
       // Update the database record
       await updatePaperTags(paper.id, tags);
       count++;

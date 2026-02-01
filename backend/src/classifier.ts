@@ -1,9 +1,10 @@
+import { classifyWithAI } from './ai_service.js';
 
-export function classifyPaper(title: string, abstract: string): string[] {
+export async function classifyPaper(title: string, abstract: string): Promise<string[]> {
   const text = (title + " " + abstract).toLowerCase();
   const tags: Set<string> = new Set();
 
-  // --- Subject Categories ---
+  // --- 1. Rule-Based Classification (Fast & Cheap) ---
 
   // World Models & Model-Based RL (Primary Focus)
   if (
@@ -95,50 +96,32 @@ export function classifyPaper(title: string, abstract: string): string[] {
   }
 
   // --- Architecture Categories ---
-
   if (
     text.includes('transformer') || 
-    text.includes('attention') || 
-    text.includes('vit') || 
-    text.includes('gpt') ||
-    text.includes('bert') ||
-    text.includes('llama')
+    text.includes('attention mechanism') ||
+    text.includes('gpt')
   ) {
-    tags.add('Transformer');
+    tags.add('Transformers');
   }
 
   if (
-    text.includes('diffusion model') || 
-    text.includes('score-based') || 
-    text.includes('denoising') ||
-    text.includes('ddpm') ||
-    text.includes('latent diffusion')
+    text.includes('diffusion model') ||
+    text.includes('score-based') ||
+    text.includes('denoising')
   ) {
-    tags.add('Diffusion');
+    tags.add('Diffusion Models');
   }
 
-  if (
-    text.includes('rnn') || 
-    text.includes('lstm') || 
-    text.includes('gru') || 
-    text.includes('recurrent neural network')
-  ) {
-    tags.add('RNN');
-  }
-
-  if (
-    text.includes('state space model') || 
-    text.includes('ssm') || 
-    text.includes('mamba') || 
-    text.includes('s4') ||
-    text.includes('rwkv')
-  ) {
-    tags.add('State Space Models');
-  }
+  // --- 2. AI-Based Classification (Enhancement) ---
+  // If we have very few tags, or specific complex categories, let's ask AI.
+  // For now, let's ALWAYS ask AI to enrich the tags, but merge them with our rule-based ones.
+  // To save costs/time, you might only want to call this if tags.size === 0
   
-  // Default tag if none found
-  if (tags.size === 0) {
-      tags.add('Uncategorized');
+  try {
+    const aiTags = await classifyWithAI(title, abstract);
+    aiTags.forEach(tag => tags.add(tag));
+  } catch (error) {
+    console.error("AI Classification failed, falling back to rules only:", error);
   }
 
   return Array.from(tags);
