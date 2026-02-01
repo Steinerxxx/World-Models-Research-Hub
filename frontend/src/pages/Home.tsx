@@ -167,20 +167,30 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12">
       <header className="mb-8 space-y-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col items-center justify-center gap-6 text-center relative">
           <div>
             <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-600">
               World Models Research Hub
             </h1>
             <p className="text-muted-foreground mt-2">
-            Tracking the latest advancements in World Models and Model-Based RL (v1.6)
+            Tracking the latest advancements in World Models and Model-Based RL (v1.7)
           </p>
           </div>
           <Button 
             onClick={handleRefresh} 
             disabled={refreshing}
             variant="outline"
-            className="gap-2"
+            className="gap-2 absolute right-0 top-0 hidden md:flex"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh Data'}
+          </Button>
+          {/* Mobile refresh button */}
+          <Button 
+            onClick={handleRefresh} 
+            disabled={refreshing}
+            variant="outline"
+            className="gap-2 w-full md:hidden"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             {refreshing ? 'Refreshing...' : 'Refresh Data'}
