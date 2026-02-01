@@ -23,11 +23,11 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   
   // Use context for filters
-  const { searchTerm, setSearchTerm, selectedTag, setSelectedTag } = useFilter();
+  const { searchTerm, setSearchTerm, selectedTag, setSelectedTag, itemsPerPage } = useFilter();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 25;
+  // itemsPerPage is now controlled by FilterContext
 
   const fetchPapers = () => {
     setLoading(true);
@@ -173,8 +173,8 @@ export default function Home() {
               World Models Research Hub
             </h1>
             <p className="text-muted-foreground mt-2">
-              Tracking the latest advancements in World Models and Model-Based RL (v1.2)
-            </p>
+            Tracking the latest advancements in World Models and Model-Based RL (v1.3)
+          </p>
           </div>
           <Button 
             onClick={handleRefresh} 
