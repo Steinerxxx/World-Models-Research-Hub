@@ -64,18 +64,34 @@ export function Sidebar() {
   } as const;
 
   // Determine animation state
-  const animateState = isMobile ? (isOpen ? "open" : "closed") : "open";
+  const animateState = isOpen ? "open" : "closed";
+
+  // Handle desktop/mobile variants
+  const variants = isMobile ? {
+    open: { x: 0, opacity: 1, position: "fixed" as const, zIndex: 40 },
+    closed: { x: "-100%", opacity: 0, position: "fixed" as const, zIndex: 40 }
+  } : {
+    open: { width: "20rem", opacity: 1, x: 0 },
+    closed: { width: "0rem", opacity: 0, x: 0 }
+  };
+
+  useEffect(() => {
+    // Default to open on desktop, closed on mobile
+    setIsOpen(!isMobile);
+  }, [isMobile]);
 
   return (
     <>
-      {/* Mobile Toggle Button */}
+      {/* Toggle Button (Always visible) */}
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 md:hidden bg-background/50 backdrop-blur-sm border border-border"
+        className={`fixed top-4 left-4 z-50 transition-all duration-300 ${
+          isOpen && !isMobile ? 'left-[20.5rem]' : 'left-4'
+        } bg-background/50 backdrop-blur-sm border border-border shadow-sm hover:bg-accent`}
         onClick={toggleSidebar}
       >
-        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        {isOpen ? <Menu className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
 
       {/* Backdrop for mobile */}
@@ -95,20 +111,15 @@ export function Sidebar() {
       <motion.aside
         initial={false}
         animate={animateState}
-        variants={sidebarVariants}
-        // Force style override on desktop to ensure visibility
-        style={{ 
-          width: '20rem',
-          transform: !isMobile ? 'none' : undefined,
-          opacity: !isMobile ? 1 : undefined
-        }}
-        className={`fixed top-0 left-0 h-full bg-background/95 backdrop-blur-md border-r border-border z-40 flex flex-col shadow-2xl md:translate-x-0 md:opacity-100 md:relative md:flex`}
+        variants={variants}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className={`h-full bg-background/95 backdrop-blur-md border-r border-border flex flex-col shadow-2xl overflow-hidden whitespace-nowrap`}
       >
-        <div className="p-6 flex items-center justify-between border-b border-border/50">
+        <div className="p-6 flex items-center justify-between border-b border-border/50 min-w-[20rem]">
           <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600">
             Research Hub
           </h2>
-          {/* Desktop close button - usually hidden but good for flexibility */}
+          {/* Close button inside sidebar for mobile */}
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsOpen(false)}>
             <X className="h-5 w-5" />
           </Button>
