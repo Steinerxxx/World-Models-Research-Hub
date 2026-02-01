@@ -47,24 +47,29 @@ function parseDate(dateText: string): string {
 export async function scrapeArxiv(fullBackfill = false) {
   const result = { found: 0, added: 0, errors: 0 };
   const MAX_RESULTS = fullBackfill ? 2000 : 200; // Scrape deeper if backfilling
-  const BATCH_SIZE = 50;
+  const BATCH_SIZE = 25; // Reduced from 50 to avoid timeouts/rate-limits
   const CUTOFF_DATE = new Date('2025-01-01');
 
   // Helper for exponential backoff
-  const fetchWithRetry = async (url: string, retries = 3, delay = 5000) => {
+  const fetchWithRetry = async (url: string, retries = 5, delay = 5000) => {
     for (let i = 0; i < retries; i++) {
       try {
         return await axios.get(url, {
+          timeout: 30000, // 30s timeout
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
           }
         });
       } catch (err: any) {
         if (err.response && err.response.status === 429) {
-          console.warn(`Rate limited (429). Retrying in ${delay/1000}s... (Attempt ${i + 1}/${retries})`);
+          console.warn(`⚠️ Rate limited (429). Retrying in ${delay/1000}s... (Attempt ${i + 1}/${retries})`);
           await new Promise(res => setTimeout(res, delay));
           delay *= 2; // Exponential backoff
+        } else if (err.code === 'ECONNABORTED') {
+           console.warn(`⚠️ Request timed out. Retrying in ${delay/1000}s... (Attempt ${i + 1}/${retries})`);
+           await new Promise(res => setTimeout(res, delay));
         } else {
+          console.error(`Request failed: ${err.message}`);
           throw err;
         }
       }
