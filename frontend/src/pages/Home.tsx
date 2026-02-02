@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ExternalLink, Calendar, Users, Loader2, RefreshCw, Tag, ChevronLeft, ChevronRight, Copy, FileText } from "lucide-react";
+import { Search, ExternalLink, Calendar, Users, Loader2, RefreshCw, Tag, ChevronLeft, ChevronRight, Copy } from "lucide-react";
 import { useFilter } from '@/contexts/FilterContext';
 
 // Define the type for a single paper
@@ -324,7 +324,7 @@ export default function Home() {
                       title="Copy BibTeX"
                       className="border-primary/20 hover:bg-primary/10 hover:text-primary"
                     >
-                      <FileText className="h-4 w-4" />
+                      <Copy className="h-4 w-4" />
                     </Button>
                   </CardFooter>
                 </Card>
