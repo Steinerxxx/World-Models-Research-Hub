@@ -5,6 +5,7 @@ dotenv.config();
 
 const apiKey = process.env.AI_API_KEY;
 const baseURL = process.env.AI_BASE_URL || 'https://api.deepseek.com';
+const modelName = process.env.AI_MODEL_NAME || 'deepseek-chat';
 
 if (!apiKey) {
   console.warn('AI_API_KEY is not set. AI features will be disabled.');
@@ -52,7 +53,7 @@ Example Output:
     `;
 
     const response = await openai.chat.completions.create({
-      model: 'deepseek-chat',
+      model: modelName,
       messages: [
         { role: 'system', content: 'You are a helpful assistant that outputs strict JSON arrays.' },
         { role: 'user', content: prompt }
