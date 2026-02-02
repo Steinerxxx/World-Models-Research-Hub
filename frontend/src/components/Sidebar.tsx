@@ -12,7 +12,8 @@ import {
   Tag, 
   Layers, 
   Cpu,
-  List
+  List,
+  ArrowUpDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -45,7 +46,7 @@ export function Sidebar() {
     return false;
   });
   const { theme, toggleTheme } = useTheme();
-  const { selectedTag, setSelectedTag, itemsPerPage, setItemsPerPage } = useFilter();
+  const { selectedTag, setSelectedTag, itemsPerPage, setItemsPerPage, sortBy, setSortBy } = useFilter();
 
   // Handle responsive behavior
   useEffect(() => {
@@ -193,26 +194,50 @@ export function Sidebar() {
           </Button>
 
           {/* Pagination Settings */}
-          <div className="w-full">
-            <label htmlFor="items-per-page" className="sr-only">Items per page</label>
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <List className="h-4 w-4 text-muted-foreground" />
+          <div className="w-full space-y-3">
+            <div className="w-full">
+              <label htmlFor="sort-order" className="sr-only">Sort Order</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <select
+                  id="sort-order"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full h-10 pl-9 pr-3 rounded-md border border-border bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none cursor-pointer"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="relevance">Relevance</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-xs">
+                  ▼
+                </div>
               </div>
-              <select
-                id="items-per-page"
-                value={itemsPerPage}
-                onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                className="w-full h-10 pl-9 pr-3 rounded-md border border-border bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none cursor-pointer"
-              >
-                {[10, 25, 50, 100].map((num) => (
-                  <option key={num} value={num}>
-                    {num} papers per page
-                  </option>
-                ))}
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-xs">
-                ▼
+            </div>
+
+            <div className="w-full">
+              <label htmlFor="items-per-page" className="sr-only">Items per page</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <List className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <select
+                  id="items-per-page"
+                  value={itemsPerPage}
+                  onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                  className="w-full h-10 pl-9 pr-3 rounded-md border border-border bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none cursor-pointer"
+                >
+                  {[10, 25, 50, 100].map((num) => (
+                    <option key={num} value={num}>
+                      {num} papers per page
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-xs">
+                  ▼
+                </div>
               </div>
             </div>
           </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ExternalLink, Calendar, Users, Loader2, RefreshCw, Tag, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ExternalLink, Calendar, Users, Loader2, RefreshCw, Tag, ChevronLeft, ChevronRight, Copy, FileText } from "lucide-react";
 import { useFilter } from '@/contexts/FilterContext';
 
 // Define the type for a single paper
@@ -23,7 +23,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   
   // Use context for filters
-  const { searchTerm, setSearchTerm, selectedTag, setSelectedTag, itemsPerPage } = useFilter();
+  const { searchTerm, setSearchTerm, selectedTag, setSelectedTag, itemsPerPage, sortBy } = useFilter();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,6 +78,23 @@ export default function Home() {
       });
   };
 
+  const copyBibTeX = (paper: Paper) => {
+    const year = new Date(paper.publication_date).getFullYear();
+    const firstAuthor = paper.authors[0].split(' ').pop() || 'Author';
+    const title = paper.title.replace(/\s+/g, '_').substring(0, 20).replace(/[^a-zA-Z0-9_]/g, '');
+    const id = `${firstAuthor}${year}${title}`;
+    
+    const bibtex = `@article{${id},
+  title={${paper.title}},
+  author={${paper.authors.join(' and ')}},
+  journal={arXiv preprint arXiv:${paper.url.split('/').pop()}},
+  year={${year}},
+  url={${paper.url}}
+}`;
+    navigator.clipboard.writeText(bibtex);
+    alert("BibTeX copied to clipboard!");
+  };
+
   // Filter papers based on the search term and selected tag
   const filteredPapers = papers.filter(paper => {
     const searchTermLower = searchTerm.toLowerCase();
@@ -87,12 +104,24 @@ export default function Home() {
     const tagMatch = selectedTag ? paper.tags?.includes(selectedTag) : true;
     
     return (titleMatch || authorsMatch || abstractMatch) && tagMatch;
+  }).sort((a, b) => {
+    if (sortBy === 'newest') {
+      return new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime();
+    } else if (sortBy === 'oldest') {
+      return new Date(a.publication_date).getTime() - new Date(b.publication_date).getTime();
+    }
+    // For 'relevance', we rely on the original order (or implementation of scoring later)
+    // But if no search term, fallback to newest
+    if (!searchTerm) {
+        return new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime();
+    }
+    return 0;
   });
 
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedTag, itemsPerPage]);
+  }, [searchTerm, selectedTag, itemsPerPage, sortBy]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredPapers.length / itemsPerPage);
@@ -210,19 +239,26 @@ export default function Home() {
         </div>
         
         {/* Active Filter Indicator */}
-        {selectedTag && (
-          <div className="flex justify-center items-center gap-2">
-            <span className="text-sm text-muted-foreground">Filtered by:</span>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setSelectedTag(null)}
-              className="rounded-full flex items-center gap-2"
-            >
-              {selectedTag} <span className="ml-1 text-xs">×</span>
-            </Button>
-          </div>
-        )}
+        <div className="flex flex-col items-center gap-2">
+          {selectedTag && (
+            <div className="flex justify-center items-center gap-2">
+              <span className="text-sm text-muted-foreground">Filtered by:</span>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setSelectedTag(null)}
+                className="rounded-full flex items-center gap-2"
+              >
+                {selectedTag} <span className="ml-1 text-xs">×</span>
+              </Button>
+            </div>
+          )}
+          {!loading && !error && (
+            <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">
+              Found {filteredPapers.length} papers
+            </p>
+          )}
+        </div>
       </div>
 
       <main>
@@ -272,14 +308,23 @@ export default function Home() {
                       {paper.abstract}
                     </p>
                   </CardContent>
-                  <CardFooter className="pt-4 border-t border-border/50">
+                  <CardFooter className="pt-4 border-t border-border/50 flex gap-2">
                     <Button 
                       asChild 
-                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
+                      className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
                     >
                       <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
                         Read Paper <ExternalLink className="h-4 w-4" />
                       </a>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => copyBibTeX(paper)}
+                      title="Copy BibTeX"
+                      className="border-primary/20 hover:bg-primary/10 hover:text-primary"
+                    >
+                      <FileText className="h-4 w-4" />
                     </Button>
                   </CardFooter>
                 </Card>
