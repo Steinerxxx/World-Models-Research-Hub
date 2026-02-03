@@ -74,16 +74,19 @@ export function Sidebar() {
   // Common Sidebar Content
   const SidebarContent = () => (
     <div className="flex flex-col h-full w-full">
-      <div className="p-6 flex items-center justify-between border-b border-border/50">
-        <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600">
-          Research Hub
-        </h2>
-        {/* Close button only visible on mobile */}
-        {isMobile && (
-          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-            <X className="h-5 w-5" />
-          </Button>
-        )}
+      <div className="p-6 flex flex-col border-b border-border/50">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600">
+            Research Hub
+          </h2>
+          {/* Close button only visible on mobile */}
+          {isMobile && (
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+              <X className="h-5 w-5" />
+            </Button>
+          )}
+        </div>
+        <span className="text-xs text-muted-foreground mt-1">v1.20</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
