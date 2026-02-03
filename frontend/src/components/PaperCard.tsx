@@ -105,32 +105,39 @@ export function PaperCard({
   return (
     <Card className="group relative hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full hover:z-20">
       <CardHeader className="space-y-3 pb-3">
-        <div className="flex flex-wrap gap-2 mb-2">
-          {paper.tags?.map((tag, i) => {
-            const isSelected = selectedTag === tag;
-            return (
-              <span 
-                key={i} 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedTag(isSelected ? null : tag);
-                }}
-                className={`
-                  inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border
-                  ${isSelected 
-                    ? "bg-primary text-primary-foreground shadow-sm border-primary" 
-                    : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground border-transparent hover:border-border"
-                  }
-                  ${allHighlights.includes(tag) && !isSelected ? "ring-2 ring-yellow-400/50 dark:ring-yellow-500/50 bg-yellow-100/50 dark:bg-yellow-900/20" : ""}
-                `}
-              >
-                <Tag className="h-3 w-3" />
-                <HighlightText text={tag} highlights={allHighlights} />
-              </span>
-            );
-          })}
+        {/* Fixed height for tags to ensure alignment */}
+        <div className="h-[72px] overflow-hidden relative">
+          <div className="flex flex-wrap gap-2">
+            {paper.tags?.map((tag, i) => {
+              const isSelected = selectedTag === tag;
+              return (
+                <span 
+                  key={i} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedTag(isSelected ? null : tag);
+                  }}
+                  className={`
+                    inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border
+                    ${isSelected 
+                      ? "bg-primary text-primary-foreground shadow-sm border-primary" 
+                      : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground border-transparent hover:border-border"
+                    }
+                    ${allHighlights.includes(tag) && !isSelected ? "ring-2 ring-yellow-400/50 dark:ring-yellow-500/50 bg-yellow-100/50 dark:bg-yellow-900/20" : ""}
+                  `}
+                >
+                  <Tag className="h-3 w-3" />
+                  <HighlightText text={tag} highlights={allHighlights} />
+                </span>
+              );
+            })}
+          </div>
+          {/* Fade effect at bottom of tags if they overflow */}
+          <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-card/50 to-transparent pointer-events-none"></div>
         </div>
-        <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
+        
+        {/* Fixed min-height for title to align authors */}
+        <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem] flex items-center">
           <HighlightText text={paper.title} highlights={allHighlights} />
         </CardTitle>
       </CardHeader>
