@@ -150,9 +150,14 @@ export default function Home() {
     
     if (terms.length === 0) return <>{text}</>;
     
-    // Escape special regex characters for all terms
-    const escapedTerms = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    // Create a regex that matches any of the terms
+    // Create regex pattern with word boundaries for better matching
+    const escapedTerms = terms.map(t => {
+      const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // If term starts with a word character, enforce word boundary at start
+      // This prevents "rl" from matching inside "World"
+      return /^\w/.test(t) ? `\\b${escaped}` : escaped;
+    });
+    
     const pattern = new RegExp(`(${escapedTerms.join('|')})`, 'gi');
     
     const parts = text.split(pattern);
@@ -199,9 +204,15 @@ export default function Home() {
     
     // A paper must match ALL terms in the query
     const matchesAllTerms = terms.every(term => {
-      const inTitle = paper.title.toLowerCase().includes(term);
-      const inAuthors = paper.authors.join(', ').toLowerCase().includes(term);
-      const inAbstract = paper.abstract.toLowerCase().includes(term);
+      // Create regex for this specific term with word boundary
+      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // If term starts with a word character, enforce word boundary at start
+      const patternStr = /^\w/.test(term) ? `\\b${escaped}` : escaped;
+      const termPattern = new RegExp(patternStr, 'i');
+
+      const inTitle = termPattern.test(paper.title);
+      const inAuthors = termPattern.test(paper.authors.join(' '));
+      const inAbstract = termPattern.test(paper.abstract);
       return inTitle || inAuthors || inAbstract;
     });
 
@@ -314,7 +325,7 @@ export default function Home() {
                 Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span>
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                v1.30
+                v1.31
               </span>
             </div>
           </div>
