@@ -153,9 +153,12 @@ export default function Home() {
     // Create regex pattern with word boundaries for better matching
     const escapedTerms = terms.map(t => {
       const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      let pattern = escaped;
       // If term starts with a word character, enforce word boundary at start
-      // This prevents "rl" from matching inside "World"
-      return /^\w/.test(t) ? `\\b${escaped}` : escaped;
+      if (/^\w/.test(t)) pattern = `\\b${pattern}`;
+      // If term ends with a word character, enforce word boundary at end
+      if (/\w$/.test(t)) pattern = `${pattern}\\b`;
+      return pattern;
     });
     
     const pattern = new RegExp(`(${escapedTerms.join('|')})`, 'gi');
@@ -206,8 +209,12 @@ export default function Home() {
     const matchesAllTerms = terms.every(term => {
       // Create regex for this specific term with word boundary
       const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      let patternStr = escaped;
       // If term starts with a word character, enforce word boundary at start
-      const patternStr = /^\w/.test(term) ? `\\b${escaped}` : escaped;
+      if (/^\w/.test(term)) patternStr = `\\b${patternStr}`;
+      // If term ends with a word character, enforce word boundary at end
+      if (/\w$/.test(term)) patternStr = `${patternStr}\\b`;
+      
       const termPattern = new RegExp(patternStr, 'i');
 
       const inTitle = termPattern.test(paper.title);
@@ -325,7 +332,7 @@ export default function Home() {
                 Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span>
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                v1.31
+                v1.32
               </span>
             </div>
           </div>
