@@ -1,164 +1,179 @@
 import { classifyWithAI } from './ai_service.js';
 
+interface CategoryRule {
+  tag: string;
+  strongKeywords: string[]; // Match ANY of these -> Tag added immediately
+  weakKeywords: string[];   // Match ANY of these -> Tag added
+  requiredContext?: string[]; // If present, one of these must ALSO be present for weak keywords to count
+  excludes?: string[];      // If ANY of these present, do NOT tag
+}
+
+const TAXONOMY: CategoryRule[] = [
+  {
+    tag: 'World Models',
+    strongKeywords: [
+      'world model', 'dreamer', 'daydreamer', 'genie', 'diamond', 'iris', 
+      'latent dynamics', 'predictive state representation', 'decision transformer'
+    ],
+    weakKeywords: [
+      'model-based', 'mbrl', 'predict future', 'imagination'
+    ]
+  },
+  {
+    tag: 'Model-Based RL',
+    strongKeywords: [
+      'model-based reinforcement learning', 'mbrl', 'dreamer', 'muzero', 'alphazero', 
+      'planet', 'simpla', 'td-mpc'
+    ],
+    weakKeywords: [
+      'model-based', 'planning in latent space'
+    ]
+  },
+  {
+    tag: 'Reinforcement Learning',
+    strongKeywords: [
+      'reinforcement learning', 'deep rl', 'policy gradient', 'q-learning', 
+      'actor-critic', 'ppo', 'sac', 'td3', 'ddpg', 'dqn', 'muzero', 'dreamer'
+    ],
+    weakKeywords: [
+      'reward function', 'bellman', 'temporal difference', 'off-policy', 'on-policy', 
+      'exploration', 'exploitation', 'markov decision process'
+    ]
+  },
+  {
+    tag: 'Generative Models',
+    strongKeywords: [
+      'generative model', 'gan', 'vae', 'diffusion model', 'flow matching', 
+      'consistency model', 'score-based generative', 'image generation', 
+      'video generation', 'sora', 'veo', 'latent diffusion'
+    ],
+    weakKeywords: [
+      'denoising', 'autoregressive', 'synthesis'
+    ]
+  },
+  {
+    tag: 'Video Prediction',
+    strongKeywords: [
+      'video prediction', 'future frame prediction', 'video generation', 
+      'next-frame prediction', 'spatiotemporal prediction', 'dynamics model'
+    ],
+    weakKeywords: [
+      'predict next frame', 'temporal consistency'
+    ]
+  },
+  {
+    tag: 'Robotics',
+    strongKeywords: [
+      'robotics', 'robot', 'manipulation', 'locomotion', 'sim-to-real', 
+      'imitation learning', 'behavior cloning', 'dexterous', 'mobile manipulator'
+    ],
+    weakKeywords: [
+      'control', 'actuator', 'grasping', 'trajectory'
+    ]
+  },
+  {
+    tag: 'Planning',
+    strongKeywords: [
+      'trajectory optimization', 'monte carlo tree search', 'mcts', 
+      'rapidly-exploring random tree', 'rrt', 'path planning', 'motion planning'
+    ],
+    weakKeywords: [
+      'planning', 'tree search', 'search algorithm'
+    ]
+  },
+  {
+    tag: 'Representation Learning',
+    strongKeywords: [
+      'representation learning', 'contrastive learning', 'self-supervised learning', 
+      'masked autoencoder', 'jepa', 'disentangled representation', 'latent space'
+    ],
+    weakKeywords: [
+      'embedding', 'feature extraction', 'unsupervised'
+    ]
+  },
+  {
+    tag: 'Transformers',
+    strongKeywords: [
+      'transformer', 'attention mechanism', 'self-attention', 'vision transformer', 
+      'vit', 'gpt', 'bert', 'large language model'
+    ],
+    weakKeywords: []
+  },
+  {
+    tag: 'Diffusion Models',
+    strongKeywords: [
+      'diffusion model', 'ddpm', 'ddim', 'score-based', 'latent diffusion'
+    ],
+    weakKeywords: [
+      'diffusion process', 'denoising'
+    ]
+  },
+  {
+    tag: 'State Space Models',
+    strongKeywords: [
+      'state space model', 'ssm', 'mamba', 's4', 'structured state space', 'linear recurrent unit'
+    ],
+    weakKeywords: []
+  }
+];
+
 export async function classifyPaper(title: string, abstract: string): Promise<string[]> {
   const text = (title + " " + abstract).toLowerCase();
   const tags: Set<string> = new Set();
 
-  // --- 1. Rule-Based Classification (Fast & Cheap) ---
+  // 1. Rule-Based Classification
+  TAXONOMY.forEach(rule => {
+    let match = false;
 
-  // World Models & Model-Based RL (Primary Focus)
-  if (
-    text.includes('world model') || 
-    text.includes('dreamer') || 
-    text.includes('daydreamer') || 
-    text.includes('genie') || 
-    text.includes('diamond') ||
-    text.includes('iris') ||
-    (text.includes('model-based') && (text.includes('rl') || text.includes('reinforcement'))) ||
-    text.includes('mbrl') ||
-    text.includes('muzero') ||
-    text.includes('alphazero')
-  ) {
-    tags.add('World Models');
-    tags.add('Model-Based RL');
+    // Check strong keywords
+    if (rule.strongKeywords.some(k => text.includes(k.toLowerCase()))) {
+      match = true;
+    }
+    
+    // Check weak keywords (only if no strong match yet)
+    if (!match && rule.weakKeywords.length > 0) {
+      if (rule.weakKeywords.some(k => text.includes(k.toLowerCase()))) {
+        match = true;
+      }
+    }
+
+    // Check excludes
+    if (rule.excludes && rule.excludes.some(k => text.includes(k.toLowerCase()))) {
+      match = false;
+    }
+
+    if (match) {
+      tags.add(rule.tag);
+    }
+  });
+
+  // 2. Implied Tags (Hierarchy logic)
+  if (tags.has('World Models')) {
+    tags.add('Model-Based RL'); // World Models are a subset of MBRL (mostly)
+    tags.add('Generative Models'); // Usually involve generative components
   }
-
-  // Reinforcement Learning (General)
-  if (
-    tags.has('Model-Based RL') || // If it's MBRL, it's also RL
-    text.includes('reinforcement learning') || 
-    text.includes(' deep rl ') || 
-    text.includes('policy gradient') || 
-    text.includes('q-learning') || 
-    text.includes('actor-critic') ||
-    text.includes('ppo') ||
-    text.includes('sac') ||
-    text.includes('td3') ||
-    text.includes('ddpg') ||
-    text.includes('dqn') ||
-    text.includes('off-policy') ||
-    text.includes('on-policy') ||
-    text.includes('bellman') ||
-    text.includes('temporal difference') ||
-    text.includes('reward function')
-  ) {
+  if (tags.has('Model-Based RL')) {
     tags.add('Reinforcement Learning');
   }
-
-  // Generative Models & Video
-  if (
-    text.includes('generative model') || 
-    text.includes('gan') || 
-    text.includes('vae') || 
-    text.includes('diffusion') || 
-    text.includes('flow matching') ||
-    text.includes('consistency model') ||
-    text.includes('autoregressive') ||
-    text.includes('image generation') ||
-    text.includes('video generation') ||
-    text.includes('sora') ||
-    text.includes('veo')
-  ) {
+  if (tags.has('Diffusion Models')) {
+    tags.add('Generative Models');
+  }
+  if (tags.has('Video Prediction')) {
     tags.add('Generative Models');
   }
 
-  if (
-    text.includes('video prediction') || 
-    text.includes('future frame') || 
-    text.includes('dynamics model') || 
-    text.includes('predict next frame') ||
-    text.includes('video generation') ||
-    text.includes('next-frame') ||
-    text.includes('spatiotemporal')
-  ) {
-    tags.add('Video Prediction');
-  }
-
-  // Robotics & Control
-  if (
-    text.includes('robotics') || 
-    text.includes('robot') || 
-    text.includes('control') || 
-    text.includes('manipulation') ||
-    text.includes('locomotion') ||
-    text.includes('sim-to-real') ||
-    text.includes('imitation learning') ||
-    text.includes('behavior cloning') ||
-    text.includes('dexterous') ||
-    text.includes('grasping') ||
-    text.includes('actuator')
-  ) {
-    tags.add('Robotics');
-  }
-
-  // Planning & Search
-  if (
-    text.includes('planning') || 
-    text.includes('mcts') || 
-    text.includes('tree search') ||
-    text.includes('path finding')
-  ) {
-    tags.add('Planning');
-  }
-
-  // Representation Learning
-  if (
-    text.includes('representation learning') ||
-    text.includes('latent space') ||
-    text.includes('disentanglement') ||
-    text.includes('self-supervised') ||
-    text.includes('contrastive') ||
-    text.includes('masked autoencoder') ||
-    text.includes('jepa')
-  ) {
-    tags.add('Representation Learning');
-  }
-
-  // --- Architecture Categories ---
-  if (
-    text.includes('transformer') || 
-    text.includes('attention mechanism') ||
-    text.includes('gpt')
-  ) {
-    tags.add('Transformers');
-  }
-
-  if (
-    text.includes('diffusion model') ||
-    text.includes('score-based') ||
-    text.includes('denoising')
-  ) {
-    tags.add('Diffusion Models');
-  }
-
-  if (
-    text.includes('rnn') ||
-    text.includes('recurrent neural network') ||
-    text.includes('lstm') ||
-    text.includes('gru')
-  ) {
-    tags.add('RNN');
-  }
-
-  if (
-    text.includes('state space model') ||
-    text.includes('ssm') ||
-    text.includes('mamba') ||
-    text.includes('s4')
-  ) {
-    tags.add('State Space Models');
-  }
-
-  // --- 2. AI-Based Classification (Enhancement) ---
-  // If we have very few tags, or specific complex categories, let's ask AI.
-  // For now, let's ALWAYS ask AI to enrich the tags, but merge them with our rule-based ones.
-  // To save costs/time, you might only want to call this if tags.size === 0
-  
+  // 3. AI-Based Classification (Enhancement)
+  // Only attempt if we missed obvious categories or if we want extra precision.
+  // We wrap in try-catch to ensure the rule-based tags are always returned even if AI fails.
   try {
+    // Only call AI if configured (checked inside the service)
     const aiTags = await classifyWithAI(title, abstract);
-    aiTags.forEach(tag => tags.add(tag));
+    if (aiTags && aiTags.length > 0) {
+      aiTags.forEach(tag => tags.add(tag));
+    }
   } catch (error) {
-    console.error("AI Classification failed, falling back to rules only:", error);
+    // Silent fail for AI, we rely on rules
+    // console.error("AI Classification skipped/failed");
   }
 
   return Array.from(tags);
