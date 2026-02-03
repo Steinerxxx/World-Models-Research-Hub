@@ -50,12 +50,12 @@ export function PaperCard({
           let hidden = false;
           if (matches.length > 0) {
             const containerRect = authorsRef.current.getBoundingClientRect();
-            // Use a small tolerance for sub-pixel rendering
-            const bottomLimit = containerRect.bottom; 
+            // Use a significant tolerance (4px) to handle sub-pixel rendering and descenders (g, y, j, etc.)
+            // We only want to flag matches that are clearly pushed to the next line or significantly cut off.
+            const bottomLimit = containerRect.bottom + 4; 
             
             matches.forEach(match => {
               const matchRect = match.getBoundingClientRect();
-              // If the element's top is visible but bottom is cut off, or entirely below
               if (matchRect.bottom > bottomLimit) {
                 hidden = true;
               }
@@ -77,7 +77,7 @@ export function PaperCard({
           let hidden = false;
           if (matches.length > 0) {
             const containerRect = abstractRef.current.getBoundingClientRect();
-            const bottomLimit = containerRect.bottom;
+            const bottomLimit = containerRect.bottom + 4;
             
             matches.forEach(match => {
               const matchRect = match.getBoundingClientRect();
