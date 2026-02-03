@@ -102,15 +102,15 @@ export function PaperCard({
         <div className="flex items-start space-x-2 text-sm text-muted-foreground">
           <Users className="h-4 w-4 mt-1 flex-shrink-0" />
           <div className="relative group/authors cursor-help flex-1">
-            <span ref={authorsRef} className="line-clamp-2 block">
+            <div ref={authorsRef} className="line-clamp-2 text-sm">
               {paper.authors.map((author, i) => (
-                <span key={i}>
+                <span key={i} className="inline">
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       setSearchTerm(`author:"${author}"`);
                     }}
-                    className="hover:text-primary hover:underline transition-colors focus:outline-none"
+                    className="hover:text-primary hover:underline transition-colors focus:outline-none inline"
                     title={`Filter by author: ${author}`}
                   >
                     <HighlightText text={author} highlights={allHighlights} />
@@ -118,7 +118,7 @@ export function PaperCard({
                   {i < paper.authors.length - 1 ? ', ' : ''}
                 </span>
               ))}
-            </span>
+            </div>
 
             {/* Full author list (visible on hover) */}
             <div className="hidden group-hover/authors:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-50 max-h-[400px] overflow-y-auto">
