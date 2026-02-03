@@ -4,7 +4,8 @@
   "description": "A Node.js scraper for arXiv computer science papers.",
   "main": "scraper.js",
   "scripts": {
-    "start": "node scraper.js"
+    "start": "node scraper.js",
+    "build": "cd frontend && npm install && npm run build && cd .. && mkdir -p dist && cp -r frontend/dist/* dist/"
   },
   "keywords": [
     "arxiv",
