@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ExternalLink, Calendar, Users, Loader2, RefreshCw, Tag, ChevronLeft, ChevronRight, Copy } from "lucide-react";
+import { Search, ExternalLink, Calendar, Users, Loader2, RefreshCw, Tag, ChevronLeft, ChevronRight, Copy, X } from "lucide-react";
 import { useFilter } from '@/contexts/FilterContext';
 
 // Define the type for a single paper
@@ -295,7 +295,7 @@ export default function Home() {
                 Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span>
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                v1.26
+                v1.27
               </span>
             </div>
           </div>
@@ -324,14 +324,10 @@ export default function Home() {
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition-colors"
               aria-label="Clear search"
             >
-              <span className="sr-only">Clear</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x">
-                <path d="M18 6 6 18"/>
-                <path d="m6 6 18 18"/>
-              </svg>
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
