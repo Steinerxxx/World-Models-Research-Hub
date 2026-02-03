@@ -160,9 +160,6 @@ export default function Home() {
   // Filter papers based on the search term and selected tag
   const { general: searchGeneral, filters: searchFilters } = parseSearchQuery(searchTerm);
 
-  // Combine search terms and selected tag for highlighting
-  const combinedHighlight = [searchGeneral, selectedTag].filter(Boolean).join(' ');
-
   const filteredPapers = papers.filter(paper => {
     // 1. Check advanced filters
     if (searchFilters.tag) {
@@ -377,7 +374,7 @@ export default function Home() {
                       ))}
                     </div>
                     <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
-                      <HighlightText text={paper.title} highlight={combinedHighlight} />
+                      <HighlightText text={paper.title} highlight={searchGeneral} />
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="flex-grow space-y-4">
@@ -386,7 +383,7 @@ export default function Home() {
                       <span className="line-clamp-2">
                         {paper.authors.map((author, i) => (
                           <span key={i}>
-                            <HighlightText text={author} highlight={combinedHighlight} />
+                            <HighlightText text={author} highlight={searchGeneral} />
                             {i < paper.authors.length - 1 ? ', ' : ''}
                           </span>
                         ))}
@@ -397,7 +394,7 @@ export default function Home() {
                       <span>{new Date(paper.publication_date).toLocaleDateString()}</span>
                     </div>
                     <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4">
-                      <HighlightText text={paper.abstract} highlight={combinedHighlight} />
+                      <HighlightText text={paper.abstract} highlight={searchGeneral} />
                     </p>
                   </CardContent>
                   <CardFooter className="pt-4 border-t border-border/50 flex gap-2">
