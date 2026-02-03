@@ -33,7 +33,7 @@ export function PaperCard({
 }: PaperCardProps) {
   const [isAuthorsTruncated, setIsAuthorsTruncated] = useState(false);
   const [isAbstractTruncated, setIsAbstractTruncated] = useState(false);
-  const authorsRef = useRef<HTMLSpanElement>(null);
+  const authorsRef = useRef<HTMLDivElement>(null);
   const abstractRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
