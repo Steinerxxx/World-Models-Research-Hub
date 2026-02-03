@@ -366,7 +366,7 @@ export default function Home() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {currentPapers.map(paper => (
-                <Card key={paper.id} className="bg-card/50 border-border hover:border-primary/30 transition-all duration-300 hover:shadow-primary/5 hover:shadow-lg flex flex-col group h-full backdrop-blur-sm">
+                <Card key={paper.id} className="bg-card/50 border-border hover:border-primary/30 transition-all duration-300 hover:shadow-primary/5 hover:shadow-lg flex flex-col group h-full backdrop-blur-sm relative hover:z-20">
                   <CardHeader>
                     <div className="flex flex-wrap gap-2 mb-3">
                       {paper.tags?.map(tag => (
@@ -405,9 +405,18 @@ export default function Home() {
                       <Calendar className="h-3 w-3" />
                       <span>{new Date(paper.publication_date).toLocaleDateString()}</span>
                     </div>
-                    <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4">
-                      <HighlightText text={paper.abstract} highlights={allHighlights} />
-                    </p>
+                    
+                    <div className="relative group/abstract cursor-help">
+                      {/* Truncated version (visible by default) */}
+                      <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4">
+                        <HighlightText text={paper.abstract} highlights={allHighlights} />
+                      </p>
+
+                      {/* Full version (visible on hover) */}
+                      <div className="hidden group-hover/abstract:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-50 max-h-[400px] overflow-y-auto">
+                        <HighlightText text={paper.abstract} highlights={allHighlights} />
+                      </div>
+                    </div>
                   </CardContent>
                   <CardFooter className="pt-4 border-t border-border/50 flex gap-2">
                     <Button 
