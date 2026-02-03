@@ -102,7 +102,7 @@ export function PaperCard({
         <div className="flex items-start space-x-2 text-sm text-muted-foreground">
           <Users className="h-4 w-4 mt-1 flex-shrink-0" />
           <div className="relative group/authors cursor-help flex-1">
-            <div ref={authorsRef} className="line-clamp-2 text-sm">
+            <div ref={authorsRef} className="line-clamp-2 text-sm break-words">
               {paper.authors.map((author, i) => (
                 <span key={i} className="inline">
                   <button
