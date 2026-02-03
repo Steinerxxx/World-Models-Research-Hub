@@ -332,7 +332,7 @@ export default function Home() {
                 Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span>
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                v1.32
+                v2.1
               </span>
             </div>
           </div>
@@ -490,7 +490,15 @@ export default function Home() {
                       </p>
                       
                       {/* Highlight Indicator (Yellow Triangle) */}
-                      {allHighlights.length > 0 && allHighlights.some(term => paper.abstract.toLowerCase().includes(term.toLowerCase())) && (
+                      {allHighlights.length > 0 && allHighlights.some(term => {
+                        if (!term) return false;
+                        const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        let patternStr = escaped;
+                        if (/^\w/.test(term)) patternStr = `\\b${patternStr}`;
+                        if (/\w$/.test(term)) patternStr = `${patternStr}\\b`;
+                        const termPattern = new RegExp(patternStr, 'i');
+                        return termPattern.test(paper.abstract);
+                      }) && (
                         <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[12px] border-l-transparent border-b-[12px] border-b-yellow-400/80 drop-shadow-md group-hover/abstract:hidden animate-pulse" title="Contains highlighted terms - Hover to view"></div>
                       )}
 
