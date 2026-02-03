@@ -202,7 +202,7 @@ export default function Home() {
     if (currentPage !== 1) {
       setCurrentPage(1);
     }
-  }, [searchTerm, selectedTag, itemsPerPage, sortBy]);
+  }, [searchTerm, selectedTag, itemsPerPage, sortBy, currentPage]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredPapers.length / itemsPerPage);

@@ -249,7 +249,6 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
 };
 
 export function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.matchMedia('(max-width: 767px)').matches;
@@ -257,25 +256,26 @@ export function Sidebar() {
     return false;
   });
 
+  const [isOpen, setIsOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !window.matchMedia('(max-width: 767px)').matches;
+    }
+    return true;
+  });
+
   // Handle responsive behavior
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 767px)');
     const handleResize = (e: MediaQueryListEvent | MediaQueryList) => {
-      setIsMobile(e.matches);
+      const mobile = e.matches;
+      setIsMobile(mobile);
+      setIsOpen(!mobile); // Auto-open/close based on device
     };
-    
-    // Initial check
-    handleResize(mediaQuery);
     
     // Listen for changes
     mediaQuery.addEventListener('change', handleResize);
     return () => mediaQuery.removeEventListener('change', handleResize);
   }, []);
-
-  // Auto-open/close based on device
-  useEffect(() => {
-    setIsOpen(!isMobile);
-  }, [isMobile]);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
