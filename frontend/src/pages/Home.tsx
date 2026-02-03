@@ -383,23 +383,44 @@ export default function Home() {
                   <CardContent className="flex-grow space-y-4">
                     <div className="flex items-start space-x-2 text-sm text-muted-foreground">
                       <Users className="h-4 w-4 mt-1 flex-shrink-0" />
-                      <span className="line-clamp-2">
-                        {paper.authors.map((author, i) => (
-                          <span key={i}>
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setSearchTerm(`author:"${author}"`);
-                              }}
-                              className="hover:text-primary hover:underline transition-colors focus:outline-none"
-                              title={`Filter by author: ${author}`}
-                            >
-                              <HighlightText text={author} highlights={allHighlights} />
-                            </button>
-                            {i < paper.authors.length - 1 ? ', ' : ''}
-                          </span>
-                        ))}
-                      </span>
+                      <div className="relative group/authors cursor-help flex-1">
+                        <span className="line-clamp-2">
+                          {paper.authors.map((author, i) => (
+                            <span key={i}>
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setSearchTerm(`author:"${author}"`);
+                                }}
+                                className="hover:text-primary hover:underline transition-colors focus:outline-none"
+                                title={`Filter by author: ${author}`}
+                              >
+                                <HighlightText text={author} highlights={allHighlights} />
+                              </button>
+                              {i < paper.authors.length - 1 ? ', ' : ''}
+                            </span>
+                          ))}
+                        </span>
+
+                        {/* Full author list (visible on hover) */}
+                        <div className="hidden group-hover/authors:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-50 max-h-[400px] overflow-y-auto">
+                          {paper.authors.map((author, i) => (
+                            <span key={i}>
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setSearchTerm(`author:"${author}"`);
+                                }}
+                                className="hover:text-primary hover:underline transition-colors focus:outline-none"
+                                title={`Filter by author: ${author}`}
+                              >
+                                <HighlightText text={author} highlights={allHighlights} />
+                              </button>
+                              {i < paper.authors.length - 1 ? ', ' : ''}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3" />
