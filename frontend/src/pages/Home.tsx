@@ -546,7 +546,10 @@ export default function Home() {
         )}
       </main>
       
-      <footer className="text-center text-muted-foreground py-8 text-sm mt-12 border-t border-border/50">
+      <footer className="text-center text-muted-foreground py-8 text-sm mt-12 border-t border-border/50 space-y-2">
+        <p className="max-w-2xl mx-auto px-4 opacity-80">
+          * Note: Dates are displayed based on the original arXiv submission/announcement time (UTC) to ensure consistency across time zones.
+        </p>
         <p>&copy; {new Date().getFullYear()} World Models Research Hub. All rights reserved.</p>
       </footer>
     </div>
