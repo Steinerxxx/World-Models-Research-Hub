@@ -476,6 +476,19 @@ export default function Home() {
                             </span>
                           ))}
                         </div>
+                        
+                        {/* Highlight Indicator (Yellow Triangle) for Authors */}
+                        {allHighlights.length > 0 && allHighlights.some(term => {
+                          if (!term) return false;
+                          const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                          let patternStr = escaped;
+                          if (/^\w/.test(term)) patternStr = `\\b${patternStr}`;
+                          if (/\w$/.test(term)) patternStr = `${patternStr}\\b`;
+                          const termPattern = new RegExp(patternStr, 'i');
+                          return termPattern.test(paper.authors.join(' '));
+                        }) && (
+                          <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[12px] border-l-transparent border-b-[12px] border-b-yellow-400/80 drop-shadow-md group-hover/authors:hidden animate-pulse" title="Contains highlighted terms - Hover to view"></div>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 text-xs text-muted-foreground">
