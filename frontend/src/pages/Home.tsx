@@ -128,21 +128,31 @@ export default function Home() {
   const HighlightText = ({ text, highlight }: { text: string; highlight: string }) => {
     if (!highlight.trim()) return <>{text}</>;
     
-    // Escape special regex characters
-    const escapedHighlight = highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const parts = text.split(new RegExp(`(${escapedHighlight})`, 'gi'));
+    // Split highlight string into terms, ignoring empty strings
+    const terms = highlight.trim().split(/\s+/).filter(t => t.length > 0);
+    
+    if (terms.length === 0) return <>{text}</>;
+    
+    // Escape special regex characters for all terms
+    const escapedTerms = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    // Create a regex that matches any of the terms
+    const pattern = new RegExp(`(${escapedTerms.join('|')})`, 'gi');
+    
+    const parts = text.split(pattern);
     
     return (
       <>
-        {parts.map((part, i) => 
-          part.toLowerCase() === highlight.toLowerCase() ? (
+        {parts.map((part, i) => {
+          // Check if this part matches any of the terms (case-insensitive)
+          const isMatch = terms.some(term => part.toLowerCase() === term.toLowerCase());
+          return isMatch ? (
             <span key={i} className="bg-yellow-500/30 text-yellow-200 font-semibold rounded px-0.5 border border-yellow-500/50">
               {part}
             </span>
           ) : (
             part
-          )
-        )}
+          );
+        })}
       </>
     );
   };
@@ -162,14 +172,20 @@ export default function Home() {
       if (new Date(paper.publication_date).getFullYear().toString() !== searchFilters.year) return false;
     }
 
-    // 2. Check general search term
-    const generalLower = searchGeneral.toLowerCase();
-    const titleMatch = paper.title.toLowerCase().includes(generalLower);
-    const authorsMatch = paper.authors.join(', ').toLowerCase().includes(generalLower);
-    const abstractMatch = paper.abstract.toLowerCase().includes(generalLower);
+    // 2. Check general search term (Multi-keyword AND logic)
+    const terms = searchGeneral.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+    
+    // A paper must match ALL terms in the query
+    const matchesAllTerms = terms.every(term => {
+      const inTitle = paper.title.toLowerCase().includes(term);
+      const inAuthors = paper.authors.join(', ').toLowerCase().includes(term);
+      const inAbstract = paper.abstract.toLowerCase().includes(term);
+      return inTitle || inAuthors || inAbstract;
+    });
+
     const tagMatch = selectedTag ? paper.tags?.includes(selectedTag) : true;
     
-    return (titleMatch || authorsMatch || abstractMatch) && tagMatch;
+    return matchesAllTerms && tagMatch;
   }).sort((a, b) => {
     if (sortBy === 'newest') {
       return new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime();
