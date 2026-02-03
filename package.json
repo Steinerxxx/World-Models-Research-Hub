@@ -5,7 +5,7 @@
   "main": "scraper.js",
   "scripts": {
     "start": "node scraper.js",
-    "build": "cd frontend && npm install && npm run build"
+    "build": "echo 'Using vercel.json builds'"
   },
   "keywords": [
     "arxiv",

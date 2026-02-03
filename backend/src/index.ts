@@ -118,6 +118,10 @@ cron.schedule('0 * * * *', async () => {
 });
 
 // Start the server
-app.listen(port, () => {
-  console.log(`Backend server is running at port ${port}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`Backend server is running at port ${port}`);
+  });
+}
+
+export default app;
