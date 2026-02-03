@@ -295,7 +295,7 @@ export default function Home() {
                 Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span>
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                v1.24
+                v1.25
               </span>
             </div>
           </div>
@@ -369,12 +369,22 @@ export default function Home() {
                 <Card key={paper.id} className="bg-card/50 border-border hover:border-primary/30 transition-all duration-300 hover:shadow-primary/5 hover:shadow-lg flex flex-col group h-full backdrop-blur-sm relative hover:z-20">
                   <CardHeader>
                     <div className="flex flex-wrap gap-2 mb-3">
-                      {paper.tags?.map(tag => (
-                        <span key={tag} className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-xs border border-primary/20 flex items-center">
-                          <Tag className="w-3 h-3 mr-1" />
-                          {tag}
-                        </span>
-                      ))}
+                      {paper.tags?.map(tag => {
+                        const isSelected = selectedTag === tag;
+                        return (
+                          <span 
+                            key={tag} 
+                            className={`px-2 py-0.5 rounded-md text-xs border flex items-center transition-all duration-300 ${
+                              isSelected 
+                                ? "bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border-yellow-500/50 font-medium shadow-[0_0_10px_rgba(234,179,8,0.2)]" 
+                                : "bg-primary/10 text-primary border-primary/20"
+                            }`}
+                          >
+                            <Tag className={`w-3 h-3 mr-1 ${isSelected ? "text-yellow-600 dark:text-yellow-400" : ""}`} />
+                            <HighlightText text={tag} highlights={allHighlights} />
+                          </span>
+                        );
+                      })}
                     </div>
                     <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
                       <HighlightText text={paper.title} highlights={allHighlights} />
