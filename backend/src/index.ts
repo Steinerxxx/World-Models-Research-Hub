@@ -118,10 +118,9 @@ cron.schedule('0 * * * *', async () => {
 });
 
 // Start the server
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(port, () => {
-    console.log(`Backend server is running at port ${port}`);
-  });
-}
+// Listen on all interfaces (0.0.0.0) which is required by Render
+app.listen(Number(port), '0.0.0.0', () => {
+  console.log(`Backend server is running at port ${port}`);
+});
 
 export default app;
