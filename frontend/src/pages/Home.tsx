@@ -25,6 +25,25 @@ export default function Home() {
   // Use context for filters
   const { searchTerm, setSearchTerm, selectedTag, setSelectedTag, itemsPerPage, sortBy } = useFilter();
   
+  // Local state for debounced search to prevent lag
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+
+  // Sync local state when context changes (e.g. when cleared via button)
+  useEffect(() => {
+    setLocalSearchTerm(searchTerm);
+  }, [searchTerm]);
+
+  // Debounce search updates
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (localSearchTerm !== searchTerm) {
+        setSearchTerm(localSearchTerm);
+      }
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [localSearchTerm, setSearchTerm, searchTerm]);
+  
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [inputPage, setInputPage] = useState('');
@@ -295,7 +314,7 @@ export default function Home() {
                 Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span>
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                v1.29
+                v1.30
               </span>
             </div>
           </div>
@@ -318,8 +337,8 @@ export default function Home() {
             type="text"
             placeholder="Search by title, authors, or abstract..."
             className="w-full pl-10 pr-10 py-6 text-lg bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/50 rounded-xl shadow-lg backdrop-blur-sm transition-all duration-300"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={localSearchTerm}
+            onChange={(e) => setLocalSearchTerm(e.target.value)}
           />
           {searchTerm && (
             <button
