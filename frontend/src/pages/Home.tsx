@@ -295,9 +295,14 @@ export default function Home() {
             <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-600">
               World Models Research Hub
             </h1>
-            <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto">
-              Tracking the latest advancements in World Models and Model-Based RL (v1.20)
-            </p>
+            <div className="flex flex-col items-center gap-2 mt-2">
+              <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
+                Tracking the latest advancements in <span className="text-foreground font-medium">World Models</span> and <span className="text-foreground font-medium">Model-Based RL</span>
+              </p>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
+                v1.20
+              </span>
+            </div>
           </div>
           
           <Button 
