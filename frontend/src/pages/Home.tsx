@@ -424,7 +424,7 @@ export default function Home() {
                     </div>
                     <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3" />
-                      <span>{new Date(paper.publication_date).toLocaleDateString(undefined, { timeZone: 'UTC' })}</span>
+                      <span>{paper.publication_date}</span>
                     </div>
                     
                     <div className="relative group/abstract cursor-help">
