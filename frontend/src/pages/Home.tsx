@@ -295,7 +295,7 @@ export default function Home() {
                 Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span>
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                v1.27
+                v1.28
               </span>
             </div>
           </div>
@@ -451,6 +451,11 @@ export default function Home() {
                       <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4">
                         <HighlightText text={paper.abstract} highlights={allHighlights} />
                       </p>
+                      
+                      {/* Highlight Indicator (Yellow Triangle) */}
+                      {allHighlights.length > 0 && allHighlights.some(term => paper.abstract.toLowerCase().includes(term.toLowerCase())) && (
+                        <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[12px] border-l-transparent border-b-[12px] border-b-yellow-400/80 drop-shadow-md group-hover/abstract:hidden animate-pulse" title="Contains highlighted terms - Hover to view"></div>
+                      )}
 
                       {/* Full version (visible on hover) */}
                       <div className="hidden group-hover/abstract:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-50 max-h-[400px] overflow-y-auto">
