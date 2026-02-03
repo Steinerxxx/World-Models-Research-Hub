@@ -195,12 +195,8 @@ export default function Home() {
     } else if (sortBy === 'oldest') {
       return new Date(a.publication_date).getTime() - new Date(b.publication_date).getTime();
     }
-    // For 'relevance', we rely on the original order (or implementation of scoring later)
-    // But if no search term, fallback to newest
-    if (!searchTerm) {
-        return new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime();
-    }
-    return 0;
+    // Fallback to newest
+    return new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime();
   });
 
   // Reset page when filters change
@@ -299,7 +295,7 @@ export default function Home() {
                 Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span>
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                v1.23
+                v1.24
               </span>
             </div>
           </div>

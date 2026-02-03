@@ -61,7 +61,7 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
             </Button>
           )}
         </div>
-        <span className="text-xs text-muted-foreground mt-1">v1.23</span>
+        <span className="text-xs text-muted-foreground mt-1">v1.24</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
@@ -211,7 +211,6 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
-                  <option value="relevance">Relevance</option>
                 </select>
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-xs">
                   ▼
