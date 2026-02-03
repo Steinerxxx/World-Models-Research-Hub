@@ -146,7 +146,7 @@ export default function Home() {
           // Check if this part matches any of the terms (case-insensitive)
           const isMatch = terms.some(term => part.toLowerCase() === term.toLowerCase());
           return isMatch ? (
-            <span key={i} className="bg-yellow-500/30 text-yellow-200 font-semibold rounded px-0.5 border border-yellow-500/50">
+            <span key={i} className="bg-yellow-200 text-yellow-900 dark:bg-yellow-500/30 dark:text-yellow-200 font-semibold rounded px-0.5 border border-yellow-400 dark:border-yellow-500/50">
               {part}
             </span>
           ) : (
@@ -159,6 +159,9 @@ export default function Home() {
 
   // Filter papers based on the search term and selected tag
   const { general: searchGeneral, filters: searchFilters } = parseSearchQuery(searchTerm);
+
+  // Combine search terms and selected tag for highlighting
+  const combinedHighlight = [searchGeneral, selectedTag].filter(Boolean).join(' ');
 
   const filteredPapers = papers.filter(paper => {
     // 1. Check advanced filters
@@ -374,7 +377,7 @@ export default function Home() {
                       ))}
                     </div>
                     <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
-                      <HighlightText text={paper.title} highlight={searchGeneral} />
+                      <HighlightText text={paper.title} highlight={combinedHighlight} />
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="flex-grow space-y-4">
@@ -383,7 +386,7 @@ export default function Home() {
                       <span className="line-clamp-2">
                         {paper.authors.map((author, i) => (
                           <span key={i}>
-                            <HighlightText text={author} highlight={searchGeneral} />
+                            <HighlightText text={author} highlight={combinedHighlight} />
                             {i < paper.authors.length - 1 ? ', ' : ''}
                           </span>
                         ))}
@@ -394,7 +397,7 @@ export default function Home() {
                       <span>{new Date(paper.publication_date).toLocaleDateString()}</span>
                     </div>
                     <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4">
-                      <HighlightText text={paper.abstract} highlight={searchGeneral} />
+                      <HighlightText text={paper.abstract} highlight={combinedHighlight} />
                     </p>
                   </CardContent>
                   <CardFooter className="pt-4 border-t border-border/50 flex gap-2">
