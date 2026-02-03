@@ -1,0 +1,191 @@
+import { useState, useRef, useEffect } from 'react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ExternalLink, Calendar, Users, Copy, Tag } from "lucide-react";
+import { HighlightText } from './HighlightText';
+
+interface Paper {
+  id: number;
+  title: string;
+  authors: string[];
+  abstract: string;
+  publication_date: string;
+  url: string;
+  tags?: string[];
+}
+
+interface PaperCardProps {
+  paper: Paper;
+  allHighlights: string[];
+  selectedTag: string | null;
+  setSelectedTag: (tag: string | null) => void;
+  setSearchTerm: (term: string) => void;
+  copyBibTeX: (paper: Paper) => void;
+}
+
+export function PaperCard({ 
+  paper, 
+  allHighlights, 
+  selectedTag, 
+  setSelectedTag, 
+  setSearchTerm, 
+  copyBibTeX 
+}: PaperCardProps) {
+  const [isAuthorsTruncated, setIsAuthorsTruncated] = useState(false);
+  const [isAbstractTruncated, setIsAbstractTruncated] = useState(false);
+  const authorsRef = useRef<HTMLSpanElement>(null);
+  const abstractRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    const checkTruncation = () => {
+      if (authorsRef.current) {
+        setIsAuthorsTruncated(authorsRef.current.scrollHeight > authorsRef.current.clientHeight);
+      }
+      if (abstractRef.current) {
+        setIsAbstractTruncated(abstractRef.current.scrollHeight > abstractRef.current.clientHeight);
+      }
+    };
+
+    checkTruncation();
+    window.addEventListener('resize', checkTruncation);
+    return () => window.removeEventListener('resize', checkTruncation);
+  }, [paper.authors, paper.abstract]);
+
+  const hasHighlight = (text: string) => {
+    return allHighlights.length > 0 && allHighlights.some(term => {
+      if (!term) return false;
+      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      let patternStr = escaped;
+      if (/^\w/.test(term)) patternStr = `\\b${patternStr}`;
+      if (/\w$/.test(term)) patternStr = `${patternStr}\\b`;
+      const termPattern = new RegExp(patternStr, 'i');
+      return termPattern.test(text);
+    });
+  };
+
+  const hasAuthorHighlight = hasHighlight(paper.authors.join(' '));
+  const hasAbstractHighlight = hasHighlight(paper.abstract);
+
+  return (
+    <Card className="group hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full overflow-hidden">
+      <CardHeader className="space-y-3 pb-3">
+        <div className="flex flex-wrap gap-2 mb-2">
+          {paper.tags?.map((tag, i) => {
+            const isSelected = selectedTag === tag;
+            return (
+              <span 
+                key={i} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedTag(isSelected ? null : tag);
+                }}
+                className={`
+                  inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border
+                  ${isSelected 
+                    ? "bg-primary text-primary-foreground shadow-sm border-primary" 
+                    : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground border-transparent hover:border-border"
+                  }
+                  ${allHighlights.includes(tag) && !isSelected ? "ring-2 ring-yellow-400/50 dark:ring-yellow-500/50 bg-yellow-100/50 dark:bg-yellow-900/20" : ""}
+                `}
+              >
+                <Tag className="h-3 w-3" />
+                <HighlightText text={tag} highlights={allHighlights} />
+              </span>
+            );
+          })}
+        </div>
+        <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
+          <HighlightText text={paper.title} highlights={allHighlights} />
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex-grow space-y-4">
+        <div className="flex items-start space-x-2 text-sm text-muted-foreground">
+          <Users className="h-4 w-4 mt-1 flex-shrink-0" />
+          <div className="relative group/authors cursor-help flex-1">
+            <span ref={authorsRef} className="line-clamp-2 block">
+              {paper.authors.map((author, i) => (
+                <span key={i}>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setSearchTerm(`author:"${author}"`);
+                    }}
+                    className="hover:text-primary hover:underline transition-colors focus:outline-none"
+                    title={`Filter by author: ${author}`}
+                  >
+                    <HighlightText text={author} highlights={allHighlights} />
+                  </button>
+                  {i < paper.authors.length - 1 ? ', ' : ''}
+                </span>
+              ))}
+            </span>
+
+            {/* Full author list (visible on hover) */}
+            <div className="hidden group-hover/authors:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-50 max-h-[400px] overflow-y-auto">
+              {paper.authors.map((author, i) => (
+                <span key={i}>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setSearchTerm(`author:"${author}"`);
+                    }}
+                    className="hover:text-primary hover:underline transition-colors focus:outline-none"
+                    title={`Filter by author: ${author}`}
+                  >
+                    <HighlightText text={author} highlights={allHighlights} />
+                  </button>
+                  {i < paper.authors.length - 1 ? ', ' : ''}
+                </span>
+              ))}
+            </div>
+            
+            {/* Highlight Indicator (Yellow Triangle) for Authors */}
+            {isAuthorsTruncated && hasAuthorHighlight && (
+              <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[12px] border-l-transparent border-b-[12px] border-b-yellow-400/80 drop-shadow-md group-hover/authors:hidden animate-pulse" title="Contains highlighted terms - Hover to view"></div>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+          <Calendar className="h-3 w-3" />
+          <span>{paper.publication_date.split('T')[0]}</span>
+        </div>
+        
+        <div className="relative group/abstract cursor-help">
+          {/* Truncated version (visible by default) */}
+          <p ref={abstractRef} className="text-muted-foreground text-sm leading-relaxed line-clamp-4">
+            <HighlightText text={paper.abstract} highlights={allHighlights} />
+          </p>
+          
+          {/* Highlight Indicator (Yellow Triangle) */}
+          {isAbstractTruncated && hasAbstractHighlight && (
+            <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[12px] border-l-transparent border-b-[12px] border-b-yellow-400/80 drop-shadow-md group-hover/abstract:hidden animate-pulse" title="Contains highlighted terms - Hover to view"></div>
+          )}
+
+          {/* Full version (visible on hover) */}
+          <div className="hidden group-hover/abstract:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-50 max-h-[400px] overflow-y-auto">
+            <HighlightText text={paper.abstract} highlights={allHighlights} />
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="pt-4 border-t border-border/50 flex gap-2">
+        <Button 
+          asChild 
+          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
+        >
+          <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
+            Read Paper <ExternalLink className="h-4 w-4" />
+          </a>
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => copyBibTeX(paper)}
+          title="Copy BibTeX"
+          className="border-primary/20 hover:bg-primary/10 hover:text-primary"
+        >
+          <Copy className="h-4 w-4" />
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}

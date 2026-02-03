@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ExternalLink, Calendar, Users, Loader2, RefreshCw, Tag, ChevronLeft, ChevronRight, Copy, X } from "lucide-react";
+import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useFilter } from '@/contexts/FilterContext';
+import { PaperCard } from '@/components/PaperCard';
 
 // Define the type for a single paper
 interface Paper {
@@ -141,45 +141,6 @@ export default function Home() {
     }
 
     return { general: general.trim(), filters };
-  };
-
-  // Helper component for highlighting
-  const HighlightText = ({ text, highlights }: { text: string; highlights: string[] }) => {
-    // Filter out empty strings
-    const terms = highlights.filter(t => t && t.trim().length > 0);
-    
-    if (terms.length === 0) return <>{text}</>;
-    
-    // Create regex pattern with word boundaries for better matching
-    const escapedTerms = terms.map(t => {
-      const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      let pattern = escaped;
-      // If term starts with a word character, enforce word boundary at start
-      if (/^\w/.test(t)) pattern = `\\b${pattern}`;
-      // If term ends with a word character, enforce word boundary at end
-      if (/\w$/.test(t)) pattern = `${pattern}\\b`;
-      return pattern;
-    });
-    
-    const pattern = new RegExp(`(${escapedTerms.join('|')})`, 'gi');
-    
-    const parts = text.split(pattern);
-    
-    return (
-      <>
-        {parts.map((part, i) => {
-          // Check if this part matches any of the terms (case-insensitive)
-          const isMatch = terms.some(term => part.toLowerCase() === term.toLowerCase());
-          return isMatch ? (
-            <span key={i} className="bg-yellow-200 text-yellow-900 dark:bg-yellow-500/30 dark:text-yellow-200 font-semibold rounded px-0.5 border border-yellow-400 dark:border-yellow-500/50">
-              {part}
-            </span>
-          ) : (
-            part
-          );
-        })}
-      </>
-    );
   };
 
   // Filter papers based on the search term and selected tag
@@ -412,135 +373,15 @@ export default function Home() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {currentPapers.map(paper => (
-                <Card key={paper.id} className="bg-card/50 border-border hover:border-primary/30 transition-all duration-300 hover:shadow-primary/5 hover:shadow-lg flex flex-col group h-full backdrop-blur-sm relative hover:z-20">
-                  <CardHeader>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {paper.tags?.map(tag => {
-                        const isSelected = selectedTag === tag;
-                        return (
-                          <span 
-                            key={tag} 
-                            className={`px-2 py-0.5 rounded-md text-xs border flex items-center transition-all duration-300 ${
-                              isSelected 
-                                ? "bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border-yellow-500/50 font-medium shadow-[0_0_10px_rgba(234,179,8,0.2)]" 
-                                : "bg-primary/10 text-primary border-primary/20"
-                            }`}
-                          >
-                            <Tag className={`w-3 h-3 mr-1 ${isSelected ? "text-yellow-600 dark:text-yellow-400" : ""}`} />
-                            <HighlightText text={tag} highlights={allHighlights} />
-                          </span>
-                        );
-                      })}
-                    </div>
-                    <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
-                      <HighlightText text={paper.title} highlights={allHighlights} />
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex-grow space-y-4">
-                    <div className="flex items-start space-x-2 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4 mt-1 flex-shrink-0" />
-                      <div className="relative group/authors cursor-help flex-1">
-                        <span className="line-clamp-2">
-                          {paper.authors.map((author, i) => (
-                            <span key={i}>
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setSearchTerm(`author:"${author}"`);
-                                }}
-                                className="hover:text-primary hover:underline transition-colors focus:outline-none"
-                                title={`Filter by author: ${author}`}
-                              >
-                                <HighlightText text={author} highlights={allHighlights} />
-                              </button>
-                              {i < paper.authors.length - 1 ? ', ' : ''}
-                            </span>
-                          ))}
-                        </span>
-
-                        {/* Full author list (visible on hover) */}
-                        <div className="hidden group-hover/authors:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-50 max-h-[400px] overflow-y-auto">
-                          {paper.authors.map((author, i) => (
-                            <span key={i}>
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setSearchTerm(`author:"${author}"`);
-                                }}
-                                className="hover:text-primary hover:underline transition-colors focus:outline-none"
-                                title={`Filter by author: ${author}`}
-                              >
-                                <HighlightText text={author} highlights={allHighlights} />
-                              </button>
-                              {i < paper.authors.length - 1 ? ', ' : ''}
-                            </span>
-                          ))}
-                        </div>
-                        
-                        {/* Highlight Indicator (Yellow Triangle) for Authors */}
-                        {allHighlights.length > 0 && allHighlights.some(term => {
-                          if (!term) return false;
-                          const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                          let patternStr = escaped;
-                          if (/^\w/.test(term)) patternStr = `\\b${patternStr}`;
-                          if (/\w$/.test(term)) patternStr = `${patternStr}\\b`;
-                          const termPattern = new RegExp(patternStr, 'i');
-                          return termPattern.test(paper.authors.join(' '));
-                        }) && (
-                          <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[12px] border-l-transparent border-b-[12px] border-b-yellow-400/80 drop-shadow-md group-hover/authors:hidden animate-pulse" title="Contains highlighted terms - Hover to view"></div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
-                      <span>{paper.publication_date.split('T')[0]}</span>
-                    </div>
-                    
-                    <div className="relative group/abstract cursor-help">
-                      {/* Truncated version (visible by default) */}
-                      <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4">
-                        <HighlightText text={paper.abstract} highlights={allHighlights} />
-                      </p>
-                      
-                      {/* Highlight Indicator (Yellow Triangle) */}
-                      {allHighlights.length > 0 && allHighlights.some(term => {
-                        if (!term) return false;
-                        const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        let patternStr = escaped;
-                        if (/^\w/.test(term)) patternStr = `\\b${patternStr}`;
-                        if (/\w$/.test(term)) patternStr = `${patternStr}\\b`;
-                        const termPattern = new RegExp(patternStr, 'i');
-                        return termPattern.test(paper.abstract);
-                      }) && (
-                        <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[12px] border-l-transparent border-b-[12px] border-b-yellow-400/80 drop-shadow-md group-hover/abstract:hidden animate-pulse" title="Contains highlighted terms - Hover to view"></div>
-                      )}
-
-                      {/* Full version (visible on hover) */}
-                      <div className="hidden group-hover/abstract:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-50 max-h-[400px] overflow-y-auto">
-                        <HighlightText text={paper.abstract} highlights={allHighlights} />
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="pt-4 border-t border-border/50 flex gap-2">
-                    <Button 
-                      asChild 
-                      className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
-                    >
-                      <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
-                        Read Paper <ExternalLink className="h-4 w-4" />
-                      </a>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => copyBibTeX(paper)}
-                      title="Copy BibTeX"
-                      className="border-primary/20 hover:bg-primary/10 hover:text-primary"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
+                <PaperCard
+                  key={paper.id}
+                  paper={paper}
+                  allHighlights={allHighlights}
+                  selectedTag={selectedTag}
+                  setSelectedTag={setSelectedTag}
+                  setSearchTerm={setSearchTerm}
+                  copyBibTeX={copyBibTeX}
+                />
               ))}
             </div>
 
