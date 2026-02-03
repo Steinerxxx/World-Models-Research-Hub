@@ -299,7 +299,7 @@ export default function Home() {
                 Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span>
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                v1.22
+                v1.23
               </span>
             </div>
           </div>
@@ -468,47 +468,49 @@ export default function Home() {
 
             {/* Pagination Controls */}
             {filteredPapers.length > itemsPerPage && (
-              <div className="flex justify-center items-center mt-12 gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="bg-card border-border text-foreground hover:text-primary hover:border-primary/50"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                
-                {getPageNumbers().map((page, index) => (
+              <div className="flex flex-col sm:flex-row justify-center items-center mt-12 gap-4 sm:gap-2">
+                <div className="flex items-center justify-center gap-2 flex-wrap">
                   <Button
-                    key={index}
-                    variant={page === currentPage ? "secondary" : "outline"}
-                    size="sm"
-                    onClick={() => typeof page === 'number' && handlePageChange(page)}
-                    disabled={page === '...'}
-                    className={`min-w-[2.5rem] ${
-                      page === currentPage 
-                        ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
-                        : 'bg-card border-border text-foreground hover:text-primary hover:border-primary/50'
-                    } ${page === '...' ? 'cursor-default hover:bg-card hover:text-muted-foreground' : ''}`}
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="bg-card border-border text-foreground hover:text-primary hover:border-primary/50"
                   >
-                    {page}
+                    <ChevronLeft className="h-4 w-4" />
                   </Button>
-                ))}
+                  
+                  {getPageNumbers().map((page, index) => (
+                    <Button
+                      key={index}
+                      variant={page === currentPage ? "secondary" : "outline"}
+                      size="sm"
+                      onClick={() => typeof page === 'number' && handlePageChange(page)}
+                      disabled={page === '...'}
+                      className={`min-w-[2.5rem] ${
+                        page === currentPage 
+                          ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+                          : 'bg-card border-border text-foreground hover:text-primary hover:border-primary/50'
+                      } ${page === '...' ? 'cursor-default hover:bg-card hover:text-muted-foreground' : ''}`}
+                    >
+                      {page}
+                    </Button>
+                  ))}
 
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="bg-card border-border text-foreground hover:text-primary hover:border-primary/50"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="bg-card border-border text-foreground hover:text-primary hover:border-primary/50"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
 
                 {/* Jump to Page Input */}
-                <div className="flex items-center gap-2 ml-4 pl-4 border-l border-border/50">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap hidden sm:inline-block">Go to:</span>
+                <div className="flex items-center gap-2 sm:ml-4 sm:pl-4 sm:border-l border-border/50 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50 w-full sm:w-auto justify-center sm:justify-start">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">Go to:</span>
                   <Input
                     type="number"
                     min={1}
