@@ -383,7 +383,16 @@ export default function Home() {
                       <span className="line-clamp-2">
                         {paper.authors.map((author, i) => (
                           <span key={i}>
-                            <HighlightText text={author} highlight={searchGeneral} />
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setSearchTerm(`author:"${author}"`);
+                              }}
+                              className="hover:text-primary hover:underline transition-colors focus:outline-none"
+                              title={`Filter by author: ${author}`}
+                            >
+                              <HighlightText text={author} highlight={searchGeneral} />
+                            </button>
                             {i < paper.authors.length - 1 ? ', ' : ''}
                           </span>
                         ))}
