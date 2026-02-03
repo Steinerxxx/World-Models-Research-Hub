@@ -3,7 +3,7 @@ import * as cheerio from 'cheerio';
 import { addPaper } from './database.js';
 import { classifyPaper } from './classifier.js';
 
-const BASE_ARXIV_URL = 'https://arxiv.org/search/?query="World+Models"&searchtype=all&source=header&order=-announced_date_first&size=50';
+const BASE_ARXIV_URL = 'https://arxiv.org/search/?query="World+Models"+OR+"Model-Based+Reinforcement+Learning"+OR+"Generative+World+Model"&searchtype=all&source=header&order=-announced_date_first&size=50';
 
 interface Paper {
   title: string;
