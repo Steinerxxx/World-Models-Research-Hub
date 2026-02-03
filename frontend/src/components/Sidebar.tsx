@@ -38,41 +38,16 @@ const ARCHITECTURE_TAGS = [
   'State Space Models'
 ];
 
-export function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.matchMedia('(max-width: 767px)').matches;
-    }
-    return false;
-  });
+interface SidebarContentProps {
+  isMobile: boolean;
+  onClose: () => void;
+}
+
+const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
   const { theme, toggleTheme } = useTheme();
   const { selectedTag, setSelectedTag, itemsPerPage, setItemsPerPage, sortBy, setSortBy } = useFilter();
 
-  // Handle responsive behavior
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 767px)');
-    const handleResize = (e: MediaQueryListEvent | MediaQueryList) => {
-      setIsMobile(e.matches);
-    };
-    
-    // Initial check
-    handleResize(mediaQuery);
-    
-    // Listen for changes
-    mediaQuery.addEventListener('change', handleResize);
-    return () => mediaQuery.removeEventListener('change', handleResize);
-  }, []);
-
-  // Auto-open/close based on device
-  useEffect(() => {
-    setIsOpen(!isMobile);
-  }, [isMobile]);
-
-  const toggleSidebar = () => setIsOpen(!isOpen);
-
-  // Common Sidebar Content
-  const SidebarContent = () => (
+  return (
     <div className="flex flex-col h-full w-full">
       <div className="p-6 flex flex-col border-b border-border/50">
         <div className="flex items-center justify-between">
@@ -81,12 +56,12 @@ export function Sidebar() {
           </h2>
           {/* Close button only visible on mobile */}
           {isMobile && (
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+            <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="h-5 w-5" />
             </Button>
           )}
         </div>
-        <span className="text-xs text-muted-foreground mt-1">v1.21</span>
+        <span className="text-xs text-muted-foreground mt-1">v1.22</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
@@ -106,6 +81,7 @@ export function Sidebar() {
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 }`
               }
+              onClick={() => setSelectedTag(null)}
             >
               <Home className="h-4 w-4" />
               Home
@@ -271,6 +247,38 @@ export function Sidebar() {
       </div>
     </div>
   );
+};
+
+export function Sidebar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.matchMedia('(max-width: 767px)').matches;
+    }
+    return false;
+  });
+
+  // Handle responsive behavior
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const handleResize = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobile(e.matches);
+    };
+    
+    // Initial check
+    handleResize(mediaQuery);
+    
+    // Listen for changes
+    mediaQuery.addEventListener('change', handleResize);
+    return () => mediaQuery.removeEventListener('change', handleResize);
+  }, []);
+
+  // Auto-open/close based on device
+  useEffect(() => {
+    setIsOpen(!isMobile);
+  }, [isMobile]);
+
+  const toggleSidebar = () => setIsOpen(!isOpen);
 
   // Mobile Layout
   if (isMobile) {
@@ -306,7 +314,7 @@ export function Sidebar() {
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className="fixed inset-y-0 left-0 z-50 w-[80%] max-w-[20rem] bg-background/95 backdrop-blur-md border-r border-border shadow-2xl overflow-hidden"
               >
-                <SidebarContent />
+                <SidebarContent isMobile={true} onClose={() => setIsOpen(false)} />
               </motion.aside>
             </>
           )}
@@ -338,7 +346,7 @@ export function Sidebar() {
         className="relative h-full bg-background/95 backdrop-blur-md border-r border-border flex flex-col shadow-2xl overflow-hidden whitespace-nowrap"
       >
         <div className="w-[20rem] h-full">
-          <SidebarContent />
+          <SidebarContent isMobile={false} onClose={() => setIsOpen(false)} />
         </div>
       </motion.aside>
     </>
