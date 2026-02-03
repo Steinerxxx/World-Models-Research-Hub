@@ -33,23 +33,74 @@ export function PaperCard({
 }: PaperCardProps) {
   const [isAuthorsTruncated, setIsAuthorsTruncated] = useState(false);
   const [isAbstractTruncated, setIsAbstractTruncated] = useState(false);
+  const [hasHiddenAuthorHighlight, setHasHiddenAuthorHighlight] = useState(false);
+  const [hasHiddenAbstractHighlight, setHasHiddenAbstractHighlight] = useState(false);
   const authorsRef = useRef<HTMLDivElement>(null);
   const abstractRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     const checkTruncation = () => {
+      // Check Authors Truncation & Hidden Highlights
       if (authorsRef.current) {
-        setIsAuthorsTruncated(authorsRef.current.scrollHeight > authorsRef.current.clientHeight);
+        const isTruncated = authorsRef.current.scrollHeight > authorsRef.current.clientHeight;
+        setIsAuthorsTruncated(isTruncated);
+
+        if (isTruncated) {
+          const matches = authorsRef.current.querySelectorAll('.highlight-match');
+          let hidden = false;
+          if (matches.length > 0) {
+            const containerRect = authorsRef.current.getBoundingClientRect();
+            // Use a small tolerance for sub-pixel rendering
+            const bottomLimit = containerRect.bottom; 
+            
+            matches.forEach(match => {
+              const matchRect = match.getBoundingClientRect();
+              // If the element's top is visible but bottom is cut off, or entirely below
+              if (matchRect.bottom > bottomLimit) {
+                hidden = true;
+              }
+            });
+          }
+          setHasHiddenAuthorHighlight(hidden);
+        } else {
+          setHasHiddenAuthorHighlight(false);
+        }
       }
+
+      // Check Abstract Truncation & Hidden Highlights
       if (abstractRef.current) {
-        setIsAbstractTruncated(abstractRef.current.scrollHeight > abstractRef.current.clientHeight);
+        const isTruncated = abstractRef.current.scrollHeight > abstractRef.current.clientHeight;
+        setIsAbstractTruncated(isTruncated);
+
+        if (isTruncated) {
+          const matches = abstractRef.current.querySelectorAll('.highlight-match');
+          let hidden = false;
+          if (matches.length > 0) {
+            const containerRect = abstractRef.current.getBoundingClientRect();
+            const bottomLimit = containerRect.bottom;
+            
+            matches.forEach(match => {
+              const matchRect = match.getBoundingClientRect();
+              if (matchRect.bottom > bottomLimit) {
+                hidden = true;
+              }
+            });
+          }
+          setHasHiddenAbstractHighlight(hidden);
+        } else {
+          setHasHiddenAbstractHighlight(false);
+        }
       }
     };
 
-    checkTruncation();
+    // Small delay to ensure layout is computed
+    const timer = setTimeout(checkTruncation, 100);
     window.addEventListener('resize', checkTruncation);
-    return () => window.removeEventListener('resize', checkTruncation);
-  }, [paper.authors, paper.abstract]);
+    return () => {
+      window.removeEventListener('resize', checkTruncation);
+      clearTimeout(timer);
+    };
+  }, [paper.authors, paper.abstract, allHighlights]);
 
   const hasHighlight = (text: string) => {
     return allHighlights.length > 0 && allHighlights.some(term => {
@@ -140,7 +191,7 @@ export function PaperCard({
             </div>
             
             {/* Highlight Indicator (Yellow Triangle) for Authors */}
-            {isAuthorsTruncated && hasAuthorHighlight && (
+            {isAuthorsTruncated && hasHiddenAuthorHighlight && (
               <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[12px] border-l-transparent border-b-[12px] border-b-yellow-400/80 drop-shadow-md group-hover/authors:hidden animate-pulse" title="Contains highlighted terms - Hover to view"></div>
             )}
           </div>
@@ -157,7 +208,7 @@ export function PaperCard({
           </p>
           
           {/* Highlight Indicator (Yellow Triangle) */}
-          {isAbstractTruncated && hasAbstractHighlight && (
+          {isAbstractTruncated && hasHiddenAbstractHighlight && (
             <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[12px] border-l-transparent border-b-[12px] border-b-yellow-400/80 drop-shadow-md group-hover/abstract:hidden animate-pulse" title="Contains highlighted terms - Hover to view"></div>
           )}
 
