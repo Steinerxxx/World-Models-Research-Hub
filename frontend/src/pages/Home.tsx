@@ -125,11 +125,9 @@ export default function Home() {
   };
 
   // Helper component for highlighting
-  const HighlightText = ({ text, highlight }: { text: string; highlight: string }) => {
-    if (!highlight.trim()) return <>{text}</>;
-    
-    // Split highlight string into terms, ignoring empty strings
-    const terms = highlight.trim().split(/\s+/).filter(t => t.length > 0);
+  const HighlightText = ({ text, highlights }: { text: string; highlights: string[] }) => {
+    // Filter out empty strings
+    const terms = highlights.filter(t => t && t.trim().length > 0);
     
     if (terms.length === 0) return <>{text}</>;
     
@@ -159,6 +157,11 @@ export default function Home() {
 
   // Filter papers based on the search term and selected tag
   const { general: searchGeneral, filters: searchFilters } = parseSearchQuery(searchTerm);
+
+  // Prepare terms for highlighting
+  const searchTerms = searchGeneral.trim().split(/\s+/).filter(t => t.length > 0);
+  // Add selectedTag to highlights if it exists (as a whole phrase, not split)
+  const allHighlights = selectedTag ? [...searchTerms, selectedTag] : searchTerms;
 
   const filteredPapers = papers.filter(paper => {
     // 1. Check advanced filters
@@ -374,7 +377,7 @@ export default function Home() {
                       ))}
                     </div>
                     <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
-                      <HighlightText text={paper.title} highlight={searchGeneral} />
+                      <HighlightText text={paper.title} highlights={allHighlights} />
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="flex-grow space-y-4">
@@ -391,7 +394,7 @@ export default function Home() {
                               className="hover:text-primary hover:underline transition-colors focus:outline-none"
                               title={`Filter by author: ${author}`}
                             >
-                              <HighlightText text={author} highlight={searchGeneral} />
+                              <HighlightText text={author} highlights={allHighlights} />
                             </button>
                             {i < paper.authors.length - 1 ? ', ' : ''}
                           </span>
@@ -403,7 +406,7 @@ export default function Home() {
                       <span>{new Date(paper.publication_date).toLocaleDateString()}</span>
                     </div>
                     <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4">
-                      <HighlightText text={paper.abstract} highlight={searchGeneral} />
+                      <HighlightText text={paper.abstract} highlights={allHighlights} />
                     </p>
                   </CardContent>
                   <CardFooter className="pt-4 border-t border-border/50 flex gap-2">
