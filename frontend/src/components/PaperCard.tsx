@@ -102,21 +102,6 @@ export function PaperCard({
     };
   }, [paper.authors, paper.abstract, allHighlights]);
 
-  const hasHighlight = (text: string) => {
-    return allHighlights.length > 0 && allHighlights.some(term => {
-      if (!term) return false;
-      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      let patternStr = escaped;
-      if (/^\w/.test(term)) patternStr = `\\b${patternStr}`;
-      if (/\w$/.test(term)) patternStr = `${patternStr}\\b`;
-      const termPattern = new RegExp(patternStr, 'i');
-      return termPattern.test(text);
-    });
-  };
-
-  const hasAuthorHighlight = hasHighlight(paper.authors.join(' '));
-  const hasAbstractHighlight = hasHighlight(paper.abstract);
-
   return (
     <Card className="group relative hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full hover:z-20">
       <CardHeader className="space-y-3 pb-3">
