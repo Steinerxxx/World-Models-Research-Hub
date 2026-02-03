@@ -32,7 +32,15 @@ export async function classifyPaper(title: string, abstract: string): Promise<st
     text.includes('q-learning') || 
     text.includes('actor-critic') ||
     text.includes('ppo') ||
-    text.includes('sac')
+    text.includes('sac') ||
+    text.includes('td3') ||
+    text.includes('ddpg') ||
+    text.includes('dqn') ||
+    text.includes('off-policy') ||
+    text.includes('on-policy') ||
+    text.includes('bellman') ||
+    text.includes('temporal difference') ||
+    text.includes('reward function')
   ) {
     tags.add('Reinforcement Learning');
   }
@@ -43,9 +51,13 @@ export async function classifyPaper(title: string, abstract: string): Promise<st
     text.includes('gan') || 
     text.includes('vae') || 
     text.includes('diffusion') || 
+    text.includes('flow matching') ||
+    text.includes('consistency model') ||
+    text.includes('autoregressive') ||
     text.includes('image generation') ||
     text.includes('video generation') ||
-    text.includes('sora')
+    text.includes('sora') ||
+    text.includes('veo')
   ) {
     tags.add('Generative Models');
   }
@@ -55,7 +67,9 @@ export async function classifyPaper(title: string, abstract: string): Promise<st
     text.includes('future frame') || 
     text.includes('dynamics model') || 
     text.includes('predict next frame') ||
-    text.includes('video generation')
+    text.includes('video generation') ||
+    text.includes('next-frame') ||
+    text.includes('spatiotemporal')
   ) {
     tags.add('Video Prediction');
   }
@@ -67,7 +81,12 @@ export async function classifyPaper(title: string, abstract: string): Promise<st
     text.includes('control') || 
     text.includes('manipulation') ||
     text.includes('locomotion') ||
-    text.includes('sim-to-real')
+    text.includes('sim-to-real') ||
+    text.includes('imitation learning') ||
+    text.includes('behavior cloning') ||
+    text.includes('dexterous') ||
+    text.includes('grasping') ||
+    text.includes('actuator')
   ) {
     tags.add('Robotics');
   }
