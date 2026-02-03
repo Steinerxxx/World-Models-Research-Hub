@@ -13,7 +13,8 @@ import {
   Layers, 
   Cpu,
   List,
-  ArrowUpDown
+  ArrowUpDown,
+  TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -106,6 +107,20 @@ export function Sidebar() {
               <Home className="h-4 w-4" />
               Home
             </NavLink>
+            <NavLink
+              to="/trends"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                  isActive 
+                    ? 'bg-primary/10 text-primary' 
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`
+              }
+            >
+              <TrendingUp className="h-4 w-4" />
+              <span className="font-medium">Trends Dashboard</span>
+            </NavLink>
+
             <NavLink
               to="/introduction"
               className={({ isActive }) =>
