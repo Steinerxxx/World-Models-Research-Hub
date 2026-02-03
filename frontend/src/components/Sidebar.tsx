@@ -149,7 +149,11 @@ export function Sidebar() {
             {SUBJECT_TAGS.map(tag => (
               <button
                 key={tag}
-                onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelectedTag(selectedTag === tag ? null : tag);
+                }}
                 className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors flex items-center gap-2 ${
                   selectedTag === tag
                     ? "bg-cyan-500/10 text-cyan-500 font-medium"
@@ -172,7 +176,11 @@ export function Sidebar() {
             {ARCHITECTURE_TAGS.map(tag => (
               <button
                 key={tag}
-                onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelectedTag(selectedTag === tag ? null : tag);
+                }}
                 className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors flex items-center gap-2 ${
                   selectedTag === tag
                     ? "bg-purple-500/10 text-purple-500 font-medium"

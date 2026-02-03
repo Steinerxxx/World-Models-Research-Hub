@@ -205,7 +205,9 @@ export default function Home() {
 
   // Reset page when filters change
   useEffect(() => {
-    setCurrentPage(1);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
   }, [searchTerm, selectedTag, itemsPerPage, sortBy]);
 
   // Pagination logic
@@ -215,14 +217,7 @@ export default function Home() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Scroll the main content container to top
-    const mainContent = document.getElementById('main-content');
-    if (mainContent) {
-      mainContent.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      // Fallback
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleGoToPage = () => {
