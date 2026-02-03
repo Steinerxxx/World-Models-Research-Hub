@@ -95,12 +95,78 @@ export default function Home() {
     alert("BibTeX copied to clipboard!");
   };
 
+  // Helper to parse search query
+  const parseSearchQuery = (query: string) => {
+    const filters: { tag?: string; author?: string; year?: string } = {};
+    let general = query;
+
+    // Extract tag: (supports tag:Robotics or tag:"Reinforcement Learning")
+    const tagMatch = general.match(/tag:(?:"([^"]+)"|(\S+))/i);
+    if (tagMatch) {
+      filters.tag = tagMatch[1] || tagMatch[2];
+      general = general.replace(tagMatch[0], '');
+    }
+
+    // Extract author:
+    const authorMatch = general.match(/author:(?:"([^"]+)"|(\S+))/i);
+    if (authorMatch) {
+      filters.author = authorMatch[1] || authorMatch[2];
+      general = general.replace(authorMatch[0], '');
+    }
+
+    // Extract year:
+    const yearMatch = general.match(/year:(\d{4})/i);
+    if (yearMatch) {
+      filters.year = yearMatch[1];
+      general = general.replace(yearMatch[0], '');
+    }
+
+    return { general: general.trim(), filters };
+  };
+
+  // Helper component for highlighting
+  const HighlightText = ({ text, highlight }: { text: string; highlight: string }) => {
+    if (!highlight.trim()) return <>{text}</>;
+    
+    // Escape special regex characters
+    const escapedHighlight = highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const parts = text.split(new RegExp(`(${escapedHighlight})`, 'gi'));
+    
+    return (
+      <>
+        {parts.map((part, i) => 
+          part.toLowerCase() === highlight.toLowerCase() ? (
+            <span key={i} className="bg-yellow-500/30 text-yellow-200 font-semibold rounded px-0.5 border border-yellow-500/50">
+              {part}
+            </span>
+          ) : (
+            part
+          )
+        )}
+      </>
+    );
+  };
+
   // Filter papers based on the search term and selected tag
+  const { general: searchGeneral, filters: searchFilters } = parseSearchQuery(searchTerm);
+
   const filteredPapers = papers.filter(paper => {
-    const searchTermLower = searchTerm.toLowerCase();
-    const titleMatch = paper.title.toLowerCase().includes(searchTermLower);
-    const authorsMatch = paper.authors.join(', ').toLowerCase().includes(searchTermLower);
-    const abstractMatch = paper.abstract.toLowerCase().includes(searchTermLower);
+    // 1. Check advanced filters
+    if (searchFilters.tag) {
+      if (!paper.tags?.some(t => t.toLowerCase().includes(searchFilters.tag!.toLowerCase()))) return false;
+    }
+    if (searchFilters.author) {
+      if (!paper.authors.some(a => a.toLowerCase().includes(searchFilters.author!.toLowerCase()))) return false;
+    }
+    if (searchFilters.year) {
+      if (new Date(paper.publication_date).getFullYear().toString() !== searchFilters.year) return false;
+    }
+
+    // 2. Check general search term
+    const generalLower = searchGeneral.toLowerCase();
+    const titleMatch = paper.title.toLowerCase().includes(generalLower);
+    const authorsMatch = paper.authors.join(', ').toLowerCase().includes(generalLower);
+    const abstractMatch = paper.abstract.toLowerCase().includes(generalLower);
     const tagMatch = selectedTag ? paper.tags?.includes(selectedTag) : true;
     
     return (titleMatch || authorsMatch || abstractMatch) && tagMatch;
@@ -292,20 +358,27 @@ export default function Home() {
                       ))}
                     </div>
                     <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
-                      {paper.title}
+                      <HighlightText text={paper.title} highlight={searchGeneral} />
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="flex-grow space-y-4">
                     <div className="flex items-start space-x-2 text-sm text-muted-foreground">
                       <Users className="h-4 w-4 mt-1 flex-shrink-0" />
-                      <span className="line-clamp-2">{paper.authors.join(', ')}</span>
+                      <span className="line-clamp-2">
+                        {paper.authors.map((author, i) => (
+                          <span key={i}>
+                            <HighlightText text={author} highlight={searchGeneral} />
+                            {i < paper.authors.length - 1 ? ', ' : ''}
+                          </span>
+                        ))}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3" />
                       <span>{new Date(paper.publication_date).toLocaleDateString()}</span>
                     </div>
                     <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4">
-                      {paper.abstract}
+                      <HighlightText text={paper.abstract} highlight={searchGeneral} />
                     </p>
                   </CardContent>
                   <CardFooter className="pt-4 border-t border-border/50 flex gap-2">
