@@ -67,7 +67,7 @@ export function PaperCard({
   const hasAbstractHighlight = hasHighlight(paper.abstract);
 
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full overflow-hidden">
+    <Card className="group relative hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full hover:z-20">
       <CardHeader className="space-y-3 pb-3">
         <div className="flex flex-wrap gap-2 mb-2">
           {paper.tags?.map((tag, i) => {
