@@ -14,11 +14,14 @@ export const HighlightText: React.FC<HighlightTextProps> = ({ text, highlights, 
   
   // Create regex pattern with word boundaries for better matching
   const escapedTerms = terms.map(t => {
+    // If term contains spaces (phrase), treat it as a whole unit
+    const isPhrase = t.trim().indexOf(' ') !== -1;
     const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     let pattern = escaped;
-    // If term starts with a word character, enforce word boundary at start
+    
+    // Only apply word boundaries if it's a phrase or starts/ends with word char
+    // If it's a phrase like "Kevin Zhang", we want \bKevin Zhang\b
     if (/^\w/.test(t)) pattern = `\\b${pattern}`;
-    // If term ends with a word character, enforce word boundary at end
     if (/\w$/.test(t)) pattern = `${pattern}\\b`;
     return pattern;
   });

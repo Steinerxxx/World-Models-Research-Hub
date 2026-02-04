@@ -163,10 +163,13 @@ export default function Home() {
       if (new Date(paper.publication_date).getFullYear().toString() !== searchFilters.year) return false;
     }
 
-    // 2. Check general search term (Multi-keyword AND logic)
-    const terms = searchGeneral.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+    // 2. Check general search term
+    // If the search term contains spaces, treat it as a single phrase search first
+    // This allows searching for full names like "Kevin Zhang" without matching just "Zhang"
+    const trimmedSearch = searchGeneral.trim();
+    const terms = [trimmedSearch];
     
-    // A paper must match ALL terms in the query
+    // A paper must match the search term (as a phrase)
     const matchesAllTerms = terms.every(term => {
       // Create regex for this specific term with word boundary
       const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
