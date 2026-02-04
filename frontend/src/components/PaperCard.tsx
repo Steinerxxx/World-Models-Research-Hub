@@ -150,11 +150,10 @@ export function PaperCard({
         </div>
         
         {/* Fixed min-height for title to align authors */}
-        <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
+        <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors min-h-[3.5rem]">
           <HighlightText 
             text={paper.title} 
             highlights={allHighlights} 
-            className="highlight-match bg-yellow-100/80 text-foreground dark:bg-yellow-500/20 dark:text-yellow-100 rounded px-0.5"
           />
         </CardTitle>
       </CardHeader>
