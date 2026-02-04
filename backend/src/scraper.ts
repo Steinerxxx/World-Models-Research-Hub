@@ -93,7 +93,11 @@ export async function scrapeArxiv(fullBackfill = false) {
 
       $('li.arxiv-result').each((_i, el) => {
         const title = $(el).find('p.title').text().trim();
-        const authors = $(el).find('p.authors').text().replace('Authors:', '').trim().split(', ');
+        const authors = $(el).find('p.authors').text()
+          .replace('Authors:', '')
+          .split(',')
+          .map(a => a.trim())
+          .filter(a => a.length > 0);
         const abstract = $(el).find('span.abstract-full').text().trim().replace('(Less)', '');
         const pdfLink = $(el).find('p.list-title.is-inline-block > span > a').attr('href');
         

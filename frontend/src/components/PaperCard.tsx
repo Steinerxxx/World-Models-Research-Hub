@@ -201,10 +201,10 @@ export function PaperCard({
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      setSearchTerm(`author:"${author}"`);
+                      setSearchTerm(`author:"${author.trim()}"`);
                     }}
                     className="hover:text-primary hover:underline transition-colors focus:outline-none inline"
-                    title={`Filter by author: ${author}`}
+                    title={`Filter by author: ${author.trim()}`}
                   >
                     <HighlightText text={author} highlights={allHighlights} />
                   </button>
@@ -220,10 +220,10 @@ export function PaperCard({
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      setSearchTerm(`author:"${author}"`);
+                      setSearchTerm(`author:"${author.trim()}"`);
                     }}
                     className="hover:text-primary hover:underline transition-colors focus:outline-none"
-                    title={`Filter by author: ${author}`}
+                    title={`Filter by author: ${author.trim()}`}
                   >
                     <HighlightText text={author} highlights={allHighlights} />
                   </button>
