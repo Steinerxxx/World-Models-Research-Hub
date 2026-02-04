@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X, Star } from "lucide-react";
 import { useFilter } from '@/contexts/FilterContext';
+import { useFavorites } from '@/contexts/FavoritesContext';
 import { PaperCard } from '@/components/PaperCard';
 
 // Define the type for a single paper
@@ -27,6 +28,7 @@ export default function Home() {
   
   // Use context for filters
   const { searchTerm, setSearchTerm, selectedTag, setSelectedTag, itemsPerPage, sortBy } = useFilter();
+  const { favorites, showFavoritesOnly, setShowFavoritesOnly } = useFavorites();
   
   // Local state for debounced search to prevent lag
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
@@ -170,6 +172,9 @@ export default function Home() {
   const allHighlights = selectedTag ? [...searchTerms, selectedTag] : searchTerms;
 
   const filteredPapers = papers.filter(paper => {
+    // 0. Check favorites filter
+    if (showFavoritesOnly && !favorites.includes(paper.id)) return false;
+
     // 1. Check advanced filters
     if (searchFilters.tag) {
       if (!paper.tags?.some(t => t.toLowerCase().includes(searchFilters.tag!.toLowerCase()))) return false;
@@ -223,7 +228,7 @@ export default function Home() {
     if (currentPage !== 1) {
       setCurrentPage(1);
     }
-  }, [searchTerm, selectedTag, itemsPerPage, sortBy, currentPage]);
+  }, [searchTerm, selectedTag, itemsPerPage, sortBy, showFavoritesOnly, currentPage]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredPapers.length / itemsPerPage);
@@ -365,19 +370,36 @@ export default function Home() {
         
         {/* Active Filter Indicator */}
         <div className="flex flex-col items-center gap-2">
-          {selectedTag && (
-            <div className="flex justify-center items-center gap-2">
-              <span className="text-sm text-muted-foreground">Filtered by:</span>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setSelectedTag(null)}
-                className="rounded-full flex items-center gap-2"
-              >
-                {selectedTag} <span className="ml-1 text-xs">×</span>
-              </Button>
-            </div>
-          )}
+          <div className="flex flex-wrap justify-center items-center gap-2">
+            {showFavoritesOnly && (
+              <div className="flex justify-center items-center gap-2">
+                <span className="text-sm text-muted-foreground">Showing:</span>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowFavoritesOnly(false)}
+                  className="rounded-full flex items-center gap-2 bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 border border-yellow-500/20"
+                >
+                  <Star className="h-3 w-3 fill-current" />
+                  Favorites Only <span className="ml-1 text-xs">×</span>
+                </Button>
+              </div>
+            )}
+            
+            {selectedTag && (
+              <div className="flex justify-center items-center gap-2">
+                {!showFavoritesOnly && <span className="text-sm text-muted-foreground">Filtered by:</span>}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setSelectedTag(null)}
+                  className="rounded-full flex items-center gap-2"
+                >
+                  {selectedTag} <span className="ml-1 text-xs">×</span>
+                </Button>
+              </div>
+            )}
+          </div>
           {!loading && !error && (
             <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">
               Found {filteredPapers.length} papers

@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Calendar, Users, Copy, Tag, Sparkles, Loader2 } from "lucide-react";
+import { ExternalLink, Calendar, Users, Copy, Tag, Sparkles, Loader2, Star } from "lucide-react";
 import { HighlightText } from './HighlightText';
+import { useFavorites } from '@/contexts/FavoritesContext';
 
 interface Paper {
   id: number;
@@ -43,6 +44,19 @@ export function PaperCard({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const authorsRef = useRef<HTMLDivElement>(null);
   const abstractRef = useRef<HTMLParagraphElement>(null);
+  
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const isStarred = isFavorite(paper.id);
+
+  const toggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (isStarred) {
+      removeFavorite(paper.id);
+    } else {
+      addFavorite(paper.id);
+    }
+  };
 
   // Clean abstract text to remove "Less" artifact from scraping
   const cleanedAbstract = paper.abstract.replace(/\s*[△▽▲▼]?\s*Less\s*$/i, '').trim();
@@ -141,6 +155,19 @@ export function PaperCard({
 
   return (
     <Card className="group relative hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full hover:z-20">
+      {/* Favorite Button */}
+      <button
+        onClick={toggleFavorite}
+        className={`absolute top-4 right-4 z-30 p-2 rounded-full transition-all duration-200 ${
+          isStarred 
+            ? "text-yellow-500 bg-yellow-500/10 hover:bg-yellow-500/20" 
+            : "text-muted-foreground/30 hover:text-yellow-500 hover:bg-yellow-500/10"
+        }`}
+        title={isStarred ? "Remove from favorites" : "Add to favorites"}
+      >
+        <Star className={`h-5 w-5 ${isStarred ? "fill-current" : ""}`} />
+      </button>
+
       <CardHeader className="space-y-3 pb-3">
         {/* Tags Section - Allow full height but maintain min-height for alignment consistency */}
         <div className="min-h-[72px]">

@@ -14,11 +14,13 @@ import {
   Cpu,
   List,
   ArrowUpDown,
-  TrendingUp
+  TrendingUp,
+  Star
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useFilter } from '@/contexts/FilterContext';
+import { useFavorites } from '@/contexts/FavoritesContext';
 
 const SUBJECT_TAGS = [
   'Reinforcement Learning', 
@@ -44,6 +46,7 @@ interface SidebarContentProps {
 const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
   const { theme, toggleTheme } = useTheme();
   const { selectedTag, setSelectedTag, itemsPerPage, setItemsPerPage, sortBy, setSortBy } = useFilter();
+  const { showFavoritesOnly, setShowFavoritesOnly, favorites } = useFavorites();
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -97,6 +100,23 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
               <TrendingUp className="h-4 w-4" />
               <span className="font-medium">Trends Dashboard</span>
             </NavLink>
+
+            <button
+              onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                showFavoritesOnly
+                  ? "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 font-medium"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              <Star className={`h-4 w-4 ${showFavoritesOnly ? "fill-current" : ""}`} />
+              <span className="font-medium">My Favorites</span>
+              {favorites.length > 0 && (
+                <span className="ml-auto text-xs bg-muted-foreground/10 px-2 py-0.5 rounded-full">
+                  {favorites.length}
+                </span>
+              )}
+            </button>
 
             <NavLink
               to="/introduction"
