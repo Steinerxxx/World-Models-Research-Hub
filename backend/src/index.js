@@ -8,7 +8,8 @@ import {
   updatePaperSummary,
   getPaperById,
   query,
-  initDatabase
+  initDatabase,
+  seedMockData
 } from './database.js';
 import { scrapeArxiv } from './scraper.js';
 import { classifyPaper } from './classifier.js';
@@ -36,7 +37,24 @@ app.get('/', (req, res) => {
 });
 
 // Initialize Database (or fallback to JSON)
-initDatabase();
+(async () => {
+  await initDatabase();
+  
+  // Check if database is empty and seed if necessary
+  try {
+    const papers = await getAllPapers();
+    if (papers.length === 0) {
+      console.log('Database is empty. Attempting to seed with mock data...');
+      await seedMockData();
+      
+      // Also trigger a background scrape
+      console.log('Triggering background scrape...');
+      scrapeArxiv().catch(err => console.error('Background scrape failed:', err));
+    }
+  } catch (err) {
+    console.error('Error checking database state:', err);
+  }
+})();
 
 // API route to test database connection
 app.get('/api/test-db', async (req, res) => {

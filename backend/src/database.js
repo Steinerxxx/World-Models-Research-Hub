@@ -164,3 +164,38 @@ export async function getAllPapers() {
     return papers.sort((a, b) => new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime());
   }
 }
+
+export async function seedMockData() {
+  const MOCK_PAPERS = [
+    {
+      title: "World Models",
+      authors: ["David Ha", "Jürgen Schmidhuber"],
+      abstract: "We explore building generative neural network models of popular reinforcement learning environments. Our world model can be trained quickly in an unsupervised manner to learn a compressed spatial and temporal representation of the environment.",
+      publication_date: "2018-03-27",
+      url: "https://arxiv.org/abs/1803.10122",
+      tags: ["World Models", "Reinforcement Learning", "Generative Models"]
+    },
+    {
+      title: "DreamerV3: Mastering Diverse Domains through World Models",
+      authors: ["Danijar Hafner", "Jurgis Pasukonis", "Jimmy Ba", "Timothy Lillicrap"],
+      abstract: "General intelligence requires solving tasks across many domains. Current reinforcement learning algorithms carry this out by specializing to the specific domain. We present DreamerV3, a general and scalable algorithm based on world models.",
+      publication_date: "2023-01-10",
+      url: "https://arxiv.org/abs/2301.04104",
+      tags: ["Model-Based RL", "World Models", "General Intelligence"]
+    },
+    {
+      title: "Mastering Atari with Discrete World Models",
+      authors: ["Danijar Hafner", "Timothy Lillicrap", "Mohammad Norouzi", "Jimmy Ba"],
+      abstract: "Intelligent agents need to generalize from past experience to unseen situations. We introduce DreamerV2, a reinforcement learning agent that learns a world model with discrete latent variables.",
+      publication_date: "2020-10-01",
+      url: "https://arxiv.org/abs/2010.02193",
+      tags: ["Model-Based RL", "Discrete Latents", "Atari"]
+    }
+  ];
+
+  console.log('Seeding database with mock data...');
+  for (const paper of MOCK_PAPERS) {
+    await addPaper(paper);
+  }
+  console.log('Database seeded with mock data.');
+}
