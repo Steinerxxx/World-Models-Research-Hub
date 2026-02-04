@@ -163,7 +163,9 @@ export default function Home() {
   const { general: searchGeneral, filters: searchFilters } = parseSearchQuery(searchTerm);
 
   // Prepare terms for highlighting
-  const searchTerms = searchGeneral.trim().split(/\s+/).filter(t => t.length > 0);
+  // Use the full search phrase for highlighting to match the search logic (which treats it as a phrase)
+  // This prevents highlighting individual words like "Zhang" when searching for "Kevin Zhang"
+  const searchTerms = searchGeneral.trim() ? [searchGeneral.trim()] : [];
   // Add selectedTag to highlights if it exists (as a whole phrase, not split)
   const allHighlights = selectedTag ? [...searchTerms, selectedTag] : searchTerms;
 
