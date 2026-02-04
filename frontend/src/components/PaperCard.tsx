@@ -5,6 +5,8 @@ import { ExternalLink, Calendar, Users, Copy, Tag, Sparkles, Loader2, Star } fro
 import { HighlightText } from './HighlightText';
 import { useFavorites } from '@/contexts/FavoritesContext';
 
+import { API_BASE_URL } from '@/config';
+
 interface Paper {
   id: number;
   title: string;
@@ -64,12 +66,7 @@ export function PaperCard({
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     try {
-      // Use local backend for development, fallback to production
-      const API_BASE = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3001' 
-        : 'https://world-models-research-hub-backend.onrender.com';
-        
-      const res = await fetch(`${API_BASE}/api/papers/${paper.id}/analyze`, {
+      const res = await fetch(`${API_BASE_URL}/api/papers/${paper.id}/analyze`, {
         method: 'POST'
       });
       

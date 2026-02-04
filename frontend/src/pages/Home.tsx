@@ -6,6 +6,8 @@ import { useFilter } from '@/contexts/FilterContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { PaperCard } from '@/components/PaperCard';
 
+import { API_BASE_URL } from '@/config';
+
 // Define the type for a single paper
 interface Paper {
   id: number;
@@ -56,7 +58,7 @@ export default function Home() {
 
   const fetchPapers = () => {
     setLoading(true);
-    fetch('https://world-models-research-hub-backend.onrender.com/api/papers')
+    fetch(`${API_BASE_URL}/api/papers`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -86,7 +88,7 @@ export default function Home() {
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetch('https://world-models-research-hub-backend.onrender.com/api/scrape', {
+    fetch(`${API_BASE_URL}/api/scrape`, {
       method: 'POST',
     })
       .then(response => {
