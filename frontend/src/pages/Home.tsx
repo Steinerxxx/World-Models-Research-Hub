@@ -304,13 +304,15 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Tongji University Logo */}
-      <div className="fixed top-6 right-6 z-50 opacity-90 hover:opacity-100 transition-opacity duration-300 hidden md:block">
-        <img 
-          src="/tongji-logo.png" 
-          alt="Tongji University" 
-          className="w-24 h-24 drop-shadow-lg filter hover:brightness-110 transition-all object-contain"
-          title="Tongji University"
-        />
+      <div className="fixed top-8 right-8 z-50 opacity-90 hover:opacity-100 transition-opacity duration-300 hidden lg:block">
+        <div className="bg-white/90 dark:bg-slate-800/90 p-3 rounded-full shadow-xl backdrop-blur-sm border border-slate-200 dark:border-slate-700">
+          <img 
+            src="/tongji-logo.png" 
+            alt="Tongji University" 
+            className="w-32 h-32 drop-shadow-md filter hover:brightness-110 transition-all object-contain dark:invert-0"
+            title="Tongji University"
+          />
+        </div>
       </div>
 
       <header className="mb-8 space-y-4">
