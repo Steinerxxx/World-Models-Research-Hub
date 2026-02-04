@@ -59,7 +59,14 @@ export default function Home() {
         return response.json();
       })
       .then(data => {
-        setPapers(data);
+        // Filter out common tags that appear in almost all papers to reduce noise
+        const processedData = data.map((paper: Paper) => ({
+          ...paper,
+          tags: paper.tags?.filter(tag => 
+            !['World Models', 'Model-Based RL'].includes(tag)
+          )
+        }));
+        setPapers(processedData);
         setLoading(false);
       })
       .catch(error => {
