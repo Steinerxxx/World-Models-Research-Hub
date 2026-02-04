@@ -319,14 +319,13 @@ export default function Home() {
     <div className="container mx-auto px-4 py-12">
       {/* Tongji University Logo */}
       <div className="fixed top-6 right-6 z-50 hidden md:block">
-        <a href="https://www.tongji.edu.cn" target="_blank" rel="noopener noreferrer" 
-           className="block bg-white rounded-full p-1 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-white/50 ring-1 ring-black/5 group overflow-hidden w-16 h-16 flex items-center justify-center">
+        <div className="block bg-white rounded-full p-1 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-white/50 ring-1 ring-black/5 w-16 h-16 flex items-center justify-center overflow-hidden">
           <img 
             src="/tongji-blue.jpg" 
             alt="Tongji University" 
             className="w-full h-full object-contain"
           />
-        </a>
+        </div>
       </div>
 
       <header className="mb-8 space-y-4">
