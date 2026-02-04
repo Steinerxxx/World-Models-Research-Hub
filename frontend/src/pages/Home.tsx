@@ -168,6 +168,15 @@ export default function Home() {
   // Use the full search phrase for highlighting to match the search logic (which treats it as a phrase)
   // This prevents highlighting individual words like "Zhang" when searching for "Kevin Zhang"
   const searchTerms = searchGeneral.trim() ? [searchGeneral.trim()] : [];
+  
+  // Add specific filters to highlights
+  if (searchFilters.author) {
+    searchTerms.push(searchFilters.author);
+  }
+  if (searchFilters.tag) {
+    searchTerms.push(searchFilters.tag);
+  }
+
   // Add selectedTag to highlights if it exists (as a whole phrase, not split)
   const allHighlights = selectedTag ? [...searchTerms, selectedTag] : searchTerms;
 
@@ -311,20 +320,11 @@ export default function Home() {
       {/* Tongji University Logo */}
       <div className="fixed top-6 right-6 z-50 hidden md:block">
         <a href="https://www.tongji.edu.cn" target="_blank" rel="noopener noreferrer" 
-           className="block bg-white rounded-full p-2 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-4 border-white/50 ring-1 ring-black/5 group">
-          {/* Use CSS Mask to ensure the logo is Tongji Blue (#005098) regardless of original image color */}
-          <div 
-            className="w-16 h-16 bg-[#005098] transition-all duration-300 group-hover:bg-[#003d73]"
-            style={{ 
-              maskImage: 'url(/tongji-logo.png)', 
-              maskSize: 'contain', 
-              maskRepeat: 'no-repeat', 
-              maskPosition: 'center',
-              WebkitMaskImage: 'url(/tongji-logo.png)', 
-              WebkitMaskSize: 'contain', 
-              WebkitMaskRepeat: 'no-repeat', 
-              WebkitMaskPosition: 'center'
-            }} 
+           className="block bg-white rounded-full p-1 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-white/50 ring-1 ring-black/5 group overflow-hidden w-16 h-16 flex items-center justify-center">
+          <img 
+            src="/tongji-blue.jpg" 
+            alt="Tongji University" 
+            className="w-full h-full object-contain"
           />
         </a>
       </div>

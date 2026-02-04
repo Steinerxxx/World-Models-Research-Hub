@@ -1,4 +1,4 @@
-import React from 'react';
+import { type FC, Fragment } from 'react';
 
 interface HighlightTextProps {
   text: string;
@@ -6,7 +6,7 @@ interface HighlightTextProps {
   className?: string; // Allow overriding styles
 }
 
-export const HighlightText: React.FC<HighlightTextProps> = ({ text, highlights, className }) => {
+export const HighlightText: FC<HighlightTextProps> = ({ text, highlights, className }) => {
   // Filter out empty strings
   const terms = highlights.filter(t => t && t.trim().length > 0);
   
