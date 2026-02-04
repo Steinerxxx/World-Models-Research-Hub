@@ -156,9 +156,9 @@ export function PaperCard({
                       setSelectedTag(isSelected ? null : tag);
                     }}
                     className={`
-                      inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border
+                      inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 border cursor-pointer
                       ${isSelected 
-                        ? "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-100 dark:border-blue-800" 
+                        ? "bg-primary text-primary-foreground border-primary shadow-md" 
                         : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground border-transparent hover:border-border"
                       }
                       ${allHighlights.includes(tag) && !isSelected ? "ring-2 ring-yellow-400/50 dark:ring-yellow-500/50 bg-yellow-100/50 dark:bg-yellow-900/20" : ""}
