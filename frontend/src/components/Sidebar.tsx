@@ -21,8 +21,6 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useFilter } from '@/contexts/FilterContext';
 
 const SUBJECT_TAGS = [
-  'World Models', 
-  'Model-Based RL', 
   'Reinforcement Learning', 
   'Generative Models', 
   'Video Prediction', 
