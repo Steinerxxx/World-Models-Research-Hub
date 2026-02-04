@@ -154,7 +154,6 @@ export function PaperCard({
           <HighlightText 
             text={paper.title} 
             highlights={allHighlights} 
-            className="bg-yellow-100/80 text-foreground dark:bg-yellow-500/30 dark:text-yellow-100 rounded px-0.5"
           />
         </CardTitle>
       </CardHeader>
