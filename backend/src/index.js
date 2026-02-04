@@ -100,7 +100,24 @@ app.post('/api/papers', async (req, res) => {
 // API route to trigger scraper
 app.post('/api/scrape', async (req, res) => {
   try {
-    const result = await scrapeArxiv();
+    const fullBackfill = req.query.type === 'full';
+    console.log(`Triggering scrape (Full Backfill: ${fullBackfill})...`);
+    
+    // Run asynchronously if full backfill to prevent timeout
+    if (fullBackfill) {
+      scrapeArxiv(true).then(stats => {
+        console.log('Full backfill completed:', stats);
+      }).catch(err => {
+        console.error('Full backfill failed:', err);
+      });
+      
+      return res.json({ 
+        message: 'Full backfill started in background. This will take several minutes to restore 1000+ papers.',
+        status: 'processing'
+      });
+    }
+
+    const result = await scrapeArxiv(false);
     res.json({ 
       message: 'Scraping completed successfully', 
       stats: result 
@@ -111,6 +128,25 @@ app.post('/api/scrape', async (req, res) => {
       message: 'Scraping failed', 
       error: err instanceof Error ? err.message : 'Unknown error' 
     });
+  }
+});
+
+// API route to restore data (Alias for full scrape)
+app.post('/api/restore', async (req, res) => {
+  try {
+    console.log('🚨 RESTORE PROTOCOL INITIATED 🚨');
+    scrapeArxiv(true).then(stats => {
+      console.log('Restore process completed:', stats);
+    }).catch(err => {
+      console.error('Restore process failed:', err);
+    });
+    
+    res.json({ 
+      message: 'Restore process started. We are re-fetching ~5000 papers from arXiv. Check back in 5-10 minutes.',
+      status: 'processing'
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to initiate restore' });
   }
 });
 

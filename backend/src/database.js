@@ -25,17 +25,32 @@ export const query = (text, params) => pool.query(text, params);
 
 export async function initDatabase() {
   try {
-    await pool.query('SELECT 1');
+    console.log('🔌 Attempting to connect to PostgreSQL...');
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL environment variable is NOT set.');
+    }
+    
+    // Test connection
+    const client = await pool.connect();
+    console.log('✅ Successfully connected to PostgreSQL database!');
+    client.release(); // Release the client back to the pool
+    
     isDbConnected = true;
-    console.log('✅ Connected to PostgreSQL database');
     await createPapersTable();
   } catch (err) {
-    console.warn('⚠️  Database connection failed. Switching to local JSON storage.');
-    console.warn('   Error:', err.message);
+    console.error('❌ Database connection FAILED.');
+    console.error('---------------------------------------------------');
+    console.error('Error Details:', err.message);
+    if (err.code) console.error('Error Code:', err.code);
+    if (err.detail) console.error('Error Detail:', err.detail);
+    console.error('Hint: Check your Render Environment Variables (DATABASE_URL).');
+    console.error('---------------------------------------------------');
+    
     isDbConnected = false;
     
     // Initialize local JSON if not exists
     if (!fs.existsSync(LOCAL_DB_PATH)) {
+      console.log('📂 Creating local papers.json fallback...');
       fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify([], null, 2));
     }
   }
