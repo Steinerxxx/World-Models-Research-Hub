@@ -309,15 +309,16 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Tongji University Logo */}
-      <div className="fixed top-8 right-8 z-50 opacity-90 hover:opacity-100 transition-opacity duration-300 hidden lg:block">
-        <div className="bg-white/90 dark:bg-slate-800/90 p-3 rounded-full shadow-xl backdrop-blur-sm border border-slate-200 dark:border-slate-700">
+      <div className="fixed top-6 right-6 z-50 hidden md:block">
+        <a href="https://www.tongji.edu.cn" target="_blank" rel="noopener noreferrer" 
+           className="block bg-white rounded-full p-2 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-4 border-white/50 ring-1 ring-black/5">
           <img 
-            src="/tongji-logo.png" 
+            src="https://upload.wikimedia.org/wikipedia/en/2/22/Tongji_Uni_logo.svg" 
             alt="Tongji University" 
-            className="w-32 h-32 drop-shadow-md filter hover:brightness-110 transition-all object-contain dark:invert-0"
-            title="Tongji University"
+            className="w-16 h-16 object-contain"
+            onError={(e) => { e.currentTarget.src = "/Tongji_University_Logo.png"; }}
           />
-        </div>
+        </a>
       </div>
 
       <header className="mb-8 space-y-4">
