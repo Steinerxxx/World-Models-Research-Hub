@@ -5,11 +5,14 @@ import {
   addPaper,
   getAllPapers,
   updatePaperTags,
+  updatePaperSummary,
+  getPaperById,
   query,
   initDatabase
 } from './database.js';
 import { scrapeArxiv } from './scraper.js';
 import { classifyPaper } from './classifier.js';
+import { generatePaperAnalysis } from './ai_service.js';
 import cron from 'node-cron';
 
 const app = express();
@@ -98,11 +101,44 @@ app.post('/api/reclassify', async (req, res) => {
       processed_count: count 
     });
   } catch (err) {
-    console.error('Error during reclassification:', err);
-    res.status(500).json({ 
-      message: 'Reclassification failed', 
-      error: err instanceof Error ? err.message : 'Unknown error' 
+    console.error('Error reclassifying papers:', err);
+    res.status(500).json({ message: 'Failed to reclassify papers' });
+  }
+});
+
+// API route to analyze a paper (summary, contribution, limitations)
+app.post('/api/papers/:id/analyze', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: 'Invalid ID format' });
+    }
+
+    const paper = await getPaperById(id);
+    if (!paper) {
+      return res.status(404).json({ message: 'Paper not found' });
+    }
+
+    if (!paper.abstract) {
+      return res.status(400).json({ message: 'Paper has no abstract to analyze' });
+    }
+
+    console.log(`Analyzing paper: ${paper.title}`);
+    const analysis = await generatePaperAnalysis(paper.title, paper.abstract);
+
+    if (!analysis) {
+      return res.status(500).json({ message: 'AI service failed to generate analysis' });
+    }
+
+    await updatePaperSummary(id, analysis);
+
+    res.json({ 
+      message: 'Analysis generated successfully', 
+      analysis 
     });
+  } catch (err) {
+    console.error('Error analyzing paper:', err);
+    res.status(500).json({ message: 'Failed to analyze paper' });
   }
 });
 

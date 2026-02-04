@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Calendar, Users, Copy, Tag } from "lucide-react";
+import { ExternalLink, Calendar, Users, Copy, Tag, Sparkles, Loader2 } from "lucide-react";
 import { HighlightText } from './HighlightText';
 
 interface Paper {
@@ -12,6 +12,9 @@ interface Paper {
   publication_date: string;
   url: string;
   tags?: string[];
+  summary?: string;
+  contribution?: string;
+  limitations?: string;
 }
 
 interface PaperCardProps {
@@ -21,6 +24,7 @@ interface PaperCardProps {
   setSelectedTag: (tag: string | null) => void;
   setSearchTerm: (term: string) => void;
   copyBibTeX: (paper: Paper) => void;
+  onPaperUpdate?: (updatedPaper: Paper) => void;
 }
 
 export function PaperCard({ 
@@ -29,17 +33,47 @@ export function PaperCard({
   selectedTag, 
   setSelectedTag, 
   setSearchTerm, 
-  copyBibTeX 
+  copyBibTeX,
+  onPaperUpdate
 }: PaperCardProps) {
   const [isAuthorsTruncated, setIsAuthorsTruncated] = useState(false);
   const [isAbstractTruncated, setIsAbstractTruncated] = useState(false);
   const [hasHiddenAuthorHighlight, setHasHiddenAuthorHighlight] = useState(false);
   const [hasHiddenAbstractHighlight, setHasHiddenAbstractHighlight] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const authorsRef = useRef<HTMLDivElement>(null);
   const abstractRef = useRef<HTMLParagraphElement>(null);
 
   // Clean abstract text to remove "Less" artifact from scraping
   const cleanedAbstract = paper.abstract.replace(/\s*[△▽▲▼]?\s*Less\s*$/i, '').trim();
+
+  const handleAnalyze = async () => {
+    setIsAnalyzing(true);
+    try {
+      // Use local backend for development, fallback to production
+      const API_BASE = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3001' 
+        : 'https://world-models-research-hub-backhend.onrender.com';
+        
+      const res = await fetch(`${API_BASE}/api/papers/${paper.id}/analyze`, {
+        method: 'POST'
+      });
+      
+      if (!res.ok) throw new Error('Analysis failed');
+      
+      const data = await res.json();
+      if (data.analysis && onPaperUpdate) {
+        onPaperUpdate({
+          ...paper,
+          ...data.analysis
+        });
+      }
+    } catch (error) {
+      console.error('Analysis error:', error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   useEffect(() => {
     const checkTruncation = () => {
@@ -225,6 +259,43 @@ export function PaperCard({
             <HighlightText text={cleanedAbstract} highlights={allHighlights} />
           </div>
         </div>
+
+        {/* AI Analysis Section */}
+        {paper.summary ? (
+          <div className="mt-4 p-4 bg-muted/50 rounded-lg space-y-3 border border-border/50 text-sm">
+            <div className="flex items-center gap-2 text-primary font-semibold">
+              <Sparkles className="h-4 w-4" />
+              AI Analysis
+            </div>
+            <div className="space-y-2">
+              <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Core Idea:</span> {paper.summary}</p>
+              <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Innovation:</span> {paper.contribution}</p>
+              <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Limitations:</span> {paper.limitations}</p>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-3 flex justify-end">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleAnalyze} 
+              disabled={isAnalyzing}
+              className="text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 h-8 px-3"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-3 w-3 mr-1.5" />
+                  Generate AI Summary
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </CardContent>
       <CardFooter className="pt-4 border-t border-border/50 flex gap-2">
         <Button 

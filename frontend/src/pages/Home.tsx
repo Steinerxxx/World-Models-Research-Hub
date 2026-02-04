@@ -14,6 +14,9 @@ interface Paper {
   publication_date: string;
   url: string;
   tags?: string[];
+  summary?: string;
+  contribution?: string;
+  limitations?: string;
 }
 
 export default function Home() {
@@ -119,6 +122,12 @@ export default function Home() {
 }`;
     navigator.clipboard.writeText(bibtex);
     alert("BibTeX copied to clipboard!");
+  };
+
+  const handlePaperUpdate = (updatedPaper: Paper) => {
+    setPapers(prevPapers => 
+      prevPapers.map(p => p.id === updatedPaper.id ? updatedPaper : p)
+    );
   };
 
   // Helper to parse search query
@@ -391,6 +400,7 @@ export default function Home() {
                   setSelectedTag={setSelectedTag}
                   setSearchTerm={setSearchTerm}
                   copyBibTeX={copyBibTeX}
+                  onPaperUpdate={handlePaperUpdate}
                 />
               ))}
             </div>

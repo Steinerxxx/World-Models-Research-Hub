@@ -61,6 +61,12 @@ export async function createPapersTable() {
 
     // Add tags column if it doesn't exist (migration for existing table)
     await query(`ALTER TABLE papers ADD COLUMN IF NOT EXISTS tags TEXT[]`);
+    
+    // Add AI summary columns if they don't exist
+    await query(`ALTER TABLE papers ADD COLUMN IF NOT EXISTS summary TEXT`);
+    await query(`ALTER TABLE papers ADD COLUMN IF NOT EXISTS contribution TEXT`);
+    await query(`ALTER TABLE papers ADD COLUMN IF NOT EXISTS limitations TEXT`);
+    
     console.log('"papers" table created or updated.');
   } catch (err) {
     console.error('Error creating table:', err);
@@ -113,6 +119,37 @@ export async function updatePaperTags(id: number, tags: string[]) {
       papers[paperIndex].tags = tags;
       fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(papers, null, 2));
     }
+  }
+}
+
+export async function updatePaperSummary(id: number, analysis: { summary: string; contribution: string; limitations: string }) {
+  if (isDbConnected) {
+    const updateQuery = `
+      UPDATE papers 
+      SET summary = $1, contribution = $2, limitations = $3 
+      WHERE id = $4;
+    `;
+    await query(updateQuery, [analysis.summary, analysis.contribution, analysis.limitations, id]);
+  } else {
+    // Local JSON Fallback
+    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
+    const paperIndex = papers.findIndex((p: any) => p.id === id);
+    if (paperIndex >= 0) {
+      papers[paperIndex] = { ...papers[paperIndex], ...analysis };
+      fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(papers, null, 2));
+    }
+  }
+}
+
+export async function getPaperById(id: number) {
+  if (isDbConnected) {
+    const { rows } = await query('SELECT * FROM papers WHERE id = $1', [id]);
+    return rows[0];
+  } else {
+    // Local JSON Fallback
+    if (!fs.existsSync(LOCAL_DB_PATH)) return null;
+    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
+    return papers.find((p: any) => p.id === Number(id));
   }
 }
 
