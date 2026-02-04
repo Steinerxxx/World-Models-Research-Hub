@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X, Star } from "lucide-react";
+import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X, Star, AlertTriangle } from "lucide-react";
 import { useFilter } from '@/contexts/FilterContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { PaperCard } from '@/components/PaperCard';
@@ -29,7 +29,8 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [usingMockData, setUsingMockData] = useState(false);
-  
+  const [fetchErrorDetail, setFetchErrorDetail] = useState<string>('');
+
   // Use context for filters
   const { searchTerm, setSearchTerm, selectedTag, setSelectedTag, itemsPerPage, sortBy } = useFilter();
   const { favorites, showFavoritesOnly, setShowFavoritesOnly } = useFavorites();
@@ -60,10 +61,14 @@ export default function Home() {
 
   const fetchPapers = () => {
     setLoading(true);
+    setFetchErrorDetail('');
+    
+    console.log(`[Debug] Fetching from: ${API_BASE_URL}/api/papers`);
+    
     fetch(`${API_BASE_URL}/api/papers`)
       .then(response => {
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         return response.json();
       })
@@ -76,10 +81,12 @@ export default function Home() {
           )
         }));
         setPapers(processedData);
+        setUsingMockData(false);
         setLoading(false);
       })
       .catch(error => {
         console.warn('Backend fetch failed, switching to Mock Data:', error);
+        setFetchErrorDetail(error.message || 'Unknown Network Error');
         // Fallback to mock data
         setPapers(MOCK_PAPERS);
         setUsingMockData(true);
@@ -341,12 +348,23 @@ export default function Home() {
             </div>
           </div>
           
+          {/* Debug Info / Offline Banner */}
           {usingMockData && (
-            <div className="w-full max-w-2xl mx-auto bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 px-4 py-3 rounded-lg flex items-center justify-center gap-2 animate-in fade-in slide-in-from-top-4">
-              <span className="text-lg">⚠️</span>
-              <p className="text-sm font-medium">
-                Backend connection failed. Displaying <span className="font-bold">offline demonstration data</span> (5 papers).
-              </p>
+            <div className="w-full max-w-2xl mx-auto bg-amber-50 border-l-4 border-amber-500 p-4 text-left">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-amber-500" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-amber-700">
+                    <span className="font-bold">Backend Connection Issue.</span> Showing offline cached data.
+                    <br/>
+                    <span className="text-xs font-mono mt-1 block opacity-75">
+                      Target: {API_BASE_URL} | Error: {fetchErrorDetail}
+                    </span>
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 

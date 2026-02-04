@@ -36,8 +36,14 @@ app.get('/', (req, res) => {
   });
 });
 
-// Initialize Database (or fallback to JSON)
+// Start the server immediately, don't wait for DB
+const server = app.listen(Number(port), '0.0.0.0', () => {
+  console.log(`Backend server is running at port ${port}`);
+});
+
+// Initialize Database asynchronously
 (async () => {
+  console.log('⏳ Initializing database connection...');
   await initDatabase();
   
   // Check if database is empty and seed if necessary
@@ -230,10 +236,9 @@ app.use((req, res) => {
   });
 });
 
-// Start the server
-// Listen on all interfaces (0.0.0.0) which is required by Render
-app.listen(Number(port), '0.0.0.0', () => {
-  console.log(`Backend server is running at port ${port}`);
-});
+// Server is already started above
+// app.listen(Number(port), '0.0.0.0', () => {
+//   console.log(`Backend server is running at port ${port}`);
+// });
 
 export default app;
