@@ -14,8 +14,6 @@ export const HighlightText: React.FC<HighlightTextProps> = ({ text, highlights, 
   
   // Create regex pattern with word boundaries for better matching
   const escapedTerms = terms.map(t => {
-    // If term contains spaces (phrase), treat it as a whole unit
-    const isPhrase = t.trim().indexOf(' ') !== -1;
     const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     let pattern = escaped;
     
@@ -23,6 +21,7 @@ export const HighlightText: React.FC<HighlightTextProps> = ({ text, highlights, 
     // If it's a phrase like "Kevin Zhang", we want \bKevin Zhang\b
     if (/^\w/.test(t)) pattern = `\\b${pattern}`;
     if (/\w$/.test(t)) pattern = `${pattern}\\b`;
+    
     return pattern;
   });
   

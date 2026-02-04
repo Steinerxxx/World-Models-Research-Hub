@@ -124,7 +124,7 @@ export function PaperCard({
                     className={`
                       inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border
                       ${isSelected 
-                        ? "bg-primary text-primary-foreground shadow-sm border-primary hover:bg-primary/90" 
+                        ? "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-100 dark:border-blue-800" 
                         : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground border-transparent hover:border-border"
                       }
                       ${allHighlights.includes(tag) && !isSelected ? "ring-2 ring-yellow-400/50 dark:ring-yellow-500/50 bg-yellow-100/50 dark:bg-yellow-900/20" : ""}
@@ -154,6 +154,7 @@ export function PaperCard({
           <HighlightText 
             text={paper.title} 
             highlights={allHighlights} 
+            className="bg-yellow-100/80 text-foreground dark:bg-yellow-500/30 dark:text-yellow-100 rounded px-0.5"
           />
         </CardTitle>
       </CardHeader>
