@@ -28,6 +28,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [usingMockData, setUsingMockData] = useState(false);
   
   // Use context for filters
   const { searchTerm, setSearchTerm, selectedTag, setSelectedTag, itemsPerPage, sortBy } = useFilter();
@@ -81,9 +82,9 @@ export default function Home() {
         console.warn('Backend fetch failed, switching to Mock Data:', error);
         // Fallback to mock data
         setPapers(MOCK_PAPERS);
+        setUsingMockData(true);
         setError(null); // Clear error to show content
         setLoading(false);
-        // Optional: Show a toast or small indicator that we are in offline/demo mode
       });
   };
 
@@ -335,11 +336,20 @@ export default function Home() {
                 Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span>
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                v2.5
+                v3.0
               </span>
             </div>
           </div>
           
+          {usingMockData && (
+            <div className="w-full max-w-2xl mx-auto bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 px-4 py-3 rounded-lg flex items-center justify-center gap-2 animate-in fade-in slide-in-from-top-4">
+              <span className="text-lg">⚠️</span>
+              <p className="text-sm font-medium">
+                Backend connection failed. Displaying <span className="font-bold">offline demonstration data</span> (5 papers).
+              </p>
+            </div>
+          )}
+
           <Button 
             onClick={handleRefresh} 
             disabled={refreshing}
