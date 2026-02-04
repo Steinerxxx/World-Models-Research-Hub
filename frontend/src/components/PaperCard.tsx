@@ -38,6 +38,9 @@ export function PaperCard({
   const authorsRef = useRef<HTMLDivElement>(null);
   const abstractRef = useRef<HTMLParagraphElement>(null);
 
+  // Clean abstract text to remove "Less" artifact from scraping
+  const cleanedAbstract = paper.abstract.replace(/\s*[△▽▲▼]?\s*Less\s*$/i, '').trim();
+
   useEffect(() => {
     const checkTruncation = () => {
       // Check Authors Truncation & Hidden Highlights
@@ -100,7 +103,7 @@ export function PaperCard({
       window.removeEventListener('resize', checkTruncation);
       clearTimeout(timer);
     };
-  }, [paper.authors, paper.abstract, allHighlights]);
+  }, [paper.authors, cleanedAbstract, allHighlights]);
 
   return (
     <Card className="group relative hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full hover:z-20">
@@ -201,7 +204,7 @@ export function PaperCard({
         <div className="relative group/abstract cursor-help">
           {/* Truncated version (visible by default) */}
           <p ref={abstractRef} className="text-muted-foreground text-sm leading-relaxed line-clamp-4">
-            <HighlightText text={paper.abstract} highlights={allHighlights} />
+            <HighlightText text={cleanedAbstract} highlights={allHighlights} />
           </p>
           
           {/* Highlight Indicator (Yellow Triangle) */}
@@ -211,7 +214,7 @@ export function PaperCard({
 
           {/* Full version (visible on hover) */}
           <div className="hidden group-hover/abstract:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-50 max-h-[400px] overflow-y-auto">
-            <HighlightText text={paper.abstract} highlights={allHighlights} />
+            <HighlightText text={cleanedAbstract} highlights={allHighlights} />
           </div>
         </div>
       </CardContent>
