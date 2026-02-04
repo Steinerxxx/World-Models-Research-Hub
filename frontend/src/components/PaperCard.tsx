@@ -140,7 +140,9 @@ export function PaperCard({
             )}
           </div>
           {/* Fade effect at bottom of tags if they overflow */}
-          <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-card/50 to-transparent pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none flex justify-end items-end pr-1 pb-0.5">
+            <span className="text-[10px] text-muted-foreground/60 leading-none">...</span>
+          </div>
         </div>
         
         {/* Fixed min-height for title to align authors */}
