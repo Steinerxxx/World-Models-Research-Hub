@@ -26,6 +26,15 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Root endpoint for debugging
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    message: 'World Models Research Hub Backend is running',
+    version: '1.0.0',
+    endpoints: ['/api/papers', '/health']
+  });
+});
+
 // Initialize Database (or fallback to JSON)
 initDatabase();
 
@@ -156,6 +165,15 @@ cron.schedule('0 * * * *', async () => {
   } catch (err) {
     console.error('Scheduled scraping failed:', err);
   }
+});
+
+// Global 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `The requested URL ${req.originalUrl} was not found on this server.`,
+    available_endpoints: ['/api/papers', '/health', '/']
+  });
 });
 
 // Start the server
