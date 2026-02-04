@@ -4,8 +4,9 @@
   "description": "A Node.js scraper for arXiv computer science papers.",
   "main": "scraper.js",
   "scripts": {
-    "start": "node scraper.js",
-    "build": "echo 'Using vercel.json builds'"
+    "start": "cd backend && npm start",
+    "build": "cd backend && npm install && npm run build",
+    "scrape": "node scraper.js"
   },
   "keywords": [
     "arxiv",
