@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -13,7 +13,7 @@ import {
 interface TechNode {
   id: string;
   label: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   description: string;
   details: string[];
   color: string;
