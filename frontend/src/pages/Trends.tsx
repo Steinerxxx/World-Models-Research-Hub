@@ -33,7 +33,7 @@ export default function Trends() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('https://world-models-research-hub-backhend.onrender.com/api/papers')
+    fetch('https://world-models-research-hub-backend.onrender.com/api/papers')
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch data');
         return res.json();

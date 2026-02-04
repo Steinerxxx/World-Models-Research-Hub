@@ -67,7 +67,7 @@ export function PaperCard({
       // Use local backend for development, fallback to production
       const API_BASE = window.location.hostname === 'localhost' 
         ? 'http://localhost:3001' 
-        : 'https://world-models-research-hub-backhend.onrender.com';
+        : 'https://world-models-research-hub-backend.onrender.com';
         
       const res = await fetch(`${API_BASE}/api/papers/${paper.id}/analyze`, {
         method: 'POST'

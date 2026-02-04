@@ -56,7 +56,7 @@ export default function Home() {
 
   const fetchPapers = () => {
     setLoading(true);
-    fetch('https://world-models-research-hub-backhend.onrender.com/api/papers')
+    fetch('https://world-models-research-hub-backend.onrender.com/api/papers')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -86,7 +86,7 @@ export default function Home() {
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetch('https://world-models-research-hub-backhend.onrender.com/api/scrape', {
+    fetch('https://world-models-research-hub-backend.onrender.com/api/scrape', {
       method: 'POST',
     })
       .then(response => {
