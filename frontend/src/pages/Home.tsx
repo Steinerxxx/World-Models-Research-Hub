@@ -311,16 +311,20 @@ export default function Home() {
       {/* Tongji University Logo */}
       <div className="fixed top-6 right-6 z-50 hidden md:block">
         <a href="https://www.tongji.edu.cn" target="_blank" rel="noopener noreferrer" 
-           className="block bg-white rounded-full p-2 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-4 border-white/50 ring-1 ring-black/5">
-          <img 
-            src="https://upload.wikimedia.org/wikipedia/en/2/22/Tongji_Uni_logo.svg" 
-            alt="Tongji University" 
-            className="w-16 h-16 object-contain"
-            onError={(e) => { 
-              const target = e.currentTarget;
-              target.onerror = null; // Prevent infinite loop
-              target.src = "/tongji-logo.png"; 
-            }}
+           className="block bg-white rounded-full p-2 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-4 border-white/50 ring-1 ring-black/5 group">
+          {/* Use CSS Mask to ensure the logo is Tongji Blue (#005098) regardless of original image color */}
+          <div 
+            className="w-16 h-16 bg-[#005098] transition-all duration-300 group-hover:bg-[#003d73]"
+            style={{ 
+              maskImage: 'url(/tongji-logo.png)', 
+              maskSize: 'contain', 
+              maskRepeat: 'no-repeat', 
+              maskPosition: 'center',
+              WebkitMaskImage: 'url(/tongji-logo.png)', 
+              WebkitMaskSize: 'contain', 
+              WebkitMaskRepeat: 'no-repeat', 
+              WebkitMaskPosition: 'center'
+            }} 
           />
         </a>
       </div>
