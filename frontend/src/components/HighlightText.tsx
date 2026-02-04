@@ -1,4 +1,4 @@
-import { type FC, Fragment } from 'react';
+import { type FC } from 'react';
 
 interface HighlightTextProps {
   text: string;
