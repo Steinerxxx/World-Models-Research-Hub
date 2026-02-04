@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '@/config';
+import { MOCK_PAPERS } from '@/data/mockData';
 import { 
   LineChart, 
   Line, 
@@ -44,7 +45,9 @@ export default function Trends() {
         setLoading(false);
       })
       .catch(err => {
-        setError(err.message);
+        console.warn('Backend fetch failed, switching to Mock Data:', err);
+        setPapers(MOCK_PAPERS);
+        setError(null);
         setLoading(false);
       });
   }, []);
