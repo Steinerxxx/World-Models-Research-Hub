@@ -105,8 +105,8 @@ export function PaperCard({
   return (
     <Card className="group relative hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full hover:z-20">
       <CardHeader className="space-y-3 pb-3">
-        {/* Fixed height for tags to ensure alignment */}
-        <div className="h-[72px] overflow-hidden relative">
+        {/* Tags Section - Allow full height but maintain min-height for alignment consistency */}
+        <div className="min-h-[72px]">
           <div className="flex flex-wrap gap-2">
             {(paper.tags && paper.tags.length > 0) ? (
               paper.tags.map((tag, i) => {
@@ -138,10 +138,6 @@ export function PaperCard({
                 Uncategorized
               </span>
             )}
-          </div>
-          {/* Fade effect at bottom of tags if they overflow */}
-          <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none flex justify-end items-end pr-1 pb-0.5">
-            <span className="text-[10px] text-muted-foreground/60 leading-none">...</span>
           </div>
         </div>
         
