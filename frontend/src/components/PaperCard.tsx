@@ -124,14 +124,19 @@ export function PaperCard({
                     className={`
                       inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border
                       ${isSelected 
-                        ? "bg-primary text-primary-foreground shadow-sm border-primary" 
+                        ? "bg-primary text-primary-foreground shadow-sm border-primary hover:bg-primary/90" 
                         : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground border-transparent hover:border-border"
                       }
                       ${allHighlights.includes(tag) && !isSelected ? "ring-2 ring-yellow-400/50 dark:ring-yellow-500/50 bg-yellow-100/50 dark:bg-yellow-900/20" : ""}
                     `}
                   >
                     <Tag className="h-3 w-3" />
-                    <HighlightText text={tag} highlights={allHighlights} />
+                    {isSelected ? (
+                      /* When selected, render plain text to avoid highlight styles clashing with primary button style */
+                      tag
+                    ) : (
+                      <HighlightText text={tag} highlights={allHighlights} />
+                    )}
                   </span>
                 );
               })
@@ -145,8 +150,12 @@ export function PaperCard({
         </div>
         
         {/* Fixed min-height for title to align authors */}
-        <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem] flex items-center">
-          <HighlightText text={paper.title} highlights={allHighlights} />
+        <CardTitle className="text-xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
+          <HighlightText 
+            text={paper.title} 
+            highlights={allHighlights} 
+            className="highlight-match bg-yellow-100/80 text-foreground dark:bg-yellow-500/20 dark:text-yellow-100 rounded px-0.5"
+          />
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow space-y-4">

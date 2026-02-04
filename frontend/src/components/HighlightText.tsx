@@ -3,9 +3,10 @@ import React from 'react';
 interface HighlightTextProps {
   text: string;
   highlights: string[];
+  className?: string; // Allow overriding styles
 }
 
-export const HighlightText: React.FC<HighlightTextProps> = ({ text, highlights }) => {
+export const HighlightText: React.FC<HighlightTextProps> = ({ text, highlights, className }) => {
   // Filter out empty strings
   const terms = highlights.filter(t => t && t.trim().length > 0);
   
@@ -26,13 +27,16 @@ export const HighlightText: React.FC<HighlightTextProps> = ({ text, highlights }
   
   const parts = text.split(pattern);
   
+  // Default style if no className provided
+  const defaultStyle = "highlight-match bg-yellow-200 text-yellow-900 dark:bg-yellow-500/30 dark:text-yellow-200 font-semibold rounded px-0.5 border border-yellow-400 dark:border-yellow-500/50";
+
   return (
     <>
       {parts.map((part, i) => {
         // Check if this part matches any of the terms (case-insensitive)
         const isMatch = terms.some(term => part.toLowerCase() === term.toLowerCase());
         return isMatch ? (
-          <span key={i} className="highlight-match bg-yellow-200 text-yellow-900 dark:bg-yellow-500/30 dark:text-yellow-200 font-semibold rounded px-0.5 border border-yellow-400 dark:border-yellow-500/50">
+          <span key={i} className={className || defaultStyle}>
             {part}
           </span>
         ) : (
