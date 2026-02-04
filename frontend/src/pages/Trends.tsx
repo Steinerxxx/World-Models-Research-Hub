@@ -33,6 +33,7 @@ export default function Trends() {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usingMockData, setUsingMockData] = useState(false);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/papers`)
@@ -47,6 +48,7 @@ export default function Trends() {
       .catch(err => {
         console.warn('Backend fetch failed, switching to Mock Data:', err);
         setPapers(MOCK_PAPERS);
+        setUsingMockData(true);
         setError(null);
         setLoading(false);
       });
@@ -104,6 +106,15 @@ export default function Trends() {
           Analytics and insights from {papers.length} collected papers.
         </p>
       </div>
+
+      {usingMockData && (
+        <div className="w-full bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 px-4 py-3 rounded-lg flex items-center justify-center gap-2 animate-in fade-in slide-in-from-top-4">
+          <span className="text-lg">⚠️</span>
+          <p className="text-sm font-medium">
+            Backend connection failed. Displaying analytics for <span className="font-bold">offline demonstration data</span>.
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Monthly Growth Chart */}
