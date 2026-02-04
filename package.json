@@ -2,16 +2,16 @@
   "name": "world-models-hub-root",
   "version": "1.0.0",
   "description": "Root package for World Models Research Hub (Backend)",
-  "main": "backend/dist/index.js",
+  "main": "backend/src/index.js",
   "type": "module",
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "npm run build && node backend/dist/index.js",
-    "build": "tsc -p backend/tsconfig.json",
-    "dev": "nodemon --watch 'backend/src/**/*.ts' --exec 'ts-node' backend/src/index.ts",
-    "scrape": "node scraper.js"
+    "start": "node backend/src/index.js",
+    "build": "echo 'No build required for Pure JS Backend'",
+    "dev": "nodemon backend/src/index.js",
+    "scrape": "node backend/src/scraper.js"
   },
   "keywords": [
     "arxiv",
