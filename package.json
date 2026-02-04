@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Root package for World Models Research Hub (Backend)",
   "main": "backend/dist/index.js",
+  "type": "module",
   "engines": {
     "node": ">=18.0.0"
   },
