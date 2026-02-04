@@ -316,7 +316,11 @@ export default function Home() {
             src="https://upload.wikimedia.org/wikipedia/en/2/22/Tongji_Uni_logo.svg" 
             alt="Tongji University" 
             className="w-16 h-16 object-contain"
-            onError={(e) => { e.currentTarget.src = "/Tongji_University_Logo.png"; }}
+            onError={(e) => { 
+              const target = e.currentTarget;
+              target.onerror = null; // Prevent infinite loop
+              target.src = "/tongji-logo.png"; 
+            }}
           />
         </a>
       </div>
