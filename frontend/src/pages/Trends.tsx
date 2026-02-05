@@ -217,10 +217,11 @@ export default function Trends() {
                   cx="50%"
                   cy="50%"
                   labelLine={true}
-                  label={({ name, percent }: { name: string; percent: number }) => {
-                    const value = (percent * 100).toFixed(0);
+                  label={({ name, percent }: { name?: string; percent?: number }) => {
+                    const value = ((percent || 0) * 100).toFixed(0);
+                    const tagName = name || '';
                     // Shorten very long names for the pie chart label
-                    const shortName = name.length > 15 ? name.substring(0, 15) + '...' : name;
+                    const shortName = tagName.length > 15 ? tagName.substring(0, 15) + '...' : tagName;
                     return `${shortName} (${value}%)`;
                   }}
                   outerRadius={100}
