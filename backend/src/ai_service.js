@@ -65,8 +65,10 @@ Do not include any other text or markdown formatting.
       console.error('Failed to parse AI response as JSON:', content);
     }
 
-    return null;
-  } catch (error) {
+    if (error.status === 402) {
+      console.warn('⚠️ AI Service: Insufficient Balance (402). Skipping AI analysis.');
+      return null;
+    }
     console.error('Error calling AI service for summary:', error);
     return null;
   }
@@ -135,7 +137,11 @@ Example Output:
 
     return [];
   } catch (error) {
-    console.error('Error calling AI service:', error);
+    if (error.status === 402) {
+      // Silent warning for balance issues to avoid log spam
+      return [];
+    }
+    console.error('Error calling AI service for classification:', error);
     return [];
   }
 }

@@ -39,6 +39,7 @@ app.get('/', (req, res) => {
 // Start the server immediately, don't wait for DB
 const server = app.listen(Number(port), '0.0.0.0', () => {
   console.log(`Backend server is running at port ${port}`);
+  console.log(`Current Working Directory: ${process.cwd()}`);
 });
 
 // Initialize Database asynchronously
