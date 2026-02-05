@@ -172,26 +172,28 @@ export default function Trends() {
           </CardHeader>
           <CardContent className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={tagData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+              <BarChart data={tagData} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
                 <XAxis type="number" className="text-xs" />
                 <YAxis 
                   dataKey="name" 
                   type="category" 
-                  width={100} 
+                  width={150} 
                   className="text-xs font-medium" 
-                  tick={{ fill: 'currentColor' }}
+                  tick={{ fill: 'currentColor', fontSize: 11 }}
+                  interval={0}
                 />
                 <Tooltip 
                   cursor={{ fill: 'transparent' }}
                   contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)', 
-                    border: '1px solid #ccc',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                    border: '1px solid #e2e8f0',
                     borderRadius: '8px',
-                    color: '#000'
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                    color: '#0f172a'
                   }}
                 />
-                <Bar dataKey="value" name="Count" fill="#8884d8" radius={[0, 4, 4, 0]}>
+                <Bar dataKey="value" name="Count" fill="#8884d8" radius={[0, 4, 4, 0]} barSize={20}>
                   {tagData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
@@ -209,16 +211,22 @@ export default function Trends() {
           </CardHeader>
           <CardContent className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
+              <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                 <Pie
                   data={tagData}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }: { name?: string; percent?: number }) => `${name ?? ''} ${(percent ? percent * 100 : 0).toFixed(0)}%`}
-                  outerRadius={120}
+                  labelLine={true}
+                  label={({ name, percent }: { name: string; percent: number }) => {
+                    const value = (percent * 100).toFixed(0);
+                    // Shorten very long names for the pie chart label
+                    const shortName = name.length > 15 ? name.substring(0, 15) + '...' : name;
+                    return `${shortName} (${value}%)`;
+                  }}
+                  outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
+                  paddingAngle={2}
                 >
                   {tagData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -226,11 +234,18 @@ export default function Trends() {
                 </Pie>
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)', 
-                    border: '1px solid #ccc',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                    border: '1px solid #e2e8f0',
                     borderRadius: '8px',
-                    color: '#000'
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                    color: '#0f172a'
                   }}
+                />
+                <Legend 
+                  layout="horizontal" 
+                  verticalAlign="bottom" 
+                  align="center"
+                  wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}
                 />
               </PieChart>
             </ResponsiveContainer>
