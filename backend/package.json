@@ -1,17 +1,17 @@
 {
   "name": "backend",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "Pure JS Backend for World Models Research Hub",
   "engines": {
     "node": ">=18.0.0"
   },
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "npm run build && node dist/index.js",
-    "build": "tsc",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/index.js",
+    "build": "echo 'No build required for Pure JS Backend'",
+    "dev": "nodemon src/index.js",
+    "scrape": "node src/scraper.js"
   },
   "keywords": [],
   "author": "",
