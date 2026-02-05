@@ -333,17 +333,6 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12">
       <header className="mb-8 space-y-4 relative">
-        {/* Tongji University Logo - Top Right */}
-        <div className="absolute -top-6 -right-2 md:right-0 z-10 hidden sm:block">
-          <div className="bg-white rounded-full p-2 shadow-lg w-16 h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden">
-            <img 
-              src="/tongji-logo.svg" 
-              alt="Tongji University Logo" 
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-
         <div className="flex flex-col items-center justify-center gap-6 text-center">
           <div className="px-4 md:px-0">
             <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-600">

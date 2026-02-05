@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <circle cx="100" cy="100" r="95" fill="#00519E" stroke="white" stroke-width="2"/>
-  <circle cx="100" cy="100" r="80" fill="none" stroke="white" stroke-width="1" opacity="0.5"/>
-  <text x="100" y="130" font-family="Arial, sans-serif" font-weight="bold" font-size="28" text-anchor="middle" fill="white">TONGJI</text>
-  <text x="100" y="155" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="white" letter-spacing="2">UNIVERSITY</text>
-  <!-- Stylized Sail/Boat (referencing Tongji's actual logo theme of crossing river together) -->
-  <path d="M70,60 L130,60 L115,90 L85,90 Z" fill="white" />
-  <path d="M65,70 Q100,100 135,70" fill="none" stroke="white" stroke-width="3" />
-</svg>
