@@ -335,11 +335,11 @@ export default function Home() {
       <header className="mb-8 space-y-4 relative">
         {/* Tongji University Logo - Top Right */}
         <div className="absolute -top-6 -right-2 md:right-0 z-10 hidden sm:block">
-          <div className="bg-white rounded-full p-2 shadow-lg w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
+          <div className="bg-white rounded-full p-2 shadow-lg w-16 h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden">
             <img 
-              src="/tongji-logo.png" 
+              src="/tongji-blue.jpg" 
               alt="Tongji University Logo" 
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
             />
           </div>
         </div>
