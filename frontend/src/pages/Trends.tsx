@@ -71,6 +71,9 @@ export default function Trends() {
     const counts: Record<string, number> = {};
     papers.forEach(paper => {
       paper.tags?.forEach(tag => {
+        // Filter out "World Models" and "Model-Based RL" as requested
+        if (tag === 'World Models' || tag === 'Model-Based RL') return;
+        
         counts[tag] = (counts[tag] || 0) + 1;
       });
     });
