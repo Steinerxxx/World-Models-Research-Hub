@@ -218,13 +218,16 @@ export default function Trends() {
                   cy="50%"
                   labelLine={true}
                   label={({ name, percent }: { name?: string; percent?: number }) => {
+                    // Hide labels for slices smaller than 2% to prevent overlap
+                    if ((percent || 0) < 0.02) return null;
+                    
                     const value = ((percent || 0) * 100).toFixed(0);
                     const tagName = name || '';
                     // Shorten very long names for the pie chart label
-                    const shortName = tagName.length > 15 ? tagName.substring(0, 15) + '...' : tagName;
+                    const shortName = tagName.length > 12 ? tagName.substring(0, 12) + '...' : tagName;
                     return `${shortName} (${value}%)`;
                   }}
-                  outerRadius={100}
+                  outerRadius={85}
                   fill="#8884d8"
                   dataKey="value"
                   paddingAngle={2}
