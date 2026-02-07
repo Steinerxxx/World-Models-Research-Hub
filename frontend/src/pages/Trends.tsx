@@ -230,15 +230,27 @@ export default function Trends() {
                       />
                     );
                   }}
-                  label={({ name, percent }: { name?: string; percent?: number }) => {
+                  label={(props: any) => {
+                    const { name, percent, x, y } = props;
                     // Hide labels for slices smaller than 2% to prevent overlap
                     if ((percent || 0) < 0.02) return null;
                     
                     const value = ((percent || 0) * 100).toFixed(0);
-                    // Show full name as requested, no truncation
-                    return `${name} (${value}%)`;
+                    // Show full name as requested, no truncation, with smaller font
+                    return (
+                      <text 
+                        x={x} 
+                        y={y} 
+                        fill={props.fill} 
+                        textAnchor={props.textAnchor} 
+                        dominantBaseline="central"
+                        style={{ fontSize: '11px', fontWeight: 500 }}
+                      >
+                        {`${name} (${value}%)`}
+                      </text>
+                    );
                   }}
-                  outerRadius={75}
+                  outerRadius={70}
                   fill="#8884d8"
                   dataKey="value"
                   paddingAngle={2}
