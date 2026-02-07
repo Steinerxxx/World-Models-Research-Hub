@@ -168,7 +168,7 @@ export function PaperCard({
       <CardHeader className="space-y-3 pb-3">
         {/* Tags Section - Allow full height but maintain min-height for alignment consistency */}
         <div className="min-h-[72px]">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pr-12">
             {(paper.tags && paper.tags.length > 0) ? (
               paper.tags.map((tag, i) => {
                 const isSelected = selectedTag === tag;
