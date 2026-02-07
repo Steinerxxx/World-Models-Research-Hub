@@ -216,18 +216,20 @@ export default function Trends() {
                   data={tagData}
                   cx="50%"
                   cy="50%"
-                  labelLine={true}
+                  labelLine={(props) => {
+                    // Hide label lines for slices smaller than 2%
+                    if ((props.percent || 0) < 0.02) return { stroke: 'none' };
+                    return { stroke: '#64748b', strokeWidth: 1 };
+                  }}
                   label={({ name, percent }: { name?: string; percent?: number }) => {
                     // Hide labels for slices smaller than 2% to prevent overlap
                     if ((percent || 0) < 0.02) return null;
                     
                     const value = ((percent || 0) * 100).toFixed(0);
-                    const tagName = name || '';
-                    // Shorten very long names for the pie chart label
-                    const shortName = tagName.length > 12 ? tagName.substring(0, 12) + '...' : tagName;
-                    return `${shortName} (${value}%)`;
+                    // Show full name as requested, no truncation
+                    return `${name} (${value}%)`;
                   }}
-                  outerRadius={85}
+                  outerRadius={75}
                   fill="#8884d8"
                   dataKey="value"
                   paddingAngle={2}
