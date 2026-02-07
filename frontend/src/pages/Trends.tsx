@@ -216,7 +216,7 @@ export default function Trends() {
                   data={tagData}
                   cx="50%"
                   cy="50%"
-                  labelLine={(props) => {
+                  labelLine={(props: { percent?: number }) => {
                     // Hide label lines for slices smaller than 2%
                     if ((props.percent || 0) < 0.02) return { stroke: 'none' };
                     return { stroke: '#64748b', strokeWidth: 1 };
