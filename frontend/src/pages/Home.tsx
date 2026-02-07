@@ -337,9 +337,9 @@ export default function Home() {
         <div className="absolute -top-6 -right-2 md:right-0 z-10 hidden sm:block">
           <div className="bg-white rounded-full p-2 shadow-lg w-16 h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden">
             <img 
-              src="/tongji-logo.svg" 
+              src="/tongji-logo.png" 
               alt="Tongji University Logo" 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
         </div>
