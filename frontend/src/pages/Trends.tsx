@@ -232,8 +232,8 @@ export default function Trends() {
                   }}
                   label={(props: any) => {
                     const { name, percent, x, y } = props;
-                    // Hide labels for slices smaller than 2% to prevent overlap
-                    if ((percent || 0) < 0.02) return null;
+                    // Always show labels unless percent is 0
+                    if ((percent || 0) === 0) return null;
                     
                     const value = ((percent || 0) * 100).toFixed(0);
                     // Show full name as requested, no truncation, with smaller font
