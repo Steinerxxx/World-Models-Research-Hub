@@ -216,10 +216,19 @@ export default function Trends() {
                   data={tagData}
                   cx="50%"
                   cy="50%"
-                  labelLine={(props: { percent?: number }) => {
+                  labelLine={(props: any) => {
                     // Hide label lines for slices smaller than 2%
-                    if ((props.percent || 0) < 0.02) return { stroke: 'none' };
-                    return { stroke: '#64748b', strokeWidth: 1 };
+                    if ((props.percent || 0) < 0.02) return <g />;
+                    
+                    // Render the default polyline for others
+                    return (
+                      <polyline
+                        stroke="#64748b"
+                        strokeWidth={1}
+                        fill="none"
+                        points={props.points.map((p: any) => `${p.x},${p.y}`).join(' ')}
+                      />
+                    );
                   }}
                   label={({ name, percent }: { name?: string; percent?: number }) => {
                     // Hide labels for slices smaller than 2% to prevent overlap
