@@ -14,6 +14,8 @@ import {
 import { scrapeArxiv } from './scraper.js';
 import { classifyPaper } from './classifier.js';
 import { generatePaperAnalysis } from './ai_service.js';
+import authRoutes from './auth.js';
+import favoritesRoutes from './favorites.js';
 import cron from 'node-cron';
 
 const app = express();

@@ -64,7 +64,7 @@ Do not include any other text or markdown formatting.
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', content);
     }
-
+  } catch (error) {
     if (error.status === 402) {
       console.warn('⚠️ AI Service: Insufficient Balance (402). Skipping AI analysis.');
       return null;
