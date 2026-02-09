@@ -34,6 +34,10 @@ router.post('/register', async (req, res) => {
 
 // Login
 router.post('/login', async (req, res) => {
+  if (!getDbStatus()) {
+    return res.status(503).json({ message: 'Database service unavailable' });
+  }
+
   const { username, password } = req.body;
   try {
     const result = await query('SELECT * FROM users WHERE username = $1', [username]);

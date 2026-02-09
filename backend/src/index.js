@@ -9,7 +9,8 @@ import {
   getPaperById,
   query,
   initDatabase,
-  seedMockData
+  seedMockData,
+  getDbStatus
 } from './database.js';
 import { scrapeArxiv } from './scraper.js';
 import { classifyPaper } from './classifier.js';
@@ -30,7 +31,11 @@ app.use('/api/favorites', favoritesRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    db_status: getDbStatus() ? 'connected' : 'disconnected'
+  });
 });
 
 // Root endpoint for debugging

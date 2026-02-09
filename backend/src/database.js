@@ -15,6 +15,9 @@ const pool = new pg.Pool({
 let isDbConnected = false;
 const LOCAL_DB_PATH = path.join(process.cwd(), 'papers.json');
 
+// Export getter for DB status
+export const getDbStatus = () => isDbConnected;
+
 pool.on('error', (err, client) => {
   console.error('Unexpected error on idle client', err);
   // Don't exit, just mark as disconnected
