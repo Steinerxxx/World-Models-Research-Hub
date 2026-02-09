@@ -37,6 +37,8 @@ export async function initDatabase() {
     
     isDbConnected = true;
     await createPapersTable();
+    await createUsersTable();
+    await createFavoritesTable();
   } catch (err) {
     console.error('❌ Database connection FAILED.');
     console.error('---------------------------------------------------');
@@ -85,6 +87,46 @@ export async function createPapersTable() {
     console.log('"papers" table created or updated.');
   } catch (err) {
     console.error('Error creating table:', err);
+  }
+}
+
+export async function createUsersTable() {
+  if (!isDbConnected) return;
+
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  try {
+    await query(createTableQuery);
+    console.log('"users" table created or updated.');
+  } catch (err) {
+    console.error('Error creating users table:', err);
+  }
+}
+
+export async function createFavoritesTable() {
+  if (!isDbConnected) return;
+
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS favorites (
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      paper_id INTEGER REFERENCES papers(id) ON DELETE CASCADE,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (user_id, paper_id)
+    );
+  `;
+
+  try {
+    await query(createTableQuery);
+    console.log('"favorites" table created or updated.');
+  } catch (err) {
+    console.error('Error creating favorites table:', err);
   }
 }
 

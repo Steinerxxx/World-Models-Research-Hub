@@ -15,12 +15,15 @@ import {
   List,
   ArrowUpDown,
   TrendingUp,
-  Star
+  Star,
+  LogIn,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useFilter } from '@/contexts/FilterContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const SUBJECT_TAGS = [
   'Reinforcement Learning', 
@@ -47,6 +50,7 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
   const { theme, toggleTheme } = useTheme();
   const { selectedTag, setSelectedTag, itemsPerPage, setItemsPerPage, sortBy, setSortBy } = useFilter();
   const { showFavoritesOnly, setShowFavoritesOnly, favorites } = useFavorites();
+  const { user, logout } = useAuth();
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -131,6 +135,30 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
               <Info className="h-4 w-4" />
               Introduction
             </NavLink>
+
+            {user ? (
+              <button
+                onClick={logout}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout ({user.username})
+              </button>
+            ) : (
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    isActive 
+                      ? "bg-primary/10 text-primary" 
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`
+                }
+              >
+                <LogIn className="h-4 w-4" />
+                Login
+              </NavLink>
+            )}
           </div>
 
           <div className="h-[1px] bg-border/50" />

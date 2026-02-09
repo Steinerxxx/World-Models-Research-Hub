@@ -22,6 +22,10 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Auth & Favorites Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/favorites', favoritesRoutes);
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
