@@ -356,7 +356,7 @@ export default function Home() {
 
         <div className="flex flex-col items-center justify-center gap-6 text-center">
           <div className="px-4 md:px-0">
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-600">
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600">
               World Models Research Hub
             </h1>
             <div className="flex flex-col items-center gap-2 mt-2">
@@ -392,7 +392,7 @@ export default function Home() {
           <Button 
             onClick={handleRefresh} 
             disabled={refreshing}
-            className="gap-2 w-full max-w-xs mx-auto bg-gradient-to-r from-blue-400 to-cyan-600 text-white border-0 hover:opacity-90 hover:shadow-lg transition-all duration-300"
+            className="gap-2 w-full max-w-xs mx-auto bg-gradient-to-r from-cyan-400 to-blue-600 text-white border-0 hover:opacity-90 hover:shadow-lg transition-all duration-300"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             {refreshing ? 'Refreshing...' : 'Refresh Data'}
