@@ -34,11 +34,20 @@ router.post('/register', async (req, res) => {
 
 // Login
 router.post('/login', async (req, res) => {
+  console.log('Login attempt for:', req.body.username);
+  
   if (!getDbStatus()) {
+    console.log('Login failed: DB unavailable');
     return res.status(503).json({ message: 'Database service unavailable' });
   }
 
   const { username, password } = req.body;
+  
+  if (!username || !password) {
+    console.log('Login failed: Missing credentials');
+    return res.status(400).json({ message: 'Username and password are required' });
+  }
+
   try {
     const result = await query('SELECT * FROM users WHERE username = $1', [username]);
     const user = result.rows[0];

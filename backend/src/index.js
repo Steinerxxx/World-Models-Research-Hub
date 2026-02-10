@@ -33,7 +33,7 @@ app.use('/api/favorites', favoritesRoutes);
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok', 
-    version: '1.0.2',
+    version: '1.0.3',
     timestamp: new Date().toISOString(),
     db_status: getDbStatus() ? 'connected' : 'disconnected'
   });
@@ -43,9 +43,14 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.status(200).json({ 
     message: 'World Models Research Hub Backend is running',
-    version: '1.0.0',
+    version: '1.0.3',
     endpoints: ['/api/papers', '/health']
   });
+});
+
+// 404 Handler for undefined routes
+app.use((req, res, next) => {
+  res.status(404).json({ message: `Route ${req.originalUrl} not found` });
 });
 
 // Global Error Handler
