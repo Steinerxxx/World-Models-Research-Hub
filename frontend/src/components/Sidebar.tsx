@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, 
@@ -47,6 +47,7 @@ interface SidebarContentProps {
 }
 
 const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { selectedTag, setSelectedTag, itemsPerPage, setItemsPerPage, sortBy, setSortBy } = useFilter();
   const { showFavoritesOnly, setShowFavoritesOnly, favorites } = useFavorites();
@@ -202,6 +203,7 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
                 onClick={(e) => {
                   e.preventDefault();
                   setSelectedTag(selectedTag === tag ? null : tag);
+                  navigate('/');
                 }}
                 className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors flex items-center gap-2 ${
                   selectedTag === tag
