@@ -361,7 +361,7 @@ export default function Home() {
             </h1>
             <div className="flex flex-col items-center gap-2 mt-2">
               <p className="text-muted-foreground text-lg sm:text-xl max-w-3xl mx-auto leading-relaxed">
-                Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span>
+                Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span> from <a href="https://arxiv.org/" target="_blank" rel="noopener noreferrer" className="text-foreground font-medium underline underline-offset-4 hover:text-primary transition-colors">arXiv</a>
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
                 v3.1
@@ -603,16 +603,18 @@ export default function Home() {
           >
             <div className="relative w-full max-w-lg aspect-square flex items-center justify-center">
               <motion.div
-                layoutId="tongji-logo"
-                className="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <img 
-                  src="/tongji-logo.png" 
-                  alt="Tongji University Logo" 
-                  className="w-full h-full object-contain p-4"
-                />
-              </motion.div>
+                 layoutId="tongji-logo"
+                 className="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden cursor-pointer"
+                 onClick={(e) => e.stopPropagation()}
+                 onDoubleClick={() => window.open('https://www.tongji.edu.cn/', '_blank')}
+                 title="Double click to visit Tongji University website"
+               >
+                 <img 
+                   src="/tongji-logo.png" 
+                   alt="Tongji University Logo" 
+                   className="w-full h-full object-contain p-4"
+                 />
+               </motion.div>
               <button 
                 onClick={() => setIsLogoZoomed(false)}
                 className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors p-2"
