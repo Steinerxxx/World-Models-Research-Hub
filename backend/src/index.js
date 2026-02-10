@@ -25,6 +25,15 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Request Logger
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+  if (Object.keys(req.body).length > 0) {
+    console.log('Body:', JSON.stringify(req.body).substring(0, 200));
+  }
+  next();
+});
+
 // Auth & Favorites Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoritesRoutes);
