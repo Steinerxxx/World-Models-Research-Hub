@@ -28,7 +28,15 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         if (res.ok) return res.json();
         throw new Error('Failed to fetch favorites');
       })
-      .then(data => setFavorites(data.map((f: any) => f.paper_id)))
+      .then(data => {
+        // Backend returns an array of numbers (IDs) directly
+        if (Array.isArray(data) && (data.length === 0 || typeof data[0] === 'number')) {
+          setFavorites(data);
+        } else {
+          // Fallback for object array format
+          setFavorites(data.map((f: any) => f.paper_id));
+        }
+      })
       .catch(console.error);
     } else {
       const stored = localStorage.getItem('favorites');
