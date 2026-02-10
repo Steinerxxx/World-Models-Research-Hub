@@ -12,8 +12,6 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
   Cell
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -165,7 +163,7 @@ export default function Trends() {
         </Card>
 
         {/* Top Tags Bar Chart */}
-        <Card>
+        <Card className="col-span-1 lg:col-span-2">
           <CardHeader>
             <CardTitle>Top Research Topics</CardTitle>
             <CardDescription>Most frequent research categories</CardDescription>
@@ -178,9 +176,9 @@ export default function Trends() {
                 <YAxis 
                   dataKey="name" 
                   type="category" 
-                  width={150} 
+                  width={200} 
                   className="text-xs font-medium" 
-                  tick={{ fill: 'currentColor', fontSize: 11 }}
+                  tick={{ fill: 'currentColor', fontSize: 12 }}
                   interval={0}
                 />
                 <Tooltip 
@@ -199,79 +197,6 @@ export default function Trends() {
                   ))}
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Tag Distribution Pie Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Topic Distribution</CardTitle>
-            <CardDescription>Share of research areas</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                <Pie
-                  data={tagData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={(props: any) => {
-                    // Render the default polyline for all slices
-                    return (
-                      <polyline
-                        stroke="#64748b"
-                        strokeWidth={1}
-                        fill="none"
-                        points={props.points.map((p: any) => `${p.x},${p.y}`).join(' ')}
-                      />
-                    );
-                  }}
-                  label={(props: any) => {
-                    const { name, percent, x, y } = props;
-                    // Always show labels unless percent is 0
-                    if ((percent || 0) === 0) return null;
-                    
-                    const value = ((percent || 0) * 100).toFixed(0);
-                    // Show full name as requested, no truncation, with smaller font
-                    return (
-                      <text 
-                        x={x} 
-                        y={y} 
-                        fill={props.fill} 
-                        textAnchor={props.textAnchor} 
-                        dominantBaseline="central"
-                        style={{ fontSize: '11px', fontWeight: 500 }}
-                      >
-                        {`${name} (${value}%)`}
-                      </text>
-                    );
-                  }}
-                  outerRadius={70}
-                  fill="#8884d8"
-                  dataKey="value"
-                  paddingAngle={2}
-                >
-                  {tagData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                    color: '#0f172a'
-                  }}
-                />
-                <Legend 
-                  layout="horizontal" 
-                  verticalAlign="bottom" 
-                  align="center"
-                  wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}
-                />
-              </PieChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
