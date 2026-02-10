@@ -597,23 +597,25 @@ export default function Home() {
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
             onClick={() => setIsLogoZoomed(false)}
           >
-            <motion.div
-              layoutId="tongji-logo"
-              className="relative max-w-lg w-full aspect-square bg-white rounded-full p-8 flex items-center justify-center"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <img 
-                src="/tongji-logo.png" 
-                alt="Tongji University Logo" 
-                className="w-full h-full object-contain"
-              />
+            <div className="relative w-full max-w-lg aspect-square flex items-center justify-center">
+              <motion.div
+                layoutId="tongji-logo"
+                className="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <img 
+                  src="/tongji-logo.png" 
+                  alt="Tongji University Logo" 
+                  className="w-full h-full object-contain p-4"
+                />
+              </motion.div>
               <button 
                 onClick={() => setIsLogoZoomed(false)}
-                className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+                className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors p-2"
               >
                 <X className="w-8 h-8" />
               </button>
-            </motion.div>
+            </div>
           </div>
         )}
       </AnimatePresence>
