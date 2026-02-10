@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, Calendar, Users, Copy, Tag, Sparkles, Loader2, Star } from "lucide-react";
 import { HighlightText } from './HighlightText';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
 
 import { API_BASE_URL } from '@/config';
 
@@ -172,6 +173,14 @@ export function PaperCard({
             {(paper.tags && paper.tags.length > 0) ? (
               paper.tags.map((tag, i) => {
                 const isSelected = selectedTags.includes(tag);
+                
+                let selectedStyle = "bg-primary text-primary-foreground border-primary";
+                if (SUBJECT_TAGS.includes(tag)) {
+                  selectedStyle = "bg-cyan-500 text-white border-cyan-500 shadow-cyan-500/20";
+                } else if (ARCHITECTURE_TAGS.includes(tag)) {
+                  selectedStyle = "bg-purple-500 text-white border-purple-500 shadow-purple-500/20";
+                }
+
                 return (
                   <span 
                     key={i} 
@@ -182,7 +191,7 @@ export function PaperCard({
                     className={`
                       inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 border cursor-pointer
                       ${isSelected 
-                        ? "bg-primary text-primary-foreground border-primary shadow-md" 
+                        ? `${selectedStyle} shadow-md` 
                         : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground border-transparent hover:border-border"
                       }
                       ${allHighlights.includes(tag) && !isSelected ? "ring-2 ring-yellow-400/50 dark:ring-yellow-500/50 bg-yellow-100/50 dark:bg-yellow-900/20" : ""}

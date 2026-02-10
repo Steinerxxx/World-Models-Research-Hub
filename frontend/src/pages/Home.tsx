@@ -8,6 +8,7 @@ import { PaperCard } from '@/components/PaperCard';
 
 import { API_BASE_URL } from '@/config';
 import { MOCK_PAPERS } from '@/data/mockData';
+import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
 
 // Define the type for a single paper
 interface Paper {
@@ -431,17 +432,27 @@ export default function Home() {
               </div>
             )}
             
-            {selectedTags.length > 0 && selectedTags.map(tag => (
-              <Button
-                key={tag}
-                variant="secondary"
-                size="sm"
-                onClick={() => setSelectedTags(selectedTags.filter(t => t !== tag))}
-                className="h-7 text-xs bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
-              >
-                {tag} <span className="ml-1 text-xs">×</span>
-              </Button>
-            ))}
+            {selectedTags.length > 0 && selectedTags.map(tag => {
+              let tagStyle = "bg-primary/10 text-primary hover:bg-primary/20 border-primary/20"; // Default
+              
+              if (SUBJECT_TAGS.includes(tag)) {
+                tagStyle = "bg-cyan-500/10 text-cyan-500 hover:bg-cyan-500/20 border-cyan-500/20";
+              } else if (ARCHITECTURE_TAGS.includes(tag)) {
+                tagStyle = "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/20";
+              }
+
+              return (
+                <Button
+                  key={tag}
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setSelectedTags(selectedTags.filter(t => t !== tag))}
+                  className={`h-7 text-xs border ${tagStyle}`}
+                >
+                  {tag} <span className="ml-1 text-xs">×</span>
+                </Button>
+              );
+            })}
           </div>
           {!loading && !error && (
             <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">

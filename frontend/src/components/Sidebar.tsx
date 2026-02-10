@@ -24,22 +24,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useFilter } from '@/contexts/FilterContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useAuth } from '@/contexts/AuthContext';
-
-const SUBJECT_TAGS = [
-  'Reinforcement Learning', 
-  'Generative Models', 
-  'Video Prediction', 
-  'Robotics', 
-  'Planning', 
-  'Representation Learning'
-];
-
-const ARCHITECTURE_TAGS = [
-  'Transformers', 
-  'Diffusion Models', 
-  'RNN', 
-  'State Space Models'
-];
+import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
 
 interface SidebarContentProps {
   isMobile: boolean;
