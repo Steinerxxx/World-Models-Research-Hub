@@ -5,6 +5,7 @@ import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X, Star, AlertTr
 import { useFilter } from '@/contexts/FilterContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { PaperCard } from '@/components/PaperCard';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { API_BASE_URL } from '@/config';
 import { MOCK_PAPERS } from '@/data/mockData';
@@ -55,6 +56,8 @@ export default function Home() {
     return () => clearTimeout(handler);
   }, [localSearchTerm, setSearchTerm, searchTerm]);
   
+  const [isLogoZoomed, setIsLogoZoomed] = useState(false);
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [inputPage, setInputPage] = useState('');
@@ -338,13 +341,17 @@ export default function Home() {
       <header className="mb-8 space-y-4 relative">
         {/* Tongji University Logo - Top Right */}
         <div className="absolute -top-6 -right-2 md:right-0 z-10 hidden sm:block">
-          <div className="bg-white rounded-full p-2 shadow-lg w-16 h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden">
+          <motion.div 
+            layoutId="tongji-logo"
+            className="bg-white rounded-full p-2 shadow-lg w-16 h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => setIsLogoZoomed(true)}
+          >
             <img 
               src="/tongji-logo.png" 
               alt="Tongji University Logo" 
               className="w-full h-full object-contain"
             />
-          </div>
+          </motion.div>
         </div>
 
         <div className="flex flex-col items-center justify-center gap-6 text-center">
@@ -582,6 +589,34 @@ export default function Home() {
         </p>
         <p>&copy; {new Date().getFullYear()} World Models Research Hub. All rights reserved.</p>
       </footer>
+
+      {/* Logo Zoom Modal */}
+      <AnimatePresence>
+        {isLogoZoomed && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setIsLogoZoomed(false)}
+          >
+            <motion.div
+              layoutId="tongji-logo"
+              className="relative max-w-lg w-full aspect-square bg-white rounded-full p-8 flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src="/tongji-logo.png" 
+                alt="Tongji University Logo" 
+                className="w-full h-full object-contain"
+              />
+              <button 
+                onClick={() => setIsLogoZoomed(false)}
+                className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+              >
+                <X className="w-8 h-8" />
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
