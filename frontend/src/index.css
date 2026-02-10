@@ -73,6 +73,36 @@
   body {
     @apply bg-background text-foreground overflow-hidden;
   }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full border-[3px] border-solid border-transparent bg-clip-content;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/40;
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-muted border-background;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
 }
 
 @layer utilities {
