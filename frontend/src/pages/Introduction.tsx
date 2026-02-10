@@ -93,7 +93,7 @@ export default function Introduction() {
               <span>, a student from <strong>Tongji University</strong>, utilizing the power of <strong>Trae</strong> IDE.</span>
             </div>
             <p className="mt-4">
-              The goal of this project is to provide researchers with an automated, up-to-date, and intelligent hub for tracking the latest advancements in World Models and related fields.
+              The goal of this project is to provide researchers with an automated, up-to-date, and intelligent hub for tracking the latest advancements in World Models and related fields from <a href="https://arxiv.org/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">arXiv</a>.
             </p>
           </CardContent>
         </Card>
