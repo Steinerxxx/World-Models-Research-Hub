@@ -46,7 +46,7 @@ app.use('/api/favorites', favoritesRoutes);
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok', 
-    version: '1.0.3',
+    version: '1.0.4',
     timestamp: new Date().toISOString(),
     db_status: getDbStatus() ? 'connected' : 'disconnected'
   });
