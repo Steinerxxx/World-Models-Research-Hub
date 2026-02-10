@@ -40,13 +40,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold mb-6 text-center">Register</h1>
-        {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
+      <div className="w-full max-w-md bg-card border border-border rounded-lg shadow-md p-6">
+        <h1 className="text-2xl font-bold mb-6 text-center text-card-foreground">Register</h1>
+        {error && <div className="bg-destructive/15 text-destructive p-3 rounded mb-4 text-sm">{error}</div>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Username</label>
+            <label className="block text-sm font-medium mb-1 text-card-foreground">Username</label>
             <Input 
               value={username} 
               onChange={e => setUsername(e.target.value)} 
@@ -54,7 +54,7 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
+            <label className="block text-sm font-medium mb-1 text-card-foreground">Password</label>
             <Input 
               type="password"
               value={password} 
@@ -63,7 +63,7 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Confirm Password</label>
+            <label className="block text-sm font-medium mb-1 text-card-foreground">Confirm Password</label>
             <Input 
               type="password"
               value={confirmPassword} 
@@ -73,8 +73,8 @@ export default function RegisterPage() {
           </div>
           <Button type="submit" className="w-full">Register</Button>
         </form>
-        <p className="mt-4 text-center text-sm">
-          Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Login</Link>
+        <p className="mt-4 text-center text-sm text-muted-foreground">
+          Already have an account? <Link to="/login" className="text-primary hover:underline">Login</Link>
         </p>
       </div>
     </div>
