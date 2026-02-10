@@ -25,6 +25,19 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Request Logger
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+  if (req.body && Object.keys(req.body).length > 0) {
+    try {
+      console.log('Body:', JSON.stringify(req.body).substring(0, 200));
+    } catch (e) {
+      console.log('Body: [Circular or Invalid JSON]');
+    }
+  }
+  next();
+});
+
 // Auth & Favorites Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoritesRoutes);
@@ -48,10 +61,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// 404 Handler for undefined routes
-app.use((req, res, next) => {
-  res.status(404).json({ message: `Route ${req.originalUrl} not found` });
-});
+
 
 // Global Error Handler
 app.use((err, req, res, next) => {
@@ -59,7 +69,7 @@ app.use((err, req, res, next) => {
   // Ensure we always return JSON
   res.status(err.status || 500).json({
     message: err.message || 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? { message: err.message, stack: err.stack } : {}
+    error: process.env.NODE_ENV === 'development' ? err : {}
   });
 });
 
