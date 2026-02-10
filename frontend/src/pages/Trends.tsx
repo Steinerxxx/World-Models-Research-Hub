@@ -9,11 +9,7 @@ import {
   CartesianGrid, 
   Tooltip, 
   Legend, 
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  Cell,
-  LabelList
+  ResponsiveContainer
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -27,6 +23,22 @@ interface Paper {
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+
+const TOPIC_DESCRIPTIONS: Record<string, string> = {
+  "Reinforcement Learning": "Algorithms that learn optimal actions through trial and error interactions.",
+  "Computer Vision": "Methods for acquiring, processing, and understanding digital images and videos.",
+  "Natural Language Processing": "Interactions between computers and human language, including generation and understanding.",
+  "Robotics": "Design and operation of robots, often involving perception, control, and planning.",
+  "Generative Models": "Models capable of generating new data instances similar to training data (e.g., GANs, Diffusion).",
+  "Representation Learning": "Learning representations of data that make it easier to extract useful information.",
+  "Planning": "Algorithms for determining a sequence of actions to achieve a goal.",
+  "Control": "Managing the behavior of dynamical systems.",
+  "RNN": "Recurrent Neural Networks, specialized for processing sequential data.",
+  "Transformer": "Attention-based architecture that has revolutionized NLP and other fields.",
+  "Diffusion Model": "Generative models that learn to reverse a gradual noising process.",
+  "Contrastive Learning": "Learning representations by contrasting positive and negative pairs.",
+  "Graph Neural Networks": "Neural networks designed to operate on graph-structured data."
+};
 
 export default function Trends() {
   const [papers, setPapers] = useState<Paper[]>([]);
