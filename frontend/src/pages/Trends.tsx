@@ -80,7 +80,15 @@ export default function Trends() {
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10) // Top 10 tags
-      .map(([name, value]) => ({ name, value }));
+      .map(([name, value]) => {
+        const percentage = ((value / papers.length) * 100).toFixed(1);
+        return { 
+          name, 
+          value,
+          percentage: `${percentage}%`,
+          description: TOPIC_DESCRIPTIONS[name] || "A key research area in modern artificial intelligence."
+        };
+      });
   }, [papers]);
 
   const maxCount = useMemo(() => {
