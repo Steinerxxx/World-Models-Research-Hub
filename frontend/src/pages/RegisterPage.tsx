@@ -8,6 +8,7 @@ import { API_BASE_URL } from '@/config';
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -15,6 +16,11 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
     
     try {
       const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
@@ -53,6 +59,15 @@ export default function RegisterPage() {
               type="password"
               value={password} 
               onChange={e => setPassword(e.target.value)} 
+              required 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Confirm Password</label>
+            <Input 
+              type="password"
+              value={confirmPassword} 
+              onChange={e => setConfirmPassword(e.target.value)} 
               required 
             />
           </div>

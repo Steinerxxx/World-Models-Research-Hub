@@ -59,13 +59,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       });
       
       try {
-        const res = await fetch(`${API_BASE_URL}/api/favorites`, {
+        const res = await fetch(`${API_BASE_URL}/api/favorites/${id}`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}` 
-          },
-          body: JSON.stringify({ paperId: id })
+          }
         });
         if (!res.ok) throw new Error('Failed to add favorite');
       } catch (error) {

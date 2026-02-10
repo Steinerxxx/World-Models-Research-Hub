@@ -75,6 +75,17 @@ const server = app.listen(Number(port), '0.0.0.0', () => {
   }
 })();
 
+// Manual seed endpoint
+app.post('/api/admin/seed', async (req, res) => {
+  try {
+    await seedMockData();
+    res.json({ message: 'Database seeded successfully' });
+  } catch (err) {
+    console.error('Seed error:', err);
+    res.status(500).json({ message: 'Seed failed' });
+  }
+});
+
 // API route to test database connection
 app.get('/api/test-db', async (req, res) => {
   try {
