@@ -176,6 +176,9 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
                 onClick={(e) => {
                   e.preventDefault();
                   setSelectedTag(selectedTag === tag ? null : tag);
+                  navigate('/');
+                  if (isMobile) onClose();
+                  window.scrollTo(0, 0);
                 }}
                 className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors flex items-center gap-2 ${
                   selectedTag === tag
@@ -204,6 +207,8 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
                   e.preventDefault();
                   setSelectedTag(selectedTag === tag ? null : tag);
                   navigate('/');
+                  if (isMobile) onClose();
+                  window.scrollTo(0, 0);
                 }}
                 className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors flex items-center gap-2 ${
                   selectedTag === tag
