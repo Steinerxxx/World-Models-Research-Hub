@@ -25,15 +25,6 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Request Logger
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
-  if (Object.keys(req.body).length > 0) {
-    console.log('Body:', JSON.stringify(req.body).substring(0, 200));
-  }
-  next();
-});
-
 // Auth & Favorites Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoritesRoutes);
@@ -42,7 +33,7 @@ app.use('/api/favorites', favoritesRoutes);
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok', 
-    version: '1.0.1',
+    version: '1.0.2',
     timestamp: new Date().toISOString(),
     db_status: getDbStatus() ? 'connected' : 'disconnected'
   });
@@ -54,6 +45,16 @@ app.get('/', (req, res) => {
     message: 'World Models Research Hub Backend is running',
     version: '1.0.0',
     endpoints: ['/api/papers', '/health']
+  });
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+  // Ensure we always return JSON
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err : {}
   });
 });
 
