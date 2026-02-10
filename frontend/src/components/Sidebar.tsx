@@ -49,7 +49,7 @@ interface SidebarContentProps {
 const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const { selectedTag, setSelectedTag, itemsPerPage, setItemsPerPage, sortBy, setSortBy } = useFilter();
+  const { selectedTags, setSelectedTags, toggleTag, itemsPerPage, setItemsPerPage, sortBy, setSortBy } = useFilter();
   const { showFavoritesOnly, setShowFavoritesOnly, favorites } = useFavorites();
   const { user, logout } = useAuth();
 
@@ -87,7 +87,7 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 }`
               }
-              onClick={() => setSelectedTag(null)}
+              onClick={() => setSelectedTags([])}
             >
               <Home className="h-4 w-4" />
               Home
@@ -107,7 +107,11 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
             </NavLink>
 
             <button
-              onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+              onClick={() => {
+                setShowFavoritesOnly(!showFavoritesOnly);
+                navigate('/');
+                window.scrollTo(0, 0);
+              }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                 showFavoritesOnly
                   ? "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 font-medium"
@@ -175,13 +179,13 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
-                  setSelectedTag(selectedTag === tag ? null : tag);
+                  toggleTag(tag);
                   navigate('/');
                   if (isMobile) onClose();
                   window.scrollTo(0, 0);
                 }}
                 className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors flex items-center gap-2 ${
-                  selectedTag === tag
+                  selectedTags.includes(tag)
                     ? "bg-cyan-500/10 text-cyan-500 font-medium"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 }`}
@@ -205,13 +209,13 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
-                  setSelectedTag(selectedTag === tag ? null : tag);
+                  toggleTag(tag);
                   navigate('/');
                   if (isMobile) onClose();
                   window.scrollTo(0, 0);
                 }}
                 className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors flex items-center gap-2 ${
-                  selectedTag === tag
+                  selectedTags.includes(tag)
                     ? "bg-purple-500/10 text-purple-500 font-medium"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 }`}

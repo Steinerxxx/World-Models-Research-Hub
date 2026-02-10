@@ -32,7 +32,7 @@ export default function Home() {
   const [fetchErrorDetail, setFetchErrorDetail] = useState<string>('');
 
   // Use context for filters
-  const { searchTerm, setSearchTerm, selectedTag, setSelectedTag, itemsPerPage, sortBy } = useFilter();
+  const { searchTerm, setSearchTerm, selectedTags, setSelectedTags, toggleTag, itemsPerPage, sortBy } = useFilter();
   const { favorites, showFavoritesOnly, setShowFavoritesOnly } = useFavorites();
   
   // Local state for debounced search to prevent lag
@@ -192,8 +192,8 @@ export default function Home() {
     searchTerms.push(searchFilters.tag);
   }
 
-  // Add selectedTag to highlights if it exists (as a whole phrase, not split)
-  const allHighlights = selectedTag ? [...searchTerms, selectedTag] : searchTerms;
+  // Add selectedTags to highlights
+  const allHighlights = [...searchTerms, ...selectedTags];
 
   const filteredPapers = papers.filter(paper => {
     // 0. Check favorites filter
@@ -234,7 +234,9 @@ export default function Home() {
       return inTitle || inAuthors || inAbstract;
     });
 
-    const tagMatch = selectedTag ? paper.tags?.includes(selectedTag) : true;
+    const tagMatch = selectedTags.length > 0 
+      ? paper.tags?.some(t => selectedTags.includes(t)) 
+      : true;
     
     return matchesAllTerms && tagMatch;
   }).sort((a, b) => {
@@ -252,7 +254,7 @@ export default function Home() {
     if (currentPage !== 1) {
       setCurrentPage(1);
     }
-  }, [searchTerm, selectedTag, itemsPerPage, sortBy, showFavoritesOnly, currentPage]);
+  }, [searchTerm, selectedTags, itemsPerPage, sortBy, showFavoritesOnly, currentPage]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredPapers.length / itemsPerPage);
@@ -429,19 +431,17 @@ export default function Home() {
               </div>
             )}
             
-            {selectedTag && (
-              <div className="flex justify-center items-center gap-2">
-                {!showFavoritesOnly && <span className="text-sm text-muted-foreground">Filtered by:</span>}
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setSelectedTag(null)}
-                  className="rounded-full flex items-center gap-2"
-                >
-                  {selectedTag} <span className="ml-1 text-xs">×</span>
-                </Button>
-              </div>
-            )}
+            {selectedTags.length > 0 && selectedTags.map(tag => (
+              <Button
+                key={tag}
+                variant="secondary"
+                size="sm"
+                onClick={() => setSelectedTags(selectedTags.filter(t => t !== tag))}
+                className="h-7 text-xs bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
+              >
+                {tag} <span className="ml-1 text-xs">×</span>
+              </Button>
+            ))}
           </div>
           {!loading && !error && (
             <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -471,12 +471,12 @@ export default function Home() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {currentPapers.map(paper => (
-                <PaperCard
-                  key={paper.id}
-                  paper={paper}
+                <PaperCard 
+                  key={paper.id} 
+                  paper={paper} 
                   allHighlights={allHighlights}
-                  selectedTag={selectedTag}
-                  setSelectedTag={setSelectedTag}
+                  selectedTags={selectedTags}
+                  toggleTag={toggleTag}
                   setSearchTerm={setSearchTerm}
                   copyBibTeX={copyBibTeX}
                   onPaperUpdate={handlePaperUpdate}

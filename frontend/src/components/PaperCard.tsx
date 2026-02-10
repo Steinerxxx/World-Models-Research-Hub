@@ -23,8 +23,8 @@ interface Paper {
 interface PaperCardProps {
   paper: Paper;
   allHighlights: string[];
-  selectedTag: string | null;
-  setSelectedTag: (tag: string | null) => void;
+  selectedTags: string[];
+  toggleTag: (tag: string) => void;
   setSearchTerm: (term: string) => void;
   copyBibTeX: (paper: Paper) => void;
   onPaperUpdate?: (updatedPaper: Paper) => void;
@@ -33,8 +33,8 @@ interface PaperCardProps {
 export function PaperCard({ 
   paper, 
   allHighlights, 
-  selectedTag, 
-  setSelectedTag, 
+  selectedTags, 
+  toggleTag, 
   setSearchTerm, 
   copyBibTeX,
   onPaperUpdate
@@ -171,13 +171,13 @@ export function PaperCard({
           <div className="flex flex-wrap gap-2 pr-12">
             {(paper.tags && paper.tags.length > 0) ? (
               paper.tags.map((tag, i) => {
-                const isSelected = selectedTag === tag;
+                const isSelected = selectedTags.includes(tag);
                 return (
                   <span 
                     key={i} 
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedTag(isSelected ? null : tag);
+                      toggleTag(tag);
                     }}
                     className={`
                       inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 border cursor-pointer

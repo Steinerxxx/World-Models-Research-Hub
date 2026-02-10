@@ -3,8 +3,9 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 interface FilterContextType {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  selectedTag: string | null;
-  setSelectedTag: (tag: string | null) => void;
+  selectedTags: string[];
+  setSelectedTags: (tags: string[]) => void;
+  toggleTag: (tag: string) => void;
   itemsPerPage: number;
   setItemsPerPage: (num: number) => void;
   sortBy: string;
@@ -15,8 +16,16 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export function FilterProvider({ children }: { children: ReactNode }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('newest');
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag) 
+        : [...prev, tag]
+    );
+  };
   // Default to 25 items per page, persisting in localStorage could be a nice touch
   const [itemsPerPage, setItemsPerPage] = useState(() => {
     const saved = localStorage.getItem('itemsPerPage');
@@ -32,8 +41,9 @@ export function FilterProvider({ children }: { children: ReactNode }) {
     <FilterContext.Provider value={{ 
       searchTerm, 
       setSearchTerm, 
-      selectedTag, 
-      setSelectedTag,
+      selectedTags, 
+      setSelectedTags,
+      toggleTag,
       itemsPerPage,
       setItemsPerPage: handleSetItemsPerPage,
       sortBy,
