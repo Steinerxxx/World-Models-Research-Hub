@@ -29,14 +29,15 @@ import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
 interface SidebarContentProps {
   isMobile: boolean;
   onClose: () => void;
+  onLogoutClick: () => void;
 }
 
-const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
+const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProps) => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { selectedTags, setSelectedTags, toggleTag, itemsPerPage, setItemsPerPage, sortBy, setSortBy } = useFilter();
   const { showFavoritesOnly, setShowFavoritesOnly, favorites } = useFavorites();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -128,7 +129,7 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
 
             {user ? (
               <button
-                onClick={logout}
+                onClick={onLogoutClick}
                 className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
               >
                 <LogOut className="h-4 w-4" />
@@ -291,6 +292,9 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
 };
 
 export function Sidebar() {
+  const { logout } = useAuth();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.matchMedia('(max-width: 767px)').matches;
@@ -320,6 +324,56 @@ export function Sidebar() {
   }, []);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
+
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    setShowLogoutConfirm(false);
+  };
+
+  const LogoutModal = () => (
+    <AnimatePresence>
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowLogoutConfirm(false)}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            className="bg-background border border-border rounded-lg shadow-xl p-6 w-full max-w-sm relative z-10"
+          >
+            <h3 className="text-lg font-semibold mb-2">Confirm Logout</h3>
+            <p className="text-muted-foreground mb-6">
+              Are you sure you want to log out?
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowLogoutConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmLogout}
+              >
+                Logout
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
 
   // Mobile Layout
   if (isMobile) {
@@ -355,11 +409,12 @@ export function Sidebar() {
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className="fixed inset-y-0 left-0 z-50 w-[80%] max-w-[20rem] bg-background/95 backdrop-blur-md border-r border-border shadow-2xl overflow-hidden"
               >
-                <SidebarContent isMobile={true} onClose={() => setIsOpen(false)} />
+                <SidebarContent isMobile={true} onClose={() => setIsOpen(false)} onLogoutClick={handleLogoutClick} />
               </motion.aside>
             </>
           )}
         </AnimatePresence>
+        <LogoutModal />
       </>
     );
   }
@@ -387,9 +442,10 @@ export function Sidebar() {
         className="relative h-full bg-background/95 backdrop-blur-md border-r border-border flex flex-col shadow-2xl overflow-hidden whitespace-nowrap"
       >
         <div className="w-[20rem] h-full">
-          <SidebarContent isMobile={false} onClose={() => setIsOpen(false)} />
+          <SidebarContent isMobile={false} onClose={() => setIsOpen(false)} onLogoutClick={handleLogoutClick} />
         </div>
       </motion.aside>
+      <LogoutModal />
     </>
   );
 }
