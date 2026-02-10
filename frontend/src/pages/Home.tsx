@@ -235,7 +235,7 @@ export default function Home() {
     });
 
     const tagMatch = selectedTags.length > 0 
-      ? paper.tags?.some(t => selectedTags.includes(t)) 
+      ? selectedTags.every(tag => paper.tags?.includes(tag))
       : true;
     
     return matchesAllTerms && tagMatch;
