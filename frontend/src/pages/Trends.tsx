@@ -217,10 +217,7 @@ export default function Trends() {
                   cx="50%"
                   cy="50%"
                   labelLine={(props: any) => {
-                    // Hide label lines for slices smaller than 2%
-                    if ((props.percent || 0) < 0.02) return <g />;
-                    
-                    // Render the default polyline for others
+                    // Render the default polyline for all slices
                     return (
                       <polyline
                         stroke="#64748b"
