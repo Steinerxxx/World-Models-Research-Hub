@@ -59,7 +59,7 @@ app.use((err, req, res, next) => {
   // Ensure we always return JSON
   res.status(err.status || 500).json({
     message: err.message || 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? err : {}
+    error: process.env.NODE_ENV === 'development' ? { message: err.message, stack: err.stack } : {}
   });
 });
 
