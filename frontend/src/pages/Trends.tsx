@@ -83,6 +83,10 @@ export default function Trends() {
       .map(([name, value]) => ({ name, value }));
   }, [papers]);
 
+  const maxCount = useMemo(() => {
+    return Math.max(...tagData.map(d => d.value), 0);
+  }, [tagData]);
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)]">
@@ -163,56 +167,43 @@ export default function Trends() {
           </CardContent>
         </Card>
 
-        {/* Top Tags Bar Chart */}
+        {/* Top Tags Bar Chart (Custom HTML Implementation for better text layout) */}
         <Card className="col-span-1 lg:col-span-2">
           <CardHeader>
             <CardTitle>Top Research Topics</CardTitle>
-            <CardDescription>Most frequent research categories</CardDescription>
+            <CardDescription>Most frequent research categories with detailed descriptions</CardDescription>
           </CardHeader>
-          <CardContent className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={tagData} layout="vertical" margin={{ top: 5, right: 60, left: 10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
-                <XAxis type="number" className="text-xs" />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  width={180} 
-                  className="text-xs font-medium" 
-                  tick={{ fill: 'currentColor', fontSize: 12 }}
-                  interval={0}
-                />
-                <Tooltip 
-                  cursor={{ fill: 'transparent' }}
-                  content={({ active, payload, label }: any) => {
-                    if (active && payload && payload.length) {
-                      const data = payload[0].payload;
-                      return (
-                        <div className="bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 p-3 rounded-lg shadow-lg max-w-xs">
-                          <p className="font-bold text-sm mb-1">{label}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">{data.description}</p>
-                          <div className="flex items-center justify-between gap-4 text-xs">
-                            <span className="font-medium text-slate-700 dark:text-slate-300">Papers:</span>
-                            <span className="font-bold text-blue-600">{data.value}</span>
-                          </div>
-                          <div className="flex items-center justify-between gap-4 text-xs mt-1">
-                            <span className="font-medium text-slate-700 dark:text-slate-300">Share:</span>
-                            <span className="font-bold text-blue-600">{data.percentage}</span>
-                          </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Bar dataKey="value" name="Count" fill="#8884d8" radius={[0, 4, 4, 0]} barSize={20}>
-                  {tagData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                  <LabelList dataKey="percentage" position="right" className="fill-foreground text-xs font-medium" />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+          <CardContent>
+            <div className="space-y-6">
+              {tagData.map((item, index) => (
+                <div key={item.name} className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  {/* Label Side: Name & Description */}
+                  <div className="sm:w-5/12 space-y-1">
+                    <div className="font-semibold text-sm text-foreground">{item.name}</div>
+                    <div className="text-xs text-muted-foreground leading-snug">
+                      {item.description}
+                    </div>
+                  </div>
+                  
+                  {/* Bar Side: Bar & Stats */}
+                  <div className="flex-1 flex items-center gap-3">
+                    <div className="flex-1 h-4 bg-secondary/50 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full rounded-full transition-all duration-1000 ease-out"
+                        style={{ 
+                          width: `${(item.value / maxCount) * 100}%`,
+                          backgroundColor: COLORS[index % COLORS.length]
+                        }}
+                      />
+                    </div>
+                    <div className="w-24 text-right flex flex-col items-end leading-none">
+                      <span className="font-bold text-sm text-foreground">{item.value}</span>
+                      <span className="text-[10px] text-muted-foreground">{item.percentage}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
