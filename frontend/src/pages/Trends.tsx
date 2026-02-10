@@ -12,7 +12,8 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  Cell
+  Cell,
+  LabelList
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -170,31 +171,45 @@ export default function Trends() {
           </CardHeader>
           <CardContent className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={tagData} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+              <BarChart data={tagData} layout="vertical" margin={{ top: 5, right: 60, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
                 <XAxis type="number" className="text-xs" />
                 <YAxis 
                   dataKey="name" 
                   type="category" 
-                  width={200} 
+                  width={180} 
                   className="text-xs font-medium" 
                   tick={{ fill: 'currentColor', fontSize: 12 }}
                   interval={0}
                 />
                 <Tooltip 
                   cursor={{ fill: 'transparent' }}
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                    color: '#0f172a'
+                  content={({ active, payload, label }: any) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 p-3 rounded-lg shadow-lg max-w-xs">
+                          <p className="font-bold text-sm mb-1">{label}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">{data.description}</p>
+                          <div className="flex items-center justify-between gap-4 text-xs">
+                            <span className="font-medium text-slate-700 dark:text-slate-300">Papers:</span>
+                            <span className="font-bold text-blue-600">{data.value}</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-4 text-xs mt-1">
+                            <span className="font-medium text-slate-700 dark:text-slate-300">Share:</span>
+                            <span className="font-bold text-blue-600">{data.percentage}</span>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
                   }}
                 />
                 <Bar dataKey="value" name="Count" fill="#8884d8" radius={[0, 4, 4, 0]} barSize={20}>
                   {tagData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
+                  <LabelList dataKey="percentage" position="right" className="fill-foreground text-xs font-medium" />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
