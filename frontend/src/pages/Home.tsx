@@ -447,7 +447,7 @@ export default function Home() {
                   variant="secondary"
                   size="sm"
                   onClick={() => setSelectedTags(selectedTags.filter(t => t !== tag))}
-                  className={`h-7 text-xs border ${tagStyle}`}
+                  className={`rounded-full h-7 text-xs border ${tagStyle}`}
                 >
                   {tag} <span className="ml-1 text-xs">×</span>
                 </Button>
