@@ -43,30 +43,39 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
   const [allBackendTags, setAllBackendTags] = useState<{tag: string, count: number}[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     const fetchTags = async () => {
       try {
+        console.log('Fetching tags from:', `${API_BASE_URL}/api/tags`);
         const response = await fetch(`${API_BASE_URL}/api/tags?t=${Date.now()}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const tags = await response.json();
         
-        console.log('Raw tags from API:', tags);
-        const formattedTags = Array.isArray(tags) ? tags
+        if (!Array.isArray(tags)) throw new Error('Invalid data format');
+
+        const formattedTags = tags
           .filter(t => t && (typeof t === 'string' ? t.trim() : t.tag && t.tag.trim()))
           .map(t => 
             typeof t === 'string' ? { tag: t, count: 0 } : { tag: t.tag, count: Number(t.count) }
-          ) : [];
+          );
 
         const filteredTags = formattedTags.filter(t => 
           !['World Models', 'Model-Based RL'].map(s => s.toLowerCase()).includes(t.tag.toLowerCase())
         );
+        
         setAllBackendTags(filteredTags);
         setError(null);
       } catch (err) {
-        console.warn('Failed to fetch tags, using mock data:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        console.error('Fetch error:', err);
+        setError(err instanceof Error ? err.message : 'Fetch failed');
         
+        // Retry logic for connection issues
+        if (retryCount < 3) {
+          setTimeout(() => setRetryCount(prev => prev + 1), 2000);
+        }
+
         const { MOCK_PAPERS } = await import('@/data/mockData');
         const tagCounts: Record<string, number> = {};
         MOCK_PAPERS.forEach(p => {
@@ -75,14 +84,14 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
           });
         });
         const filteredMockTags = Object.entries(tagCounts)
-          .filter(([tag]) => !['World Models', 'Model-Based RL'].includes(tag))
+          .filter(([tag]) => !['World Models', 'Model-Based RL'].map(s => s.toLowerCase()).includes(tag.toLowerCase()))
           .map(([tag, count]) => ({ tag, count }));
         setAllBackendTags(filteredMockTags);
       }
     };
 
     fetchTags();
-  }, []);
+  }, [retryCount]);
 
   const extraTags = allBackendTags.filter(t => 
     !SUBJECT_TAGS.map(s => s.toLowerCase()).includes(t.tag.toLowerCase()) && 
@@ -117,8 +126,8 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
           )}
         </div>
         <span className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-           v3.4.3 
-           {allBackendTags.length > 0 && (
+            v3.4.4 
+            {allBackendTags.length > 0 && (
             <span className="opacity-50">({allBackendTags.length} tags detected)</span>
           )}
           {error && <span className="text-red-500/50">!</span>}
