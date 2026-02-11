@@ -54,7 +54,7 @@ export const MOCK_PAPERS = [
     abstract: "We introduce a framework that abstracts Reinforcement Learning (RL) as a sequence modeling problem. This allows us to use the simplicity and scalability of the Transformer architecture. We present Decision Transformer, an architecture that casts the problem of RL as conditional sequence modeling.",
     publication_date: "2021-06-02",
     url: "https://arxiv.org/abs/2106.01345",
-    tags: ["Transformers", "Offline RL", "Sequence Modeling"],
+    tags: ["Transformers", "Offline RL", "Sequence Modeling", "RNN"],
     summary: "Casts RL as a sequence modeling problem solvable by Transformers.",
     contribution: "Demonstrated that Transformers can effectively solve RL tasks via offline training.",
     limitations: "Performance depends heavily on the quality of the offline dataset."

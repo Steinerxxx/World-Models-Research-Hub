@@ -52,7 +52,17 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
         );
         setAllBackendTags(filteredTags);
       })
-      .catch(err => console.error('Failed to fetch tags:', err));
+      .catch(err => {
+        console.warn('Failed to fetch tags, using mock data tags:', err);
+        // Fallback: extract tags from MOCK_PAPERS
+        import('@/data/mockData').then(({ MOCK_PAPERS }) => {
+          const mockTags = Array.from(new Set(MOCK_PAPERS.flatMap(p => p.tags || [])));
+          const filteredMockTags = mockTags.filter(t => 
+            !['World Models', 'Model-Based RL'].includes(t)
+          );
+          setAllBackendTags(filteredMockTags);
+        });
+      });
   }, []);
 
   const extraTags = allBackendTags.filter(tag => 
@@ -73,7 +83,7 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
             </Button>
           )}
         </div>
-        <span className="text-xs text-muted-foreground mt-1">v3.2.1</span>
+        <span className="text-xs text-muted-foreground mt-1">v3.2.2</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-6">

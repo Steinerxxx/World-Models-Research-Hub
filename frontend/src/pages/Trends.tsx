@@ -94,7 +94,7 @@ export default function Trends() {
 
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 10) // Top 10 tags
+      .slice(0, 15) // Show top 15 tags to ensure RNN and others are visible
       .map(([name, value]) => {
         const percentage = ((value / papers.length) * 100).toFixed(1);
         return { 
