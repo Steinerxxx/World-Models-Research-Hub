@@ -225,6 +225,27 @@ export async function getAllPapers() {
   }
 }
 
+export async function getAllTags() {
+  if (isDbConnected) {
+    const { rows } = await query(`
+      SELECT DISTINCT unnest(tags) as tag 
+      FROM papers 
+      WHERE tags IS NOT NULL 
+      ORDER BY tag ASC
+    `);
+    return rows.map(row => row.tag);
+  } else {
+    // Local JSON Fallback
+    if (!fs.existsSync(LOCAL_DB_PATH)) return [];
+    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
+    const tags = new Set();
+    papers.forEach(p => {
+      if (p.tags) p.tags.forEach(t => tags.add(t));
+    });
+    return Array.from(tags).sort();
+  }
+}
+
 export async function seedMockData() {
   const MOCK_PAPERS = [
     {

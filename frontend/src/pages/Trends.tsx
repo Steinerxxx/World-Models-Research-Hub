@@ -36,6 +36,9 @@ const TOPIC_DESCRIPTIONS: Record<string, string> = {
   "RNN": "Recurrent Neural Networks, specialized for processing sequential data.",
   "Transformer": "Attention-based architecture that has revolutionized NLP and other fields.",
   "Diffusion Model": "Generative models that learn to reverse a gradual noising process.",
+  "Diffusion Models": "Generative models that learn to reverse a gradual noising process.",
+  "State Space Models": "Efficient sequence models like Mamba that scale linearly with sequence length.",
+  "Sim-to-Real": "Techniques for transferring models or policies trained in simulation to physical robots.",
   "Contrastive Learning": "Learning representations by contrasting positive and negative pairs.",
   "Graph Neural Networks": "Neural networks designed to operate on graph-structured data."
 };

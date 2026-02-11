@@ -4,6 +4,7 @@ import {
   createPapersTable,
   addPaper,
   getAllPapers,
+  getAllTags,
   updatePaperTags,
   updatePaperSummary,
   getPaperById,
@@ -145,8 +146,18 @@ app.get('/api/papers', async (req, res) => {
     const papers = await getAllPapers();
     res.json(papers);
   } catch (err) {
-    console.error('Error fetching papers:', err);
-    res.status(500).json({ message: 'Failed to retrieve papers' });
+    console.error('Error getting papers:', err);
+    res.status(500).json({ message: 'Failed to get papers' });
+  }
+});
+
+app.get('/api/tags', async (req, res) => {
+  try {
+    const tags = await getAllTags();
+    res.json(tags);
+  } catch (err) {
+    console.error('Error getting tags:', err);
+    res.status(500).json({ message: 'Failed to get tags' });
   }
 });
 

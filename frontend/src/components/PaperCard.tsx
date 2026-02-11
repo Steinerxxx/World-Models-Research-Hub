@@ -179,6 +179,9 @@ export function PaperCard({
                   selectedStyle = "bg-cyan-500 text-white border-cyan-500 shadow-cyan-500/20";
                 } else if (ARCHITECTURE_TAGS.includes(tag)) {
                   selectedStyle = "bg-purple-500 text-white border-purple-500 shadow-purple-500/20";
+                } else {
+                  // Style for dynamic AI-generated tags (Emerging Topics)
+                  selectedStyle = "bg-orange-500 text-white border-orange-500 shadow-orange-500/20";
                 }
 
                 return (

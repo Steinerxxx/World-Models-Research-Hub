@@ -25,6 +25,7 @@ import { useFilter } from '@/contexts/FilterContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
+import { API_BASE_URL } from '@/config';
 
 interface SidebarContentProps {
   isMobile: boolean;
@@ -38,6 +39,25 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
   const { selectedTags, setSelectedTags, toggleTag, itemsPerPage, setItemsPerPage, sortBy, setSortBy } = useFilter();
   const { showFavoritesOnly, setShowFavoritesOnly, favorites } = useFavorites();
   const { user } = useAuth();
+  
+  const [allBackendTags, setAllBackendTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/tags`)
+      .then(res => res.json())
+      .then(tags => {
+        // Filter out the core tags we always show as filters
+        const filteredTags = tags.filter((t: string) => 
+          !['World Models', 'Model-Based RL'].includes(t)
+        );
+        setAllBackendTags(filteredTags);
+      })
+      .catch(err => console.error('Failed to fetch tags:', err));
+  }, []);
+
+  const extraTags = allBackendTags.filter(tag => 
+    !SUBJECT_TAGS.includes(tag) && !ARCHITECTURE_TAGS.includes(tag)
+  );
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -211,6 +231,38 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
               </button>
             ))}
           </div>
+
+          {extraTags.length > 0 && (
+            <>
+              <div className="h-[1px] bg-border/50" />
+              <div className="space-y-1">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-2 flex items-center gap-2">
+                  <TrendingUp className="h-3 w-3" /> Emerging Topics
+                </h3>
+                {extraTags.map(tag => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleTag(tag);
+                      navigate('/');
+                      if (isMobile) onClose();
+                      window.scrollTo(0, 0);
+                    }}
+                    className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors flex items-center gap-2 ${
+                      selectedTags.includes(tag)
+                        ? "bg-orange-500/10 text-orange-500 font-medium"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    }`}
+                  >
+                    <Tag className="h-3 w-3 opacity-70" />
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 

@@ -3,6 +3,7 @@ export const SUBJECT_TAGS = [
   'Generative Models', 
   'Video Prediction', 
   'Robotics', 
+  'Sim-to-Real',
   'Planning', 
   'Representation Learning'
 ];

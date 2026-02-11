@@ -56,11 +56,20 @@ const TAXONOMY = [
   {
     tag: 'Robotics',
     strongKeywords: [
-      'robotics', 'robot', 'manipulation', 'locomotion', 'sim-to-real', 
+      'robotics', 'robot', 'manipulation', 'locomotion', 
       'imitation learning', 'behavior cloning', 'dexterous', 'mobile manipulator'
     ],
     weakKeywords: [
       'control', 'actuator', 'grasping', 'trajectory'
+    ]
+  },
+  {
+    tag: 'Sim-to-Real',
+    strongKeywords: [
+      'sim-to-real', 'simulation-to-real', 'domain randomization', 'system identification'
+    ],
+    weakKeywords: [
+      'reality gap', 'transfer learning to robots'
     ]
   },
   {

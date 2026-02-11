@@ -446,6 +446,9 @@ export default function Home() {
                 tagStyle = "bg-cyan-500/10 text-cyan-500 hover:bg-cyan-500/20 border-cyan-500/20";
               } else if (ARCHITECTURE_TAGS.includes(tag)) {
                 tagStyle = "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/20";
+              } else {
+                // Style for dynamic AI-generated tags (Emerging Topics)
+                tagStyle = "bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 border-orange-500/20";
               }
 
               return (
