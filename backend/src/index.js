@@ -107,7 +107,7 @@ app.post('/api/papers/:id/analyze', async (req, res) => {
   }
 });
 
-// --- 2. Static Files & Frontend Routing ---
+// --- 2. Static Files ---
 const frontendPath = path.join(__dirname, '../../frontend/dist');
 app.use(express.static(frontendPath));
 
@@ -116,11 +116,13 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', db: getDbStatus() ? 'connected' : 'disconnected' });
 });
 
-// Frontend Catch-all
-app.use((req, res) => {
+// --- 3. Frontend Catch-all (Must be LAST) ---
+app.use((req, res, next) => {
+  // If the request starts with /api but didn't match any route, it's a 404
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'API endpoint not found' });
   }
+  // Otherwise, serve the frontend index.html
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
