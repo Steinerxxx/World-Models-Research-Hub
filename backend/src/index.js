@@ -33,6 +33,21 @@ app.use(cors());
 app.use(express.json());
 
 // --- 1. API Routes ---
+// Health check (Public)
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    version: '3.5.1',
+    timestamp: new Date().toISOString(),
+    db: getDbStatus() ? 'connected' : 'disconnected' 
+  });
+});
+
+// Debug version endpoint
+app.get('/api/debug-version', (req, res) => {
+  res.json({ version: '3.5.1', build_time: '2026-02-12' });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoritesRoutes);
 
@@ -109,20 +124,52 @@ app.post('/api/papers/:id/analyze', async (req, res) => {
   }
 });
 
+// Manual seed endpoint
+app.post('/api/admin/seed', async (req, res) => {
+  try {
+    await seedMockData();
+    res.json({ message: 'Database seeded successfully' });
+  } catch (err) {
+    console.error('Seed error:', err);
+    res.status(500).json({ message: 'Seed failed' });
+  }
+});
+
+// API route to reclassify all existing papers
+app.post('/api/reclassify', async (req, res) => {
+  try {
+    const papers = await getAllPapers();
+    let count = 0;
+    
+    for (const paper of papers) {
+      const tags = await classifyPaper(paper.title, paper.abstract);
+      await updatePaperTags(paper.id, tags);
+      count++;
+    }
+    
+    res.json({ 
+      message: 'Reclassification completed successfully', 
+      processed_count: count 
+    });
+  } catch (err) {
+    console.error('Error reclassifying papers:', err);
+    res.status(500).json({ message: 'Failed to reclassify papers' });
+  }
+});
+
 // --- 2. Static Files ---
 const frontendPath = path.join(__dirname, '../../frontend/dist');
 app.use(express.static(frontendPath));
-
-// Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', db: getDbStatus() ? 'connected' : 'disconnected' });
-});
 
 // --- 3. Frontend Catch-all (Must be LAST) ---
 app.use((req, res, next) => {
   // If the request starts with /api but didn't match any route, it's a 404
   if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ error: 'API endpoint not found' });
+    return res.status(404).json({ 
+      error: 'API endpoint not found',
+      hint: 'The backend might be running an outdated version. Please redeploy on Sealos.',
+      requested_path: req.path
+    });
   }
   // Otherwise, serve the frontend index.html
   res.sendFile(path.join(frontendPath, 'index.html'));

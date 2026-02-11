@@ -44,10 +44,18 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
   const [isExpanded, setIsExpanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-
   const [isLive, setIsLive] = useState(false);
+  const [backendVersion, setBackendVersion] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check backend health and version
+    fetch(`${API_BASE_URL}/health`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.version) setBackendVersion(data.version);
+      })
+      .catch(() => setBackendVersion(null));
+
     const fetchTags = async () => {
       try {
         console.log('Fetching tags from:', `${API_BASE_URL}/api/tags`);
@@ -131,10 +139,10 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
         </div>
         <span className="text-[10px] text-muted-foreground mt-1 flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
-            v3.5.0
+            FE: v3.5.1
             <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-            {allBackendTags.length > 0 && (
-              <span className="opacity-50">({allBackendTags.length} tags)</span>
+            {backendVersion && (
+              <span className="text-[9px] opacity-70">BE: {backendVersion}</span>
             )}
             {!isLive && (
               <button 
@@ -151,8 +159,11 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
               Error: {error}
             </div>
           )}
-          <div className="text-[7px] opacity-30 mt-0.5">
-            URL: {API_BASE_URL}/api/tags
+          <div className="text-[7px] opacity-30 mt-0.5 flex flex-col gap-0.5">
+            <div>API: {API_BASE_URL}/api/tags</div>
+            {error && error.includes('404') && (
+              <div className="text-amber-500/50 font-medium">Hint: Please REDEPLOY on Sealos to update backend.</div>
+            )}
           </div>
         </span>
       </div>
