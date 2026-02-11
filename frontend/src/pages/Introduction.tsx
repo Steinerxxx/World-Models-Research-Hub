@@ -41,7 +41,7 @@ const techNodes: TechNode[] = [
     label: 'Data & AI',
     icon: <Database className="w-6 h-6" />,
     description: 'Reliable storage and intelligent paper analysis.',
-    details: ['Supabase (PostgreSQL)', 'DeepSeek (V3/R1)', 'Automated Tagging', 'AI Summarization'],
+    details: ['Supabase (PostgreSQL)', 'DeepSeek (V3/R1)', 'AI-Powered Filtering', 'Automated Tagging', 'AI Summarization'],
     color: 'bg-purple-500'
   },
   {

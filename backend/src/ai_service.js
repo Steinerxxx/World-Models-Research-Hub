@@ -145,3 +145,55 @@ Example Output:
     return [];
   }
 }
+
+/**
+ * Checks if a paper is relevant to World Models or Model-Based RL
+ * @returns {Promise<boolean>}
+ */
+export async function checkRelevanceWithAI(title, abstract) {
+  if (!openai) {
+    return true; // Default to true if AI is disabled to avoid missing papers
+  }
+
+  try {
+    const prompt = `
+You are an expert academic reviewer. Determine if the following paper is relevant to the fields of "World Models" or "Model-Based Reinforcement Learning" (MBRL).
+
+Relevant topics include:
+- Learning a predictive model of the environment (dynamics model).
+- Using a learned model for planning or policy training (e.g., Dreamer, PlaNet).
+- Generative models of environments (video prediction for RL).
+- Representation learning for world modeling.
+
+Irrelevant topics include:
+- Pure computer vision (unless applied to world modeling).
+- Traditional model-free RL (unless compared significantly with MBRL).
+- Generic deep learning without a focus on modeling environment dynamics.
+
+Title: "${title}"
+Abstract: "${abstract}"
+
+Return ONLY a JSON object with a single key "is_relevant" (boolean).
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: modelName,
+      messages: [
+        { role: 'system', content: 'You are a strict filtering assistant that outputs JSON.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0,
+      max_tokens: 50,
+    });
+
+    const content = response.choices[0].message.content?.trim();
+    if (!content) return true;
+
+    const jsonStr = content.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+    const result = JSON.parse(jsonStr);
+    return !!result.is_relevant;
+  } catch (error) {
+    console.error('Error checking relevance with AI:', error);
+    return true; // Fallback to true on error
+  }
+}
