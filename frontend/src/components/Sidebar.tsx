@@ -73,7 +73,7 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
             </Button>
           )}
         </div>
-        <span className="text-xs text-muted-foreground mt-1">v3.1</span>
+        <span className="text-xs text-muted-foreground mt-1">v3.2</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-6">
