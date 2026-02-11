@@ -49,7 +49,7 @@ const techNodes: TechNode[] = [
     label: 'Deployment',
     icon: <Cloud className="w-6 h-6" />,
     description: 'Scalable cloud infrastructure ensuring high availability.',
-    details: ['Vercel (Frontend)', 'Render (Backend)', 'CI/CD Pipelines'],
+    details: ['Zeabur (Full-stack)', 'Hong Kong Edge', 'CI/CD Pipelines'],
     color: 'bg-orange-500'
   }
 ];
