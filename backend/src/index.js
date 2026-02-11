@@ -50,11 +50,13 @@ app.get('/api/papers', async (req, res) => {
 // API route to get all tags with counts
 app.get('/api/tags', async (req, res) => {
   try {
+    console.log('GET /api/tags - Fetching all tags');
     const tags = await getAllTags();
+    console.log(`GET /api/tags - Found ${tags.length} tags`);
     res.json(tags);
   } catch (err) {
     console.error('Error getting tags:', err);
-    res.status(500).json({ message: 'Failed to get tags' });
+    res.status(500).json({ message: 'Failed to get tags', error: err.message });
   }
 });
 

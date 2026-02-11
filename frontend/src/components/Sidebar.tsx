@@ -131,7 +131,7 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
         </div>
         <span className="text-[10px] text-muted-foreground mt-1 flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
-            v3.4.9 
+            v3.5.0
             <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
             {allBackendTags.length > 0 && (
               <span className="opacity-50">({allBackendTags.length} tags)</span>
@@ -152,7 +152,7 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
             </div>
           )}
           <div className="text-[7px] opacity-30 mt-0.5">
-            Target: {API_BASE_URL || 'relative'}/api/tags
+            URL: {API_BASE_URL}/api/tags
           </div>
         </span>
       </div>
