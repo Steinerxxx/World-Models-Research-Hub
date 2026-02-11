@@ -42,41 +42,44 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
   
   const [allBackendTags, setAllBackendTags] = useState<{tag: string, count: number}[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Add a cache-busting timestamp to ensure we get fresh tags
-    fetch(`${API_BASE_URL}/api/tags?t=${Date.now()}`)
-      .then(res => res.json())
-      .then(tags => {
+    const fetchTags = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/tags?t=${Date.now()}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const tags = await response.json();
+        
         console.log('Raw tags from API:', tags);
-        // Handle both old array of strings and new array of objects for safety
         const formattedTags = Array.isArray(tags) ? tags.map(t => 
           typeof t === 'string' ? { tag: t, count: 0 } : { tag: t.tag, count: Number(t.count) }
         ) : [];
 
-        // Filter out deprecated tags
         const filteredTags = formattedTags.filter(t => 
           !['World Models', 'Model-Based RL'].includes(t.tag)
         );
-        console.log('Formatted & Filtered tags:', filteredTags);
         setAllBackendTags(filteredTags);
-      })
-      .catch(err => {
-        console.warn('Failed to fetch tags, using mock data tags:', err);
-        // Fallback: extract tags from MOCK_PAPERS
-        import('@/data/mockData').then(({ MOCK_PAPERS }) => {
-          const tagCounts: Record<string, number> = {};
-          MOCK_PAPERS.forEach(p => {
-            (p.tags || []).forEach(t => {
-              tagCounts[t] = (tagCounts[t] || 0) + 1;
-            });
+        setError(null);
+      } catch (err) {
+        console.warn('Failed to fetch tags, using mock data:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+        
+        const { MOCK_PAPERS } = await import('@/data/mockData');
+        const tagCounts: Record<string, number> = {};
+        MOCK_PAPERS.forEach(p => {
+          (p.tags || []).forEach(t => {
+            tagCounts[t] = (tagCounts[t] || 0) + 1;
           });
-          const filteredMockTags = Object.entries(tagCounts)
-            .filter(([tag]) => !['World Models', 'Model-Based RL'].includes(tag))
-            .map(([tag, count]) => ({ tag, count }));
-          setAllBackendTags(filteredMockTags);
         });
-      });
+        const filteredMockTags = Object.entries(tagCounts)
+          .filter(([tag]) => !['World Models', 'Model-Based RL'].includes(tag))
+          .map(([tag, count]) => ({ tag, count }));
+        setAllBackendTags(filteredMockTags);
+      }
+    };
+
+    fetchTags();
   }, []);
 
   const extraTags = allBackendTags.filter(t => 
@@ -111,7 +114,13 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
             </Button>
           )}
         </div>
-        <span className="text-xs text-muted-foreground mt-1">v3.4.1</span>
+        <span className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+          v3.4.2 
+          {allBackendTags.length > 0 && (
+            <span className="opacity-50">({allBackendTags.length} tags detected)</span>
+          )}
+          {error && <span className="text-red-500/50">!</span>}
+        </span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-6">
