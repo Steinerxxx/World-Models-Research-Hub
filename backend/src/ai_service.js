@@ -89,8 +89,6 @@ Abstract: "${abstract}"
 
 Your task is to classify this paper into relevant categories.
 Choose from the following list of tags (you can select multiple, but only if they are strongly relevant):
-- World Models
-- Model-Based RL
 - Reinforcement Learning
 - Generative Models
 - Video Prediction
@@ -102,12 +100,13 @@ Choose from the following list of tags (you can select multiple, but only if the
 - Sim-to-Real
 
 Instructions:
-1. If the paper is about World Models or Dreamer-like architectures, MUST include "World Models".
-2. If it involves reinforcement learning with a learned model, MUST include "Model-Based RL".
-3. Return ONLY a JSON array of strings. Do not include any other text or markdown formatting.
+1. DO NOT include "World Models" or "Model-Based RL" as tags, as they are implied by the context of this platform.
+2. Focus on more specific sub-fields (e.g., "Robotics", "Planning", "Video Prediction").
+3. You may generate new, specific tags if they are significant (e.g., "Offline RL", "Safe RL").
+4. Return ONLY a JSON array of strings. Do not include any other text or markdown formatting.
 
 Example Output:
-["World Models", "Model-Based RL", "Robotics"]
+["Robotics", "Planning", "Representation Learning"]
     `;
 
     const response = await openai.chat.completions.create({

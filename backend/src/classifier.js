@@ -2,26 +2,6 @@ import { classifyWithAI } from './ai_service.js';
 
 const TAXONOMY = [
   {
-    tag: 'World Models',
-    strongKeywords: [
-      'world model', 'dreamer', 'daydreamer', 'genie', 'diamond', 'iris', 
-      'latent dynamics', 'predictive state representation', 'decision transformer'
-    ],
-    weakKeywords: [
-      'model-based', 'mbrl', 'predict future', 'imagination'
-    ]
-  },
-  {
-    tag: 'Model-Based RL',
-    strongKeywords: [
-      'model-based reinforcement learning', 'mbrl', 'dreamer', 'muzero', 'alphazero', 
-      'planet', 'simpla', 'td-mpc'
-    ],
-    weakKeywords: [
-      'model-based', 'planning in latent space'
-    ]
-  },
-  {
     tag: 'Reinforcement Learning',
     strongKeywords: [
       'reinforcement learning', 'deep rl', 'policy gradient', 'q-learning', 
