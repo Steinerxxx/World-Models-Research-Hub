@@ -45,6 +45,8 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
+  const [isLive, setIsLive] = useState(false);
+
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -66,10 +68,12 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
         );
         
         setAllBackendTags(filteredTags);
+        setIsLive(true);
         setError(null);
       } catch (err) {
         console.error('Fetch error:', err);
         setError(err instanceof Error ? err.message : 'Fetch failed');
+        setIsLive(false);
         
         // Retry logic for connection issues
         if (retryCount < 3) {
@@ -125,16 +129,31 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
             </Button>
           )}
         </div>
-        <span className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-            v3.4.6 
-             {allBackendTags.length > 0 && (
-            <span className="opacity-50">({allBackendTags.length} tags detected)</span>
-          )}
+        <span className="text-[10px] text-muted-foreground mt-1 flex flex-col gap-0.5">
+          <div className="flex items-center gap-1">
+            v3.4.9 
+            <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+            {allBackendTags.length > 0 && (
+              <span className="opacity-50">({allBackendTags.length} tags)</span>
+            )}
+            {!isLive && (
+              <button 
+                onClick={() => setRetryCount(v => v + 1)}
+                className="text-red-500 hover:underline cursor-pointer flex items-center gap-0.5 font-bold"
+              >
+                <span>!</span>
+                <span className="text-[8px]">RETRY</span>
+              </button>
+            )}
+          </div>
           {error && (
-            <span className="text-red-500/80 text-[9px] truncate max-w-[100px]" title={error}>
+            <div className="text-[8px] text-red-400/60 break-all leading-tight bg-red-500/5 p-1 rounded mt-1">
               Error: {error}
-            </span>
+            </div>
           )}
+          <div className="text-[7px] opacity-30 mt-0.5">
+            Target: {API_BASE_URL || 'relative'}/api/tags
+          </div>
         </span>
       </div>
 
