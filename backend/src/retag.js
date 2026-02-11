@@ -4,8 +4,11 @@ import { classifyPaper } from './classifier.js';
 
 async function retagAllPapers() {
   const forceAll = process.argv.includes('--all');
+  const startAt = parseInt(process.argv.find(arg => arg.startsWith('--start='))?.split('=')[1] || '0');
+  
   console.log('🚀 Starting AI Re-tagging Process...');
   if (forceAll) console.log('🔔 Force mode enabled: Processing ALL papers.');
+  if (startAt > 0) console.log(`⏩ Starting from index: ${startAt}`);
   
   // 1. Initialize DB
   await initDatabase();
@@ -22,18 +25,31 @@ async function retagAllPapers() {
 
   for (let i = 0; i < papers.length; i++) {
     const paper = papers[i];
+    const currentIndex = i + 1;
+
+    // Skip if before start index
+    if (currentIndex < startAt) {
+      skipCount++;
+      continue;
+    }
     
-    // Check if we should skip this paper
+    // Check if we should skip this paper based on content
     const hasDeprecatedTags = paper.tags && paper.tags.some(t => DEPRECATED_TAGS.includes(t));
     const hasNoTags = !paper.tags || paper.tags.length === 0;
     
     // If not in force mode, skip if paper is already "clean" (has tags and no deprecated ones)
     if (!forceAll && !hasNoTags && !hasDeprecatedTags) {
+      // Optional: uncomment to see skipped papers
+      // console.log(`[${currentIndex}/${papers.length}] Skipping (already clean): ${paper.title.substring(0, 30)}...`);
       skipCount++;
       continue;
     }
 
-    console.log(`[${i + 1}/${papers.length}] Processing: ${paper.title}`);
+    console.log(`[${currentIndex}/${papers.length}] Processing: ${paper.title}`);
+    if (hasDeprecatedTags) console.log(`   Reason: Contains deprecated tags (${paper.tags.filter(t => DEPRECATED_TAGS.includes(t)).join(', ')})`);
+    else if (hasNoTags) console.log(`   Reason: No existing tags`);
+    else if (forceAll) console.log(`   Reason: Force mode`);
+    else if (currentIndex >= startAt) console.log(`   Reason: Start index reached`);
     
     try {
       // 3. Get Rule-based tags first
