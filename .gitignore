@@ -9,7 +9,15 @@
 /backend/dist
 
 # Environment variables
+# SSH Keys
+id_rsa
+id_rsa.pub
+
+# Production env
 .env
+.env.local
+.env.production
+.env.production.local
 /backend/.env
 
 # Logs
