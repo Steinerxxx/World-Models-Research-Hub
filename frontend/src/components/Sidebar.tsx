@@ -43,14 +43,15 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
   const [allBackendTags, setAllBackendTags] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/tags`)
+    // Add a cache-busting timestamp to ensure we get fresh tags
+    fetch(`${API_BASE_URL}/api/tags?t=${Date.now()}`)
       .then(res => res.json())
       .then(tags => {
-        // Filter out the core tags we always show as filters
+        // Filter out deprecated tags and ensure uniqueness
         const filteredTags = tags.filter((t: string) => 
           !['World Models', 'Model-Based RL'].includes(t)
         );
-        setAllBackendTags(filteredTags);
+        setAllBackendTags(Array.from(new Set(filteredTags)));
       })
       .catch(err => {
         console.warn('Failed to fetch tags, using mock data tags:', err);
@@ -83,7 +84,7 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
             </Button>
           )}
         </div>
-        <span className="text-xs text-muted-foreground mt-1">v3.3.1</span>
+        <span className="text-xs text-muted-foreground mt-1">v3.4.0</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-6">
