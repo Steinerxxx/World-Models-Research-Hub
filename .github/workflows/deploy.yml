@@ -25,11 +25,13 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             
-            # 2. 安装后端依赖并重启
-            cd backend
+            # 2. 构建前端
+            cd /home/devbox/project/frontend
             npm install
+            npm run build
             
-            # 3. 运行服务器上的重启脚本
+            # 3. 安装后端依赖并重启
             cd /home/devbox/project/backend
+            npm install
             chmod +x restart.sh
             ./restart.sh
