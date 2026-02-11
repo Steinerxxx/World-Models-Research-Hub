@@ -95,7 +95,9 @@ export default function Trends() {
 
     return Object.entries(counts)
       .filter(([name, value]) => {
-        const isEmerging = !SUBJECT_TAGS.includes(name) && !ARCHITECTURE_TAGS.includes(name);
+        const lowerName = name.toLowerCase();
+        const isEmerging = !SUBJECT_TAGS.map(s => s.toLowerCase()).includes(lowerName) && 
+                          !ARCHITECTURE_TAGS.map(a => a.toLowerCase()).includes(lowerName);
         // Only show emerging tags if they have 5 or more papers
         if (isEmerging && value < 5) return false;
         return true;
