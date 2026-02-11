@@ -328,7 +328,6 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
           {minorTags.length > 0 && (
             <div 
               className="space-y-1"
-              onMouseLeave={() => setIsExpanded(false)}
             >
               {!prominentTags.length && (
                 <h3 className="text-xs font-semibold text-orange-500/80 uppercase tracking-wider mb-2 mt-4 px-2 flex items-center gap-2">
@@ -337,7 +336,6 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
               )}
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                onMouseEnter={() => setIsExpanded(true)}
                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 group border border-dashed border-border/50 hover:border-orange-500/30"
               >
                 <div className="flex items-center gap-2">
