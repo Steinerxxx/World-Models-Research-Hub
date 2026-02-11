@@ -126,11 +126,15 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
           )}
         </div>
         <span className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-            v3.4.4 
-            {allBackendTags.length > 0 && (
+            v3.4.5 
+             {allBackendTags.length > 0 && (
             <span className="opacity-50">({allBackendTags.length} tags detected)</span>
           )}
-          {error && <span className="text-red-500/50">!</span>}
+          {error && (
+            <span className="text-red-500/80 text-[9px] truncate max-w-[100px]" title={error}>
+              Error: {error}
+            </span>
+          )}
         </span>
       </div>
 
