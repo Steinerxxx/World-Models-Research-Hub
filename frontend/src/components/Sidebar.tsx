@@ -52,12 +52,14 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
         const tags = await response.json();
         
         console.log('Raw tags from API:', tags);
-        const formattedTags = Array.isArray(tags) ? tags.map(t => 
-          typeof t === 'string' ? { tag: t, count: 0 } : { tag: t.tag, count: Number(t.count) }
-        ) : [];
+        const formattedTags = Array.isArray(tags) ? tags
+          .filter(t => t && (typeof t === 'string' ? t.trim() : t.tag && t.tag.trim()))
+          .map(t => 
+            typeof t === 'string' ? { tag: t, count: 0 } : { tag: t.tag, count: Number(t.count) }
+          ) : [];
 
         const filteredTags = formattedTags.filter(t => 
-          !['World Models', 'Model-Based RL'].includes(t.tag)
+          !['World Models', 'Model-Based RL'].map(s => s.toLowerCase()).includes(t.tag.toLowerCase())
         );
         setAllBackendTags(filteredTags);
         setError(null);
@@ -115,8 +117,8 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
           )}
         </div>
         <span className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-          v3.4.2 
-          {allBackendTags.length > 0 && (
+           v3.4.3 
+           {allBackendTags.length > 0 && (
             <span className="opacity-50">({allBackendTags.length} tags detected)</span>
           )}
           {error && <span className="text-red-500/50">!</span>}
@@ -281,7 +283,10 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
 
           {/* Minor Tags (Folded) */}
           {minorTags.length > 0 && (
-            <div className="space-y-1">
+            <div 
+              className="space-y-1"
+              onMouseLeave={() => setIsExpanded(false)}
+            >
               {!prominentTags.length && (
                 <h3 className="text-xs font-semibold text-orange-500/80 uppercase tracking-wider mb-2 mt-4 px-2 flex items-center gap-2">
                   <TrendingUp className="h-3 w-3" /> Emerging Research
@@ -289,6 +294,7 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
               )}
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
+                onMouseEnter={() => setIsExpanded(true)}
                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 group border border-dashed border-border/50 hover:border-orange-500/30"
               >
                 <div className="flex items-center gap-2">
