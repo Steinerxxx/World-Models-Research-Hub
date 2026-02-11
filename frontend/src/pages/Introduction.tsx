@@ -32,24 +32,24 @@ const techNodes: TechNode[] = [
     id: 'backend',
     label: 'Backend',
     icon: <Server className="w-6 h-6" />,
-    description: 'Serverless logic hosted on Sealos Laf Cloud.',
-    details: ['Laf Cloud (Sealos)', 'Node.js Functions', 'Cheerio Scraper', 'JWT Auth'],
+    description: 'Full-stack monolithic container hosted on Sealos DevBox.',
+    details: ['Node.js (LTS)', 'Express 4.x', 'Cheerio Scraper', 'Volcengine (北京)'],
     color: 'bg-green-500'
   },
   {
     id: 'data',
     label: 'Data & AI',
     icon: <Database className="w-6 h-6" />,
-    description: 'Reliable storage and automated paper classification.',
-    details: ['Supabase (PostgreSQL)', 'Laf DB (MongoDB)', 'Automated Tagging', 'AI Summarization'],
+    description: 'Reliable storage and intelligent paper analysis.',
+    details: ['Supabase (PostgreSQL)', 'DeepSeek (V3/R1)', 'Automated Tagging', 'AI Summarization'],
     color: 'bg-purple-500'
   },
   {
     id: 'deployment',
     label: 'Deployment',
     icon: <Cloud className="w-6 h-6" />,
-    description: 'Optimized for extreme speed in Mainland China.',
-    details: ['Vercel (Frontend)', 'Sealos (Backend)', 'GitHub Actions'],
+    description: 'Optimized for extreme speed via Volcengine Beijing nodes.',
+    details: ['Sealos DevBox', 'Volcengine (火山引擎)', 'GitHub Actions CI/CD'],
     color: 'bg-orange-500'
   }
 ];
