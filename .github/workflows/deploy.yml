@@ -1,0 +1,37 @@
+name: Deploy to Sealos
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SEALOS_HOST }}
+          username: devbox
+          key: ${{ secrets.SEALOS_SSH_KEY }}
+          port: ${{ secrets.SEALOS_PORT }}
+          script: |
+            cd /home/devbox/project
+            # 1. 强制更新代码 (如果本地有改动会被覆盖，确保以 GitHub 为准)
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # 2. 安装后端依赖并重启
+            cd backend
+            npm install
+            
+            # 3. 如果有 pm2 就用 pm2 重启，如果没有就简单的 pkill 掉旧进程再启动
+            # 这里我们使用一种简单稳妥的方法：找到运行 src/index.js 的进程并重启
+            pkill -f "node src/index.js" || true
+            nohup npm start > output.log 2>&1 &
+            
+            echo "Deployment successful!"
