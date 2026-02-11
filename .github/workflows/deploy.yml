@@ -29,15 +29,7 @@ jobs:
             cd backend
             npm install
             
-            # 3. 优雅重启：先启动新进程，再杀掉旧进程（或者直接使用简单的重启）
-            # 使用 screen 或 nohup 的改进版，确保进程在 SSH 断开后继续运行
+            # 3. 运行服务器上的重启脚本
             cd /home/devbox/project/backend
-            
-            # 杀掉旧进程
-            pkill -f "node src/index.js" || true
-            
-            # 启动新进程，并使用 disown 确保它脱离终端控制
-            NODE_ENV=production nohup node src/index.js > output.log 2>&1 & 
-            
-            sleep 2
-            echo "Deployment successful!"
+            chmod +x restart.sh
+            ./restart.sh
