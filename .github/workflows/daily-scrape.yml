@@ -12,8 +12,4 @@ jobs:
     steps:
       - name: Trigger Scrape Endpoint
         run: |
-          if [ -n "${{ secrets.SCRAPE_URL }}" ]; then
-            curl -X POST ${{ secrets.SCRAPE_URL }}
-          else
-            curl -X POST https://world-models-research-hub-backhend.onrender.com/api/scrape
-          fi
+          curl -X POST https://world-models-research-hub-backhend.onrender.com/api/scrape
