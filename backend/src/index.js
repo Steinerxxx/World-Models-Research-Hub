@@ -44,7 +44,7 @@ app.use('/api/favorites', favoritesRoutes);
 
 // The "catchall" handler: for any request that doesn't
 // match one above, send back React's index.html file.
-app.get('*', (req, res, next) => {
+app.get('*any', (req, res, next) => {
   // If it's an API call that wasn't caught, return 404
   if (req.path.startsWith('/api/')) {
     return next();
