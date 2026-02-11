@@ -48,6 +48,7 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
     fetch(`${API_BASE_URL}/api/tags?t=${Date.now()}`)
       .then(res => res.json())
       .then(tags => {
+        console.log('Raw tags from API:', tags);
         // Handle both old array of strings and new array of objects for safety
         const formattedTags = Array.isArray(tags) ? tags.map(t => 
           typeof t === 'string' ? { tag: t, count: 0 } : { tag: t.tag, count: Number(t.count) }
@@ -57,6 +58,7 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
         const filteredTags = formattedTags.filter(t => 
           !['World Models', 'Model-Based RL'].includes(t.tag)
         );
+        console.log('Formatted & Filtered tags:', filteredTags);
         setAllBackendTags(filteredTags);
       })
       .catch(err => {
@@ -78,11 +80,22 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
   }, []);
 
   const extraTags = allBackendTags.filter(t => 
-    !SUBJECT_TAGS.includes(t.tag) && !ARCHITECTURE_TAGS.includes(t.tag)
+    !SUBJECT_TAGS.map(s => s.toLowerCase()).includes(t.tag.toLowerCase()) && 
+    !ARCHITECTURE_TAGS.map(a => a.toLowerCase()).includes(t.tag.toLowerCase())
   );
 
-  const prominentTags = extraTags.filter(t => t.count >= 5);
-  const minorTags = extraTags.filter(t => t.count < 5);
+  const prominentTags = extraTags.filter(t => Number(t.count) >= 5);
+  const minorTags = extraTags.filter(t => Number(t.count) < 5);
+
+  console.log('Sidebar render stats:', {
+    allCount: allBackendTags.length,
+    extraCount: extraTags.length,
+    prominentCount: prominentTags.length,
+    minorCount: minorTags.length,
+    prominentSample: prominentTags.slice(0, 3),
+    subjects: SUBJECT_TAGS,
+    architectures: ARCHITECTURE_TAGS
+  });
 
   return (
     <div className="flex flex-col h-full w-full">
