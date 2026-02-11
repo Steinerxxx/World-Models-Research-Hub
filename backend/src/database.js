@@ -228,21 +228,26 @@ export async function getAllPapers() {
 export async function getAllTags() {
   if (isDbConnected) {
     const { rows } = await query(`
-      SELECT DISTINCT unnest(tags) as tag 
-      FROM papers 
-      WHERE tags IS NOT NULL 
-      ORDER BY tag ASC
+      SELECT tag, count(*) as count
+      FROM (SELECT unnest(tags) as tag FROM papers) t
+      WHERE tag IS NOT NULL
+      GROUP BY tag
+      ORDER BY count DESC, tag ASC
     `);
-    return rows.map(row => row.tag);
+    return rows; // Returns [{ tag: '...', count: '...' }, ...]
   } else {
     // Local JSON Fallback
     if (!fs.existsSync(LOCAL_DB_PATH)) return [];
     const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
-    const tags = new Set();
+    const tagCounts = {};
     papers.forEach(p => {
-      if (p.tags) p.tags.forEach(t => tags.add(t));
+      (p.tags || []).forEach(t => {
+        tagCounts[t] = (tagCounts[t] || 0) + 1;
+      });
     });
-    return Array.from(tags).sort();
+    return Object.entries(tagCounts)
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
   }
 }
 

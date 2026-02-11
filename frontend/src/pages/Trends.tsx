@@ -94,6 +94,12 @@ export default function Trends() {
     });
 
     return Object.entries(counts)
+      .filter(([name, value]) => {
+        const isEmerging = !SUBJECT_TAGS.includes(name) && !ARCHITECTURE_TAGS.includes(name);
+        // Only show emerging tags if they have 5 or more papers
+        if (isEmerging && value < 5) return false;
+        return true;
+      })
       .sort((a, b) => b[1] - a[1])
       .slice(0, 50) // Show up to 50 tags to ensure emerging topics are visible
       .map(([name, value]) => {

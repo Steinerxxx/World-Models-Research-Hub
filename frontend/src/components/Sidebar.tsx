@@ -40,35 +40,49 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
   const { showFavoritesOnly, setShowFavoritesOnly, favorites } = useFavorites();
   const { user } = useAuth();
   
-  const [allBackendTags, setAllBackendTags] = useState<string[]>([]);
+  const [allBackendTags, setAllBackendTags] = useState<{tag: string, count: number}[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     // Add a cache-busting timestamp to ensure we get fresh tags
     fetch(`${API_BASE_URL}/api/tags?t=${Date.now()}`)
       .then(res => res.json())
       .then(tags => {
-        // Filter out deprecated tags and ensure uniqueness
-        const filteredTags = tags.filter((t: string) => 
-          !['World Models', 'Model-Based RL'].includes(t)
+        // Handle both old array of strings and new array of objects for safety
+        const formattedTags = Array.isArray(tags) ? tags.map(t => 
+          typeof t === 'string' ? { tag: t, count: 0 } : { tag: t.tag, count: Number(t.count) }
+        ) : [];
+
+        // Filter out deprecated tags
+        const filteredTags = formattedTags.filter(t => 
+          !['World Models', 'Model-Based RL'].includes(t.tag)
         );
-        setAllBackendTags(Array.from(new Set(filteredTags)));
+        setAllBackendTags(filteredTags);
       })
       .catch(err => {
         console.warn('Failed to fetch tags, using mock data tags:', err);
         // Fallback: extract tags from MOCK_PAPERS
         import('@/data/mockData').then(({ MOCK_PAPERS }) => {
-          const mockTags = Array.from(new Set(MOCK_PAPERS.flatMap(p => p.tags || [])));
-          const filteredMockTags = mockTags.filter(t => 
-            !['World Models', 'Model-Based RL'].includes(t)
-          );
+          const tagCounts: Record<string, number> = {};
+          MOCK_PAPERS.forEach(p => {
+            (p.tags || []).forEach(t => {
+              tagCounts[t] = (tagCounts[t] || 0) + 1;
+            });
+          });
+          const filteredMockTags = Object.entries(tagCounts)
+            .filter(([tag]) => !['World Models', 'Model-Based RL'].includes(tag))
+            .map(([tag, count]) => ({ tag, count }));
           setAllBackendTags(filteredMockTags);
         });
       });
   }, []);
 
-  const extraTags = allBackendTags.filter(tag => 
-    !SUBJECT_TAGS.includes(tag) && !ARCHITECTURE_TAGS.includes(tag)
+  const extraTags = allBackendTags.filter(t => 
+    !SUBJECT_TAGS.includes(t.tag) && !ARCHITECTURE_TAGS.includes(t.tag)
   );
+
+  const prominentTags = extraTags.filter(t => t.count >= 5);
+  const minorTags = extraTags.filter(t => t.count < 5);
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -213,13 +227,13 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
             ))}
           </div>
 
-          {/* Emerging Topics - Automatically "Promoted" to full status */}
-          {extraTags.length > 0 && (
+          {/* Promoted Tags (Emerging Research) */}
+          {prominentTags.length > 0 && (
             <div className="space-y-1">
               <h3 className="text-xs font-semibold text-orange-500/80 uppercase tracking-wider mb-2 mt-4 px-2 flex items-center gap-2">
                 <TrendingUp className="h-3 w-3" /> Emerging Research
               </h3>
-              {extraTags.map(tag => (
+              {prominentTags.map(({ tag }) => (
                 <button
                   key={tag}
                   type="button"
@@ -240,6 +254,67 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
                   <span className="font-medium">{tag}</span>
                 </button>
               ))}
+            </div>
+          )}
+
+          {/* Minor Tags (Folded) */}
+          {minorTags.length > 0 && (
+            <div className="space-y-1">
+              {!prominentTags.length && (
+                <h3 className="text-xs font-semibold text-orange-500/80 uppercase tracking-wider mb-2 mt-4 px-2 flex items-center gap-2">
+                  <TrendingUp className="h-3 w-3" /> Emerging Research
+                </h3>
+              )}
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 group border border-dashed border-border/50 hover:border-orange-500/30"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1 rounded bg-orange-500/5 group-hover:bg-orange-500/10">
+                    <List className="h-3 w-3 text-orange-500/70" />
+                  </div>
+                  <span>Discover More Topics</span>
+                  <span className="ml-1 text-[10px] px-1 rounded bg-muted text-muted-foreground group-hover:bg-orange-500/20 group-hover:text-orange-500">
+                    {minorTags.length}
+                  </span>
+                </div>
+                <ArrowUpDown className={`h-3 w-3 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-orange-500' : 'text-muted-foreground/50'}`} />
+              </button>
+              
+              <AnimatePresence initial={false}>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-1 pb-2 space-y-0.5 pl-2 border-l-2 border-orange-500/10 ml-4 mt-1">
+                      {minorTags.map(({ tag, count }) => (
+                        <button
+                          key={tag}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            toggleTag(tag);
+                            navigate('/');
+                            if (isMobile) onClose();
+                            window.scrollTo(0, 0);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md text-xs transition-all ${
+                            selectedTags.includes(tag)
+                              ? 'bg-orange-500/10 text-orange-500 font-medium'
+                              : 'text-muted-foreground/70 hover:bg-muted hover:text-foreground'
+                          }`}
+                        >
+                          <span className="truncate">{tag}</span>
+                          <span className="text-[10px] opacity-50 font-mono">{count}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
 
