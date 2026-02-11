@@ -1,40 +1,63 @@
 import { getAllPapers, updatePaperTags, initDatabase } from './database.js';
 import { classifyWithAI } from './ai_service.js';
+import { classifyPaper } from './classifier.js';
 
 async function retagAllPapers() {
+  const forceAll = process.argv.includes('--all');
   console.log('🚀 Starting AI Re-tagging Process...');
+  if (forceAll) console.log('🔔 Force mode enabled: Processing ALL papers.');
   
   // 1. Initialize DB
   await initDatabase();
   
   // 2. Get all papers
   const papers = await getAllPapers();
-  console.log(`Found ${papers.length} papers to process.`);
+  console.log(`Found ${papers.length} papers in database.`);
 
   let successCount = 0;
+  let skipCount = 0;
   let failCount = 0;
+
+  const DEPRECATED_TAGS = ['World Models', 'Model-Based RL'];
 
   for (let i = 0; i < papers.length; i++) {
     const paper = papers[i];
+    
+    // Check if we should skip this paper
+    const hasDeprecatedTags = paper.tags && paper.tags.some(t => DEPRECATED_TAGS.includes(t));
+    const hasNoTags = !paper.tags || paper.tags.length === 0;
+    
+    // If not in force mode, skip if paper is already "clean" (has tags and no deprecated ones)
+    if (!forceAll && !hasNoTags && !hasDeprecatedTags) {
+      skipCount++;
+      continue;
+    }
+
     console.log(`[${i + 1}/${papers.length}] Processing: ${paper.title}`);
     
     try {
-      // 3. Call AI to get new tags
-      console.log(`   Calling AI for "${paper.title.substring(0, 30)}..."`);
-      const newTags = await classifyWithAI(paper.title, paper.abstract);
+      // 3. Get Rule-based tags first
+      const ruleTags = await classifyPaper(paper.title, paper.abstract);
       
-      if (newTags && newTags.length > 0) {
-        // 4. Update DB
-        await updatePaperTags(paper.id, newTags);
-        console.log(`   ✅ Success! New tags: ${newTags.join(', ')}`);
+      // 4. Call AI to get new high-quality tags
+      console.log(`   Calling AI for "${paper.title.substring(0, 30)}..."`);
+      const aiTags = await classifyWithAI(paper.title, paper.abstract);
+      
+      // 5. Combine and deduplicate
+      const finalTags = Array.from(new Set([...ruleTags, ...aiTags]));
+      
+      if (finalTags.length > 0) {
+        // 6. Update DB
+        await updatePaperTags(paper.id, finalTags);
+        console.log(`   ✅ Success! New tags: ${finalTags.join(', ')}`);
         successCount++;
       } else {
-        console.log(`   ⚠️ AI returned no tags for this paper. Keeping original tags.`);
+        console.log(`   ⚠️ AI & Rules returned no tags. Keeping original or setting empty.`);
         failCount++;
       }
     } catch (error) {
       if (error.message.includes('402')) {
-        console.error(`   ❌ AI Service: Insufficient Balance (402). Stopping process to save state.`);
+        console.error(`   ❌ AI Service: Insufficient Balance (402). Stopping process.`);
         break;
       }
       console.error(`   ❌ Failed to process paper ${paper.id}:`, error.message);
@@ -42,11 +65,12 @@ async function retagAllPapers() {
     }
 
     // Small delay to avoid rate limiting
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 300));
   }
 
   console.log('\n--- Process Completed ---');
   console.log(`Total: ${papers.length}`);
+  console.log(`Skipped (already clean): ${skipCount}`);
   console.log(`Success: ${successCount}`);
   console.log(`Failed: ${failCount}`);
   process.exit(0);
