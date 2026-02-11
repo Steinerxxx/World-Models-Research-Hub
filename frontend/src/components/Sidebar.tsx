@@ -139,7 +139,7 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
         </div>
         <span className="text-[10px] text-muted-foreground mt-1 flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
-            FE: v3.5.1
+            FE: v3.5.2
             <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
             {backendVersion && (
               <span className="text-[9px] opacity-70">BE: {backendVersion}</span>

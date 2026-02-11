@@ -37,7 +37,7 @@ app.use(express.json());
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok', 
-    version: '3.5.1',
+    version: '3.5.2',
     timestamp: new Date().toISOString(),
     db: getDbStatus() ? 'connected' : 'disconnected' 
   });
@@ -45,7 +45,7 @@ app.get('/health', (req, res) => {
 
 // Debug version endpoint
 app.get('/api/debug-version', (req, res) => {
-  res.json({ version: '3.5.1', build_time: '2026-02-12' });
+  res.json({ version: '3.5.2', build_time: '2026-02-12' });
 });
 
 app.use('/api/auth', authRoutes);
@@ -183,7 +183,7 @@ app.use((err, req, res, next) => {
 
 // Start the server immediately, don't wait for DB
 const server = app.listen(Number(port), '0.0.0.0', () => {
-  console.log(`🚀 v3.5.1 Backend is now STABLE and LISTENING on port ${port}`);
+  console.log(`🚀 v3.5.2 Backend is now STABLE and LISTENING on port ${port}`);
   console.log(`🌍 Public URL: https://wpddosuxhzcu.sealosbia.site`);
 });
 
