@@ -95,6 +95,13 @@ const TAXONOMY = [
       'state space model', 'ssm', 'mamba', 's4', 'structured state space', 'linear recurrent unit'
     ],
     weakKeywords: []
+  },
+  {
+    tag: 'RNN',
+    strongKeywords: [
+      'recurrent neural network', 'rnn', 'lstm', 'gru', 'backpropagation through time'
+    ],
+    weakKeywords: []
   }
 ];
 
@@ -129,13 +136,6 @@ export async function classifyPaper(title, abstract) {
   });
 
   // 2. Implied Tags (Hierarchy logic)
-  if (tags.has('World Models')) {
-    tags.add('Model-Based RL'); // World Models are a subset of MBRL (mostly)
-    tags.add('Generative Models'); // Usually involve generative components
-  }
-  if (tags.has('Model-Based RL')) {
-    tags.add('Reinforcement Learning');
-  }
   if (tags.has('Diffusion Models')) {
     tags.add('Generative Models');
   }

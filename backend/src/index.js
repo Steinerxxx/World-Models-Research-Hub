@@ -49,6 +49,15 @@ app.get('*any', (req, res, next) => {
   if (req.path.startsWith('/api/')) {
     return next();
   }
+  
+  // Set headers to prevent caching of index.html
+  res.set({
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    'Surrogate-Control': 'no-store'
+  });
+  
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
@@ -56,7 +65,7 @@ app.get('*any', (req, res, next) => {
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok', 
-    version: '1.0.4',
+    version: '1.0.5',
     timestamp: new Date().toISOString(),
     db_status: getDbStatus() ? 'connected' : 'disconnected'
   });
@@ -66,7 +75,7 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.status(200).json({ 
     message: 'World Models Research Hub Backend is running',
-    version: '1.0.3',
+    version: '1.0.5',
     endpoints: ['/api/papers', '/health']
   });
 });
