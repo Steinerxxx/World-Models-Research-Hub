@@ -406,11 +406,11 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                   selectedTags.includes(tag)
-                    ? "bg-blue-500/10 text-blue-500 font-medium"
+                    ? "bg-purple-500/10 text-purple-500 font-medium"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                <Cpu className={`h-4 w-4 ${selectedTags.includes(tag) ? "fill-current" : ""}`} />
+                <Cpu className={`h-4 w-4 ${selectedTags.includes(tag) ? "fill-current text-purple-500" : ""}`} />
                 <span className="font-medium">{tag}</span>
               </button>
             ))}
