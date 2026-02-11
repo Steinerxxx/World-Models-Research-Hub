@@ -11,7 +11,8 @@
     "start": "node src/index.js",
     "build": "echo 'No build required for Pure JS Backend'",
     "dev": "nodemon src/index.js",
-    "scrape": "node src/scraper.js"
+    "scrape": "node src/scraper.js",
+    "retag": "node src/retag.js"
   },
   "keywords": [],
   "author": "",
