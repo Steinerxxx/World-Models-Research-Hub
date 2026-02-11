@@ -183,8 +183,8 @@ app.use((err, req, res, next) => {
 
 // Start the server immediately, don't wait for DB
 const server = app.listen(Number(port), '0.0.0.0', () => {
-  console.log(`Backend server is running at port ${port}`);
-  console.log(`Current Working Directory: ${process.cwd()}`);
+  console.log(`🚀 v3.5.1 Backend is now STABLE and LISTENING on port ${port}`);
+  console.log(`🌍 Public URL: https://wpddosuxhzcu.sealosbia.site`);
 });
 
 // Initialize Database asynchronously
