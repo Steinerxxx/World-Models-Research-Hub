@@ -32,24 +32,24 @@ const techNodes: TechNode[] = [
     id: 'backend',
     label: 'Backend',
     icon: <Server className="w-6 h-6" />,
-    description: 'Robust server-side logic handling data processing and APIs.',
-    details: ['Node.js', 'Express', 'Cheerio Scraper', 'REST API'],
+    description: 'Serverless logic hosted on Sealos Laf Cloud.',
+    details: ['Laf Cloud (Sealos)', 'Node.js Functions', 'Cheerio Scraper', 'JWT Auth'],
     color: 'bg-green-500'
   },
   {
     id: 'data',
     label: 'Data & AI',
     icon: <Database className="w-6 h-6" />,
-    description: 'Intelligent data management and automated classification.',
-    details: ['PostgreSQL (Supabase)', 'Automated Tagging', 'Keyword Analysis'],
+    description: 'Reliable storage and automated paper classification.',
+    details: ['Supabase (PostgreSQL)', 'Laf DB (MongoDB)', 'Automated Tagging', 'AI Summarization'],
     color: 'bg-purple-500'
   },
   {
     id: 'deployment',
     label: 'Deployment',
     icon: <Cloud className="w-6 h-6" />,
-    description: 'Scalable cloud infrastructure ensuring high availability.',
-    details: ['Vercel (Frontend)', 'Render (Backend)', 'CI/CD Pipelines'],
+    description: 'Optimized for extreme speed in Mainland China.',
+    details: ['Vercel (Frontend)', 'Sealos (Backend)', 'GitHub Actions'],
     color: 'bg-orange-500'
   }
 ];

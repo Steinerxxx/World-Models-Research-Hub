@@ -19,28 +19,37 @@ import authRoutes from './auth.js';
 import favoritesRoutes from './favorites.js';
 import cron from 'node-cron';
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
 
-// Request Logger
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
-  if (req.body && Object.keys(req.body).length > 0) {
-    try {
-      console.log('Body:', JSON.stringify(req.body).substring(0, 200));
-    } catch (e) {
-      console.log('Body: [Circular or Invalid JSON]');
-    }
-  }
-  next();
-});
+// Serve static files from the frontend build directory
+const frontendPath = path.join(__dirname, '../../frontend/dist');
+app.use(express.static(frontendPath));
 
-// Auth & Favorites Routes
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoritesRoutes);
+
+// ... existing health and test routes ...
+
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res, next) => {
+  // If it's an API call that wasn't caught, return 404
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
