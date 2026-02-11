@@ -98,6 +98,8 @@ Choose from the following list of tags (you can select multiple, but only if the
 - Transformers
 - Diffusion Models
 - Sim-to-Real
+- RNN
+- State Space Models
 
 Instructions:
 1. DO NOT include "World Models" or "Model-Based RL" as tags, as they are implied by the context of this platform.

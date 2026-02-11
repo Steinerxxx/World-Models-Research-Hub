@@ -8,18 +8,9 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-const OFFICIAL_TAGS = [
-  'Reinforcement Learning', 
-  'Generative Models', 
-  'Video Prediction', 
-  'Robotics', 
-  'Sim-to-Real',
-  'Planning', 
-  'Representation Learning',
-  'Transformers', 
-  'Diffusion Models', 
-  'RNN', 
-  'State Space Models'
+const DEPRECATED_TAGS = [
+  'World Models', 
+  'Model-Based RL'
 ];
 
 async function cleanup() {
@@ -37,28 +28,26 @@ async function cleanup() {
     console.log(`Checking ${papers.length} papers...`);
 
     let updatedCount = 0;
-    let badTagsFound = new Set();
+    let removedTagsCount = 0;
 
     for (const paper of papers) {
       const originalTags = paper.tags || [];
       
+      // 现在的逻辑：只过滤掉黑名单里的标签，保留其他所有（包括 AI 生成的新标签）
       const filteredTags = originalTags.filter(tag => 
-        OFFICIAL_TAGS.includes(tag)
+        !DEPRECATED_TAGS.includes(tag)
       );
-
-      originalTags.forEach(t => {
-        if (!OFFICIAL_TAGS.includes(t)) badTagsFound.add(t);
-      });
 
       if (originalTags.length !== filteredTags.length) {
         await client.query('UPDATE papers SET tags = $1 WHERE id = $2', [filteredTags, paper.id]);
         updatedCount++;
+        removedTagsCount += (originalTags.length - filteredTags.length);
       }
     }
 
-    console.log('Bad tags found across all papers:', Array.from(badTagsFound));
     console.log(`\n✅ Cleanup complete. Updated ${updatedCount} papers.`);
-    console.log(`All non-official tags have been removed.`);
+    console.log(`Removed ${removedTagsCount} deprecated tags (World Models / Model-Based RL).`);
+    console.log(`All other AI-generated tags have been PRESERVED.`);
     
   } catch (err) {
     console.error('Cleanup failed:', err);

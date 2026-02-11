@@ -201,24 +201,51 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
                   if (isMobile) onClose();
                   window.scrollTo(0, 0);
                 }}
-                className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors flex items-center gap-2 ${
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                   selectedTags.includes(tag)
                     ? "bg-cyan-500/10 text-cyan-500 font-medium"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                <Tag className="h-3 w-3 opacity-70" />
-                {tag}
+                <Tag className={`h-4 w-4 ${selectedTags.includes(tag) ? "fill-current" : ""}`} />
+                <span className="font-medium">{tag}</span>
               </button>
             ))}
           </div>
 
-          <div className="h-[1px] bg-border/50" />
+          {/* Emerging Topics - Automatically "Promoted" to full status */}
+          {extraTags.length > 0 && (
+            <div className="space-y-1">
+              <h3 className="text-xs font-semibold text-orange-500/80 uppercase tracking-wider mb-2 mt-4 px-2 flex items-center gap-2">
+                <TrendingUp className="h-3 w-3" /> Emerging Research
+              </h3>
+              {extraTags.map(tag => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toggleTag(tag);
+                    navigate('/');
+                    if (isMobile) onClose();
+                    window.scrollTo(0, 0);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedTags.includes(tag)
+                      ? "bg-orange-500/10 text-orange-500 font-medium border border-orange-500/20"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground border border-transparent"
+                  }`}
+                >
+                  <Tag className={`h-4 w-4 ${selectedTags.includes(tag) ? "fill-current text-orange-500" : ""}`} />
+                  <span className="font-medium">{tag}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
-          {/* Architecture Tags */}
           <div className="space-y-1">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-2 flex items-center gap-2">
-              <Cpu className="h-3 w-3" /> Architectures
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 mt-4 px-2 flex items-center gap-2">
+              <Cpu className="h-3 w-3" /> Architecture
             </h3>
             {ARCHITECTURE_TAGS.map(tag => (
               <button
@@ -231,49 +258,17 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
                   if (isMobile) onClose();
                   window.scrollTo(0, 0);
                 }}
-                className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors flex items-center gap-2 ${
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                   selectedTags.includes(tag)
-                    ? "bg-purple-500/10 text-purple-500 font-medium"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    ? "bg-blue-500/10 text-blue-500 font-medium"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                <Tag className="h-3 w-3 opacity-70" />
-                {tag}
+                <Cpu className={`h-4 w-4 ${selectedTags.includes(tag) ? "fill-current" : ""}`} />
+                <span className="font-medium">{tag}</span>
               </button>
             ))}
           </div>
-
-          {extraTags.length > 0 && (
-            <>
-              <div className="h-[1px] bg-border/50" />
-              <div className="space-y-1">
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-2 flex items-center gap-2">
-                  <TrendingUp className="h-3 w-3" /> Emerging Topics
-                </h3>
-                {extraTags.map(tag => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      toggleTag(tag);
-                      navigate('/');
-                      if (isMobile) onClose();
-                      window.scrollTo(0, 0);
-                    }}
-                    className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors flex items-center gap-2 ${
-                      selectedTags.includes(tag)
-                        ? "bg-orange-500/10 text-orange-500 font-medium"
-                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                    }`}
-                  >
-                    <Tag className="h-3 w-3 opacity-70" />
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
         </div>
       </div>
 

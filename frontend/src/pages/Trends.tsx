@@ -12,7 +12,8 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, TrendingUp } from "lucide-react";
+import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
 
 interface Paper {
   id: number;
@@ -50,7 +51,7 @@ export default function Trends() {
   const [usingMockData, setUsingMockData] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/papers`)
+    fetch(`${API_BASE_URL}/api/papers?t=${Date.now()}`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch data');
         return res.json();
@@ -94,14 +95,16 @@ export default function Trends() {
 
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 15) // Show top 15 tags to ensure RNN and others are visible
+      .slice(0, 50) // Show up to 50 tags to ensure emerging topics are visible
       .map(([name, value]) => {
         const percentage = ((value / papers.length) * 100).toFixed(1);
+        const isEmerging = !SUBJECT_TAGS.includes(name) && !ARCHITECTURE_TAGS.includes(name);
         return { 
           name, 
           value,
           percentage: `${percentage}%`,
-          description: TOPIC_DESCRIPTIONS[name] || "A key research area in modern artificial intelligence."
+          description: TOPIC_DESCRIPTIONS[name] || "A key research area in modern artificial intelligence.",
+          isEmerging
         };
       });
   }, [papers]);
@@ -202,7 +205,15 @@ export default function Trends() {
                 <div key={item.name} className="flex flex-col sm:flex-row sm:items-center gap-4">
                   {/* Label Side: Name & Description */}
                   <div className="sm:w-5/12 space-y-1">
-                    <div className="font-semibold text-sm text-foreground">{item.name}</div>
+                    <div className="flex items-center gap-2">
+                      <div className="font-semibold text-sm text-foreground">{item.name}</div>
+                      {item.isEmerging && (
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-500/10 text-orange-500 border border-orange-500/20 uppercase tracking-tight">
+                          <TrendingUp className="h-2.5 w-2.5" />
+                          Emerging
+                        </span>
+                      )}
+                    </div>
                     <div className="text-xs text-muted-foreground leading-snug">
                       {item.description}
                     </div>
