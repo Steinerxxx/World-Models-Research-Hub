@@ -299,7 +299,7 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
           {/* Emerging Research (Prominent & Minor Tags) */}
           {(prominentTags.length > 0 || minorTags.length > 0) && (
             <div className="space-y-1">
-              <h3 className="text-xs font-semibold text-orange-500/80 uppercase tracking-wider mb-2 mt-4 px-2 flex items-center gap-2">
+              <h3 className="text-xs font-semibold text-orange-500/80 uppercase tracking-wider mb-2 mt-1 px-2 flex items-center gap-2">
                 <TrendingUp className="h-3 w-3" /> Emerging Research
               </h3>
               
@@ -388,7 +388,7 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
           )}
 
           <div className="space-y-1">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 mt-4 px-2 flex items-center gap-2">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 mt-10 px-2 flex items-center gap-2">
               <Cpu className="h-3 w-3" /> Architecture
             </h3>
             {ARCHITECTURE_TAGS.map(tag => (
