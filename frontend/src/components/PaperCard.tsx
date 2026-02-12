@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Calendar, Users, Copy, Tag, Sparkles, Loader2, Star } from "lucide-react";
+import { ExternalLink, Calendar, Users, Copy, Tag, Sparkles, Loader2, Star, Check } from "lucide-react";
 import { HighlightText } from './HighlightText';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
@@ -27,7 +27,7 @@ interface PaperCardProps {
   selectedTags: string[];
   toggleTag: (tag: string) => void;
   setSearchTerm: (term: string) => void;
-  copyBibTeX: (paper: Paper) => void;
+  copyBibTeX: (paper: Paper) => Promise<boolean>;
   onPaperUpdate?: (updatedPaper: Paper) => void;
 }
 
@@ -45,6 +45,7 @@ export function PaperCard({
   const [hasHiddenAuthorHighlight, setHasHiddenAuthorHighlight] = useState(false);
   const [hasHiddenAbstractHighlight, setHasHiddenAbstractHighlight] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   const authorsRef = useRef<HTMLDivElement>(null);
   const abstractRef = useRef<HTMLParagraphElement>(null);
   
@@ -150,6 +151,14 @@ export function PaperCard({
       clearTimeout(timer);
     };
   }, [paper.authors, cleanedAbstract, allHighlights]);
+
+  const handleCopy = async () => {
+    const success = await copyBibTeX(paper);
+    if (success) {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
 
   return (
     <Card className="group relative hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full hover:z-20">
@@ -345,11 +354,15 @@ export function PaperCard({
         <Button
           variant="outline"
           size="icon"
-          onClick={() => copyBibTeX(paper)}
-          title="Copy BibTeX"
-          className="border-primary/20 hover:bg-primary/10 hover:text-primary"
+          onClick={handleCopy}
+          title={isCopied ? "Copied!" : "Copy BibTeX"}
+          className={`transition-all duration-200 ${
+            isCopied 
+              ? "border-green-500/50 bg-green-500/10 text-green-500" 
+              : "border-primary/20 hover:bg-primary/10 hover:text-primary"
+          }`}
         >
-          <Copy className="h-4 w-4" />
+          {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </Button>
       </CardFooter>
     </Card>

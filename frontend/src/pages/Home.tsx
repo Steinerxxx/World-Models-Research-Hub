@@ -128,21 +128,56 @@ export default function Home() {
       });
   };
 
-  const copyBibTeX = (paper: Paper) => {
-    const year = new Date(paper.publication_date).getFullYear();
-    const firstAuthor = paper.authors[0].split(' ').pop() || 'Author';
-    const title = paper.title.replace(/\s+/g, '_').substring(0, 20).replace(/[^a-zA-Z0-9_]/g, '');
-    const id = `${firstAuthor}${year}${title}`;
-    
-    const bibtex = `@article{${id},
+  const copyBibTeX = async (paper: Paper) => {
+    try {
+      const year = new Date(paper.publication_date).getFullYear();
+      const authors = paper.authors || [];
+      const firstAuthor = authors.length > 0 
+        ? authors[0].split(' ').pop() || 'Author' 
+        : 'Author';
+      
+      const titleSlug = paper.title
+        .replace(/\s+/g, '_')
+        .substring(0, 20)
+        .replace(/[^a-zA-Z0-9_]/g, '');
+        
+      const id = `${firstAuthor}${year}${titleSlug}`;
+      
+      // Extract arXiv ID more reliably (handle .pdf suffix and different URL formats)
+      let arxivId = paper.url.split('/').pop()?.replace('.pdf', '') || '';
+      if (!arxivId && paper.url.includes('arxiv.org/abs/')) {
+        arxivId = paper.url.split('arxiv.org/abs/').pop() || '';
+      }
+      
+      const bibtex = `@article{${id},
   title={${paper.title}},
-  author={${paper.authors.join(' and ')}},
-  journal={arXiv preprint arXiv:${paper.url.split('/').pop()}},
+  author={${authors.join(' and ')}},
+  journal={arXiv preprint arXiv:${arxivId}},
   year={${year}},
   url={${paper.url}}
 }`;
-    navigator.clipboard.writeText(bibtex);
-    alert("BibTeX copied to clipboard!");
+
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(bibtex);
+        return true;
+      } else {
+        // Fallback for non-secure contexts
+        const textArea = document.createElement("textarea");
+        textArea.value = bibtex;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return successful;
+      }
+    } catch (err) {
+      console.error('Copy failed:', err);
+      return false;
+    }
   };
 
   const handlePaperUpdate = (updatedPaper: Paper) => {
