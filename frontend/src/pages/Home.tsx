@@ -255,10 +255,8 @@ export default function Home() {
 
   // Reset page when filters change
   useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    }
-  }, [searchTerm, selectedTags, itemsPerPage, sortBy, showFavoritesOnly, currentPage]);
+    setCurrentPage(1);
+  }, [searchTerm, selectedTags, itemsPerPage, sortBy, showFavoritesOnly]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredPapers.length / itemsPerPage);
