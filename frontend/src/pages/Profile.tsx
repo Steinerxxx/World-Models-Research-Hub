@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '@/config';
 import { LogOut, Save, User, Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Profile() {
   const { user, login, logout } = useAuth();
@@ -18,6 +19,7 @@ export default function Profile() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   if (!user) {
     navigate('/login');
@@ -70,10 +72,65 @@ export default function Profile() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
     logout();
     navigate('/');
+    setShowLogoutConfirm(false);
   };
+
+  const LogoutModal = () => (
+    <AnimatePresence>
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowLogoutConfirm(false)}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            className="bg-card border border-border rounded-xl shadow-2xl p-6 w-full max-w-sm relative z-10"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-full bg-destructive/10 text-destructive">
+                <LogOut className="h-5 w-5" />
+              </div>
+              <h3 className="text-xl font-bold">Confirm Logout</h3>
+            </div>
+            
+            <p className="text-muted-foreground mb-6">
+              Are you sure you want to log out of your account?
+            </p>
+            
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="rounded-lg"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmLogout}
+                className="rounded-lg px-6"
+              >
+                Logout
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-background p-4 pt-12 md:pt-24">
@@ -86,7 +143,7 @@ export default function Profile() {
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={handleLogout}
+            onClick={handleLogoutClick}
             className="text-destructive hover:bg-destructive/10 hover:text-destructive gap-2"
           >
             <LogOut className="h-4 w-4" />
@@ -198,6 +255,7 @@ export default function Profile() {
           </div>
         </div>
       </div>
+      <LogoutModal />
     </div>
   );
 }

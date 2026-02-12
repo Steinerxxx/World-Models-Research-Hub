@@ -497,7 +497,6 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
 
 export function Sidebar() {
   const { logout } = useAuth();
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -528,52 +527,6 @@ export function Sidebar() {
   }, []);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
-
-  const confirmLogout = () => {
-    logout();
-    setShowLogoutConfirm(false);
-  };
-
-  const LogoutModal = () => (
-    <AnimatePresence>
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowLogoutConfirm(false)}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="bg-background border border-border rounded-lg shadow-xl p-6 w-full max-w-sm relative z-10"
-          >
-            <h3 className="text-lg font-semibold mb-2">Confirm Logout</h3>
-            <p className="text-muted-foreground mb-6">
-              Are you sure you want to log out?
-            </p>
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowLogoutConfirm(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={confirmLogout}
-              >
-                Logout
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  );
 
   // Mobile Layout
   if (isMobile) {
@@ -614,7 +567,6 @@ export function Sidebar() {
             </>
           )}
         </AnimatePresence>
-        <LogoutModal />
       </>
     );
   }
@@ -645,7 +597,6 @@ export function Sidebar() {
           <SidebarContent isMobile={false} onClose={() => setIsOpen(false)} />
         </div>
       </motion.aside>
-      <LogoutModal />
     </>
   );
 }
