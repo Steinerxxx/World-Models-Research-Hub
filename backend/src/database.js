@@ -3,13 +3,14 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-dotenv.config();
+dotenv.config({ path: path.join(process.cwd(), 'backend', '.env') });
+dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost') 
+    ? false 
+    : { rejectUnauthorized: false }
 });
 
 let isDbConnected = false;

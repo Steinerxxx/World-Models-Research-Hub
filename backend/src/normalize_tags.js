@@ -71,6 +71,12 @@ async function normalizeTags() {
       let cleaned = tag.trim();
       if (TAG_MAPPING[cleaned]) return TAG_MAPPING[cleaned];
 
+      // Don't normalize common acronyms to Title Case
+      const acronyms = ['RL', 'ML', 'AI', 'SSM', 'NLP', 'CV', 'MARL', 'VLA', 'JEPA'];
+      if (acronyms.includes(cleaned.toUpperCase())) {
+          return cleaned.toUpperCase();
+      }
+
       cleaned = cleaned.split(/[\s-]+/)
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');

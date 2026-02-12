@@ -165,20 +165,31 @@ export async function classifyPaper(title, abstract) {
   if (tags.has('Video Prediction')) {
     tags.add('Generative Models');
   }
+  if (tags.has('Offline RL')) {
+    tags.add('Reinforcement Learning');
+  }
+  if (tags.has('Decision Transformers')) {
+    tags.add('Transformers');
+  }
 
   // 3. AI-Based Classification (Enhancement)
-  // Only attempt if we missed obvious categories or if we want extra precision.
-  // We wrap in try-catch to ensure the rule-based tags are always returned even if AI fails.
   try {
-    // Only call AI if configured (checked inside the service)
     const aiTags = await classifyWithAI(title, abstract);
     if (aiTags && aiTags.length > 0) {
       aiTags.forEach(tag => tags.add(tag));
     }
   } catch (error) {
-    // Silent fail for AI, we rely on rules
-    // console.error("AI Classification skipped/failed");
+    // Silent fail for AI
   }
 
-  return Array.from(tags);
+  // 4. Final Filter: STRICTLY allow only core tags + verified discovery tags
+  const ALLOWED_CORE_TAGS = [
+    'Reinforcement Learning', 'Generative Models', 'Video Prediction', 
+    'Robotics', 'Sim-to-Real', 'Planning', 'Representation Learning', 
+    'Transformers', 'Diffusion Models', 'RNN', 'State Space Models',
+    'Offline RL', 'Multi-Agent Systems', 'Safe RL', 'Active Inference',
+    'Decision Transformers', 'Vision-Language-Action Models'
+  ];
+
+  return Array.from(tags).filter(tag => ALLOWED_CORE_TAGS.includes(tag));
 }

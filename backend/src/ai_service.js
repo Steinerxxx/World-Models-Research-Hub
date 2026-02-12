@@ -92,7 +92,11 @@ const ALLOWED_TAGS = [
   'Transformers', 
   'Diffusion Models', 
   'RNN', 
-  'State Space Models'
+  'State Space Models',
+  'Offline RL',
+  'Multi-Agent Systems',
+  'Safe RL',
+  'Active Inference'
 ];
 
 /**
@@ -114,27 +118,28 @@ Task 1: Determine if this paper is relevant to "World Models" or "Model-Based Re
 Relevant topics: dynamics models, planning/policy training with learned models, environment generative models, representation learning for world modeling.
 
 Task 2: If relevant, classify the paper into categories. 
-1. STICK TO this CORE list as much as possible: ${ALLOWED_TAGS.join(', ')}.
-2. You MAY generate ONE (at most) highly specific "Discovery Tag" ONLY if the paper introduces a significant new concept not covered by the core list.
-3. If you generate a Discovery Tag, use Title Case (e.g., "Offline RL", not "offline rl").
-4. Avoid generic tags like "Machine Learning", "AI", "Neural Networks".
-5. Return 2-4 tags in total.
+1. MANDATORY: Choose at least 2 and at most 3 tags from this CORE list: ${ALLOWED_TAGS.join(', ')}.
+2. OPTIONAL: You may generate EXACTLY ONE highly specific "Discovery Tag" ONLY if the paper introduces a significant new concept not covered by the core list.
+3. STRICT NEGATIVE CONSTRAINTS:
+   - NO "World Models", "Model-Based RL", "MBRL", "AI", "Machine Learning", "Neural Networks", "Deep Learning", "Research", "Paper".
+   - NO duplicate or near-duplicate tags.
+   - NO tags longer than 3 words.
+4. FORMATTING: Use Title Case (e.g., "Offline RL", not "offline rl").
 
 Return ONLY a JSON object:
 {
   "isRelevant": boolean,
   "tags": string[]
 }
-DO NOT include "World Models" or "Model-Based RL" in tags.
     `;
 
     const response = await openai.chat.completions.create({
       model: modelName,
       messages: [
-        { role: 'system', content: 'You are a helpful assistant that outputs strict JSON objects. You combine core categories with discovery tags.' },
+        { role: 'system', content: 'You are a strict academic classifier that outputs ONLY JSON. You follow negative constraints religiously.' },
         { role: 'user', content: prompt }
       ],
-      temperature: 0.2,
+      temperature: 0.1,
       max_tokens: 150,
     });
 
@@ -162,20 +167,18 @@ export async function classifyWithAI(title, abstract) {
 
   try {
     const prompt = `
-You are an expert academic researcher in Artificial Intelligence, specializing in World Models, Model-Based Reinforcement Learning (MBRL), and Generative AI.
-
-Analyze the following research paper:
+You are an expert academic researcher. Analyze the following research paper:
 Title: "${title}"
 Abstract: "${abstract}"
 
 Your task is to classify this paper into relevant categories.
-1. Primary Source: Select from this core list: ${ALLOWED_TAGS.join(', ')}.
-2. Secondary Source: You may generate ONE highly specific tag ONLY if the paper introduces a major new concept (e.g., "Offline RL", "Safe RL").
-3. Constraints:
-   - Total tags: 2-4.
-   - Use Title Case.
-   - NO "World Models" or "Model-Based RL".
-   - NO generic tags like "AI" or "Research".
+1. MANDATORY: Choose at least 2 and at most 3 tags from this CORE list: ${ALLOWED_TAGS.join(', ')}.
+2. OPTIONAL: You may generate EXACTLY ONE highly specific tag ONLY if the paper introduces a major new concept (e.g., "Offline RL", "Safe RL").
+3. STRICT NEGATIVE CONSTRAINTS:
+   - NO "World Models", "Model-Based RL", "MBRL", "AI", "Machine Learning", "Neural Networks", "Deep Learning", "Research", "Paper".
+   - NO duplicate or near-duplicate tags.
+   - NO tags longer than 3 words.
+4. FORMATTING: Use Title Case.
 
 Return ONLY a JSON array of strings.
     `;
@@ -183,10 +186,10 @@ Return ONLY a JSON array of strings.
     const response = await openai.chat.completions.create({
       model: modelName,
       messages: [
-        { role: 'system', content: 'You are a helpful assistant that outputs strict JSON arrays.' },
+        { role: 'system', content: 'You are a strict academic classifier that outputs ONLY JSON arrays.' },
         { role: 'user', content: prompt }
       ],
-      temperature: 0.3, // Slightly higher for better discovery
+      temperature: 0.1,
       max_tokens: 100,
     });
 
