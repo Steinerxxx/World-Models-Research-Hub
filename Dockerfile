@@ -19,7 +19,11 @@ COPY . .
 
 # 增加构建时的详细日志输出
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN cd frontend && CI=false npm run build -- --logLevel info || (echo "Build failed! Checking for common issues..." && ls -R src/ && exit 1)
+RUN cd frontend && \
+    (CI=false npm run build -- --logLevel info || \
+    (echo "Build failed! Outputting logs..." && \
+     ls -R src/ && \
+     exit 1))
 
 # --- 第二阶段：运行阶段 ---
 FROM node:18-slim
