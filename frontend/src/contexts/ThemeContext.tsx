@@ -11,17 +11,17 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Use a versioned key to force a reset to dark mode for all users
-    const savedTheme = localStorage.getItem('theme-preference-v1') as Theme;
+    // Use a versioned key to force a reset to light mode for all users
+    const savedTheme = localStorage.getItem('theme-preference-v2') as Theme;
     if (savedTheme) return savedTheme;
-    return 'dark';
+    return 'light';
   });
 
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    localStorage.setItem('theme-preference-v1', theme);
+    localStorage.setItem('theme-preference-v2', theme);
   }, [theme]);
 
   const toggleTheme = () => {

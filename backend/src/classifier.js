@@ -97,10 +97,33 @@ const TAXONOMY = [
     weakKeywords: []
   },
   {
+    tag: 'Active Inference',
+    strongKeywords: ['active inference', 'free energy principle', 'friston'],
+    weakKeywords: ['variational free energy']
+  },
+  {
+    tag: 'Offline RL',
+    strongKeywords: ['offline reinforcement learning', 'offline rl', 'batch rl', 'conservative q-learning', 'cql'],
+    weakKeywords: ['dataset-based rl']
+  },
+  {
+    tag: 'Decision Transformers',
+    strongKeywords: ['decision transformer', 'trajectory transformer', 'sequence modeling for rl'],
+    weakKeywords: []
+  },
+  {
+    tag: 'World Models',
+    strongKeywords: ['world model', 'dreamer', 'genie', 'latent dynamics', 'world modeling'],
+    weakKeywords: ['imagination', 'model-based']
+  },
+  {
+    tag: 'Model-Based RL',
+    strongKeywords: ['model-based reinforcement learning', 'mbrl', 'muzero', 'dyna-q'],
+    weakKeywords: ['planning in latent space']
+  },
+  {
     tag: 'RNN',
-    strongKeywords: [
-      'recurrent neural network', 'rnn', 'lstm', 'gru', 'backpropagation through time'
-    ],
+    strongKeywords: ['recurrent neural network', 'rnn', 'lstm', 'gru', 'backpropagation through time'],
     weakKeywords: []
   }
 ];

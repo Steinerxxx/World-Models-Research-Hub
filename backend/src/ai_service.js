@@ -1,7 +1,14 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Try to load from root or backend directory
+dotenv.config(); // Default (root if run from root)
+dotenv.config({ path: path.join(__dirname, '../.env') }); // backend/.env
 
 const apiKey = process.env.AI_API_KEY;
 const baseURL = process.env.AI_BASE_URL || 'https://api.deepseek.com';
@@ -154,19 +161,34 @@ export async function classifyWithAI(title, abstract) {
 
   try {
     const prompt = `
-You are an expert academic researcher in Artificial Intelligence.
+You are an expert academic researcher in Artificial Intelligence, specializing in World Models, Model-Based Reinforcement Learning (MBRL), and Generative AI.
+
 Analyze the following research paper:
 Title: "${title}"
 Abstract: "${abstract}"
 
-Your task is to classify this paper.
-1. Use relevant tags from this CORE list: ${ALLOWED_TAGS.join(', ')}.
-2. You SHOULD also generate 1-3 highly specific "Discovery Tags" for emerging research topics (e.g., "Active Inference", "Joint-Embedding", "World Models for Robotics").
-3. DO NOT include "World Models" or "Model-Based RL" as tags.
-4. Return ONLY a JSON array of strings.
+Your task is to classify this paper into relevant categories.
+Choose from the following list of tags (you can select multiple, but only if they are strongly relevant):
+- Reinforcement Learning
+- Generative Models
+- Video Prediction
+- Robotics
+- Planning
+- Representation Learning
+- Transformers
+- Diffusion Models
+- Sim-to-Real
+- RNN
+- State Space Models
+
+Instructions:
+1. DO NOT include "World Models" or "Model-Based RL" as tags, as they are implied by the context of this platform.
+2. Focus on more specific sub-fields (e.g., "Robotics", "Planning", "Video Prediction").
+3. You may generate new, specific tags if they are significant (e.g., "Offline RL", "Safe RL", "Multi-Agent Systems", "Active Inference", "Decision Transformers", "World Models for Robotics").
+4. Return ONLY a JSON array of strings. Do not include any other text or markdown formatting.
 
 Example Output:
-["Robotics", "Planning", "Offline RL"]
+["Robotics", "Planning", "Representation Learning", "Offline RL"]
     `;
 
     const response = await openai.chat.completions.create({
@@ -175,7 +197,7 @@ Example Output:
         { role: 'system', content: 'You are a helpful assistant that outputs strict JSON arrays.' },
         { role: 'user', content: prompt }
       ],
-      temperature: 0.2,
+      temperature: 0.3, // Slightly higher for better discovery
       max_tokens: 100,
     });
 
