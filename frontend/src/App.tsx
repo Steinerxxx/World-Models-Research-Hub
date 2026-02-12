@@ -3,6 +3,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { FilterProvider } from '@/contexts/FilterContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ToastProvider } from '@/contexts/ToastContext';
 import { Layout } from '@/components/Layout';
 import Home from '@/pages/Home';
 import Introduction from '@/pages/Introduction';
@@ -14,24 +15,26 @@ import Profile from '@/pages/Profile';
 function App() {
   return (
     <ThemeProvider>
-      <FilterProvider>
-        <AuthProvider>
-          <FavoritesProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Layout />}>
-                  <Route index element={<Home />} />
-                  <Route path="introduction" element={<Introduction />} />
-                  <Route path="trends" element={<Trends />} />
-                  <Route path="login" element={<LoginPage />} />
-                  <Route path="register" element={<RegisterPage />} />
-                  <Route path="profile" element={<Profile />} />
-                </Route>
-              </Routes>
-            </BrowserRouter>
-          </FavoritesProvider>
-        </AuthProvider>
-      </FilterProvider>
+      <ToastProvider>
+        <FilterProvider>
+          <AuthProvider>
+            <FavoritesProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Layout />}>
+                    <Route index element={<Home />} />
+                    <Route path="introduction" element={<Introduction />} />
+                    <Route path="trends" element={<Trends />} />
+                    <Route path="login" element={<LoginPage />} />
+                    <Route path="register" element={<RegisterPage />} />
+                    <Route path="profile" element={<Profile />} />
+                  </Route>
+                </Routes>
+              </BrowserRouter>
+            </FavoritesProvider>
+          </AuthProvider>
+        </FilterProvider>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

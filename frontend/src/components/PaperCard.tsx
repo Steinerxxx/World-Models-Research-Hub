@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, Calendar, Users, Copy, Tag, Sparkles, Loader2, Star, Check } from "lucide-react";
 import { HighlightText } from './HighlightText';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import { useToast } from '@/contexts/ToastContext';
 import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
 
 import { API_BASE_URL } from '@/config';
@@ -50,6 +51,7 @@ export function PaperCard({
   const abstractRef = useRef<HTMLParagraphElement>(null);
   
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const { showToast } = useToast();
   const isStarred = isFavorite(paper.id);
 
   const toggleFavorite = (e: React.MouseEvent) => {
@@ -57,8 +59,10 @@ export function PaperCard({
     e.preventDefault();
     if (isStarred) {
       removeFavorite(paper.id);
+      showToast('Removed from favorites', 'info');
     } else {
       addFavorite(paper.id);
+      showToast('Added to favorites');
     }
   };
 
@@ -80,9 +84,11 @@ export function PaperCard({
           ...paper,
           ...data.analysis
         });
+        showToast('AI analysis generated successfully!');
       }
     } catch (error) {
       console.error('Analysis error:', error);
+      showToast('AI analysis failed. Please try again.', 'error');
     } finally {
       setIsAnalyzing(false);
     }
@@ -156,7 +162,10 @@ export function PaperCard({
     const success = await copyBibTeX(paper);
     if (success) {
       setIsCopied(true);
+      showToast('BibTeX copied to clipboard!');
       setTimeout(() => setIsCopied(false), 2000);
+    } else {
+      showToast('Failed to copy BibTeX', 'error');
     }
   };
 
