@@ -1,15 +1,18 @@
 # --- 第一阶段：构建阶段 ---
-FROM node:18-slim AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
 # 安装构建工具
 RUN apt-get update && apt-get install -y python3 make g++ git && rm -rf /var/lib/apt/lists/*
 
-# 复制整个项目（包括两个 package.json）
+# 复制整个项目
 COPY . .
 
-# 分别安装依赖
+# 关键：删除 Windows 下生成的 lock 文件，防止平台冲突
+RUN rm -f package-lock.json frontend/package-lock.json
+
+# 分别安装依赖（在 Linux 环境下重新生成依赖树）
 RUN npm install --legacy-peer-deps
 RUN cd frontend && npm install --legacy-peer-deps
 
