@@ -12,4 +12,11 @@ jobs:
     steps:
       - name: Trigger Scrape Endpoint
         run: |
-          curl -X POST https://world-models-research-hub-backhend.onrender.com/api/scrape
+          # Use secret for backend URL to avoid hardcoding and handle migrations
+          BACKEND_URL="${{ secrets.BACKEND_URL }}"
+          if [ -z "$BACKEND_URL" ]; then
+            echo "⚠️ BACKEND_URL secret is not set. Skipping external trigger."
+            echo "Note: The backend has an internal cron job that runs independently."
+            exit 0
+          fi
+          curl -X POST "${BACKEND_URL}/api/scrape"
