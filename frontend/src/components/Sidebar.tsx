@@ -529,11 +529,6 @@ export function Sidebar() {
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
-  const handleLogoutClick = () => {
-    // This function is no longer needed in SidebarContent, but keeping for reference if needed elsewhere
-    // setShowLogoutConfirm(true);
-  };
-
   const confirmLogout = () => {
     logout();
     setShowLogoutConfirm(false);
