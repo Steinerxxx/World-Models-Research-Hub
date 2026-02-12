@@ -17,7 +17,6 @@ import {
   TrendingUp,
   Star,
   LogIn,
-  LogOut,
   User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -31,10 +30,9 @@ import { API_BASE_URL } from '@/config';
 interface SidebarContentProps {
   isMobile: boolean;
   onClose: () => void;
-  onLogoutClick: () => void;
 }
 
-const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProps) => {
+const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { selectedTags, setSelectedTags, toggleTag, itemsPerPage, setItemsPerPage, sortBy, setSortBy } = useFilter();
@@ -532,7 +530,8 @@ export function Sidebar() {
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   const handleLogoutClick = () => {
-    setShowLogoutConfirm(true);
+    // This function is no longer needed in SidebarContent, but keeping for reference if needed elsewhere
+    // setShowLogoutConfirm(true);
   };
 
   const confirmLogout = () => {
@@ -615,7 +614,7 @@ export function Sidebar() {
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className="fixed inset-y-0 left-0 z-50 w-[80%] max-w-[20rem] bg-background/95 backdrop-blur-md border-r border-border shadow-2xl overflow-hidden"
               >
-                <SidebarContent isMobile={true} onClose={() => setIsOpen(false)} onLogoutClick={handleLogoutClick} />
+                <SidebarContent isMobile={true} onClose={() => setIsOpen(false)} />
               </motion.aside>
             </>
           )}
@@ -648,7 +647,7 @@ export function Sidebar() {
         className="relative h-full bg-background/95 backdrop-blur-md border-r border-border flex flex-col shadow-2xl overflow-hidden whitespace-nowrap"
       >
         <div className="w-[20rem] h-full">
-          <SidebarContent isMobile={false} onClose={() => setIsOpen(false)} onLogoutClick={handleLogoutClick} />
+          <SidebarContent isMobile={false} onClose={() => setIsOpen(false)} />
         </div>
       </motion.aside>
       <LogoutModal />

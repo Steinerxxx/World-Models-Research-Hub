@@ -184,7 +184,8 @@ app.use((err, req, res, next) => {
 // Start the server immediately, don't wait for DB
 const server = app.listen(Number(port), '0.0.0.0', () => {
   console.log(`🚀 v3.5.2 Backend is now STABLE and LISTENING on port ${port}`);
-  console.log(`🌍 Public URL: https://wpddosuxhzcu.sealosbia.site`);
+  console.log(`📡 Health Check: http://localhost:${port}/health`);
+  console.log(`✨ Ready to serve requests!`);
 });
 
 // Initialize Database asynchronously
