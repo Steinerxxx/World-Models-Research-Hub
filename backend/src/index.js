@@ -206,8 +206,18 @@ const server = app.listen(Number(port), '0.0.0.0', () => {
   }
 })();
 
+// Auth middleware for admin endpoints
+const adminAuth = (req, res, next) => {
+  const adminKey = req.headers['x-admin-key'];
+  if (process.env.ADMIN_KEY && adminKey === process.env.ADMIN_KEY) {
+    next();
+  } else {
+    res.status(401).json({ message: 'Unauthorized: Admin key required' });
+  }
+};
+
 // Manual seed endpoint
-app.post('/api/admin/seed', async (req, res) => {
+app.post('/api/admin/seed', adminAuth, async (req, res) => {
   try {
     await seedMockData();
     res.json({ message: 'Database seeded successfully' });
@@ -218,7 +228,7 @@ app.post('/api/admin/seed', async (req, res) => {
 });
 
 // API route to reclassify all existing papers
-app.post('/api/reclassify', async (req, res) => {
+app.post('/api/reclassify', adminAuth, async (req, res) => {
   try {
     const papers = await getAllPapers();
     let count = 0;
