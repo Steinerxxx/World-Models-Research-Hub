@@ -6,7 +6,7 @@ WORKDIR /app
 # 安装基础工具
 RUN apt-get update && apt-get install -y python3 make g++ git && rm -rf /var/lib/apt/lists/*
 
-# 先安装前端依赖（这是最容易出问题的地方）
+# 先复制前端依赖配置并安装
 COPY frontend/package*.json ./frontend/
 RUN cd frontend && npm install --legacy-peer-deps
 
@@ -14,18 +14,22 @@ RUN cd frontend && npm install --legacy-peer-deps
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
-# 复制所有源代码
+# 复制所有源代码（注意：这会覆盖之前的 package.json，但 node_modules 已被 .dockerignore 排除，所以容器内的 node_modules 会保留）
 COPY . .
 
-# 增加构建时的详细日志输出
+# 强制使用开发环境安装的 vite 进行构建，并捕获所有输出
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN cd frontend && \
-    (CI=false ./node_modules/.bin/vite build --logLevel info || \
-    (echo "BUILD FAILED! Diagnostic information:" && \
-     ls -la . && \
-     ls -la src/ && \
-     cat package.json && \
-     exit 1))
+ENV CI=false
+
+RUN cd frontend && npm run build -- --logLevel info || ( \
+    echo "--- BUILD FAILED ---" && \
+    echo "Current directory: $(pwd)" && \
+    echo "Directory content:" && \
+    ls -la && \
+    echo "Checking node_modules/.bin:" && \
+    ls -la node_modules/.bin/vite || echo "Vite binary not found!" && \
+    exit 1 \
+)
 
 # --- 第二阶段：运行阶段 ---
 FROM node:18-slim
