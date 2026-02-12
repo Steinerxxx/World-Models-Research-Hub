@@ -5,33 +5,47 @@ on:
     branches:
       - main
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
         with:
-          host: ${{ secrets.SEALOS_HOST }}
-          username: devbox
-          key: ${{ secrets.SEALOS_SSH_KEY }}
-          port: ${{ secrets.SEALOS_PORT }}
-          script: |
-            cd /home/devbox/project
-            # 1. 强制更新代码 (如果本地有改动会被覆盖，确保以 GitHub 为准)
-            git fetch origin main
-            git reset --hard origin/main
-            
-            # 2. 构建前端
-            cd /home/devbox/project/frontend
-            npm install
-            npm run build
-            
-            # 3. 安装后端依赖并重启
-            cd /home/devbox/project/backend
-            npm install
-            chmod +x restart.sh
-            ./restart.sh
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Sealos Redeploy
+        run: |
+          # 触发 Sealos Webhook，让应用拉取最新的镜像
+          curl -X POST "${{ secrets.SEALOS_DEPLOY_WEBHOOK }}"
