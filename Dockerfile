@@ -1,28 +1,25 @@
 # --- 第一阶段：构建阶段 ---
 FROM node:20-slim AS builder
 
-# 安装构建基础工具 (git, python, make, g++)，防止依赖安装失败
-RUN apt-get update && apt-get install -y \
-    python3 \
-    make \
-    g++ \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
-# 复制 package.json
-COPY package*.json ./
-COPY frontend/package*.json ./frontend/
+# 安装必要的构建工具
+RUN apt-get update && apt-get install -y python3 make g++ git && rm -rf /var/lib/apt/lists/*
 
-# 使用 --legacy-peer-deps 强制安装，防止版本冲突导致退出
+# 1. 先安装后端依赖
+COPY package*.json ./
 RUN npm install --legacy-peer-deps
+
+# 2. 再安装前端依赖
+COPY frontend/package*.json ./frontend/
 RUN cd frontend && npm install --legacy-peer-deps
 
-# 复制所有源代码
+# 3. 复制所有代码
 COPY . .
 
-# 执行前端构建
+# 4. 执行前端构建 (增加内存限制，防止 OOM)
+# 设置 NODE_OPTIONS 提高构建内存上限到 4GB
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN cd frontend && npm run build
 
 # --- 第二阶段：运行阶段 ---
@@ -36,7 +33,6 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/backend ./backend
 COPY --from=builder /app/frontend/dist ./frontend/dist
 
-# 暴露端口
 EXPOSE 3000
 
 # 启动
