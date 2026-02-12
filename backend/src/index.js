@@ -4,6 +4,7 @@ import {
   createPapersTable,
   addPaper,
   getAllPapers,
+  getPaperTrends,
   getAllTags,
   updatePaperTags,
   updatePaperSummary,
@@ -62,6 +63,17 @@ app.get('/api/papers', async (req, res) => {
   }
 });
 
+// API route to get trends data (minimized fields)
+app.get('/api/papers/trends', async (req, res) => {
+  try {
+    const trends = await getPaperTrends();
+    res.json(trends);
+  } catch (err) {
+    console.error('Error getting trends:', err);
+    res.status(500).json({ message: 'Failed to get trends' });
+  }
+});
+
 // API route to get all tags with counts
 app.get('/api/tags', async (req, res) => {
   try {
@@ -115,8 +127,24 @@ app.post('/api/papers/:id/analyze', async (req, res) => {
     const paper = await getPaperById(id);
     if (!paper) return res.status(404).json({ message: 'Paper not found' });
 
+    // Check if analysis already exists in database
+    if (paper.summary && paper.contribution) {
+      console.log(`[Cache Hit] Returning existing analysis for paper ${id}`);
+      return res.json({ 
+        message: 'Analysis retrieved from cache', 
+        analysis: {
+          summary: paper.summary,
+          contribution: paper.contribution,
+          limitations: paper.limitations || "Not explicitly stated"
+        } 
+      });
+    }
+
+    console.log(`[Cache Miss] Generating new analysis for paper ${id}...`);
     const analysis = await generatePaperAnalysis(paper.title, paper.abstract);
-    await updatePaperSummary(id, analysis);
+    if (analysis) {
+      await updatePaperSummary(id, analysis);
+    }
     res.json({ message: 'Analysis generated', analysis });
   } catch (err) {
     console.error('Analysis error:', err);
@@ -244,12 +272,13 @@ app.post('/api/reclassify', async (req, res) => {
 
 // Schedule automatic scraping every hour
 cron.schedule('0 * * * *', async () => {
-  console.log('Running scheduled scraping task...');
+  const now = new Date().toLocaleString();
+  console.log(`[${now}] Running scheduled scraping task...`);
   try {
     const result = await scrapeArxiv();
-    console.log('Scheduled scraping completed:', result);
+    console.log(`[${now}] Scheduled scraping completed:`, result);
   } catch (err) {
-    console.error('Scheduled scraping failed:', err);
+    console.error(`[${now}] Scheduled scraping failed:`, err);
   }
 });
 

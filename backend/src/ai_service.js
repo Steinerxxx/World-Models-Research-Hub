@@ -74,6 +74,61 @@ Do not include any other text or markdown formatting.
   }
 }
 
+/**
+ * Combined function to check relevance and classify a paper in a single AI call.
+ * This is significantly faster than calling two separate functions.
+ */
+export async function processPaperWithAI(title, abstract) {
+  if (!openai) {
+    return { isRelevant: true, tags: [] };
+  }
+
+  try {
+    const prompt = `
+You are an expert academic researcher. Analyze the following paper:
+Title: "${title}"
+Abstract: "${abstract}"
+
+Task 1: Determine if this paper is relevant to "World Models" or "Model-Based Reinforcement Learning" (MBRL).
+Relevant topics: dynamics models, planning/policy training with learned models, environment generative models, representation learning for world modeling.
+
+Task 2: If relevant, classify the paper into categories (e.g., Robotics, Planning, Transformers, Diffusion Models, Sim-to-Real, RNN, State Space Models, Offline RL, Safe RL).
+
+Return ONLY a JSON object:
+{
+  "isRelevant": boolean,
+  "tags": string[] (empty if not relevant)
+}
+DO NOT include "World Models" or "Model-Based RL" in tags.
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: modelName,
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant that outputs strict JSON objects.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.1,
+      max_tokens: 150,
+    });
+
+    const content = response.choices[0].message.content?.trim();
+    if (!content) return { isRelevant: false, tags: [] };
+
+    const jsonStr = content.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+    const result = JSON.parse(jsonStr);
+    
+    return {
+      isRelevant: !!result.isRelevant,
+      tags: Array.isArray(result.tags) ? result.tags : []
+    };
+  } catch (error) {
+    if (error.status === 402) return { isRelevant: true, tags: [] };
+    console.error('Error in processPaperWithAI:', error);
+    return { isRelevant: true, tags: [] };
+  }
+}
+
 export async function classifyWithAI(title, abstract) {
   if (!openai) {
     return [];

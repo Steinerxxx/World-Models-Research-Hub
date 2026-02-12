@@ -51,7 +51,7 @@ export default function Trends() {
   const [usingMockData, setUsingMockData] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/papers?t=${Date.now()}`)
+    fetch(`${API_BASE_URL}/api/papers/trends?t=${Date.now()}`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch data');
         return res.json();

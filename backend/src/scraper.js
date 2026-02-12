@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { addPaper } from './database.js';
 import { classifyPaper } from './classifier.js';
-import { checkRelevanceWithAI, classifyWithAI } from './ai_service.js';
+import { processPaperWithAI } from './ai_service.js';
 
 const BASE_ARXIV_URL = 'https://arxiv.org/search/?query="World+Models"+OR+"Model-Based+Reinforcement+Learning"+OR+"Generative+World+Model"&searchtype=all&source=header&order=-announced_date_first&size=50';
 
@@ -144,36 +144,37 @@ export async function scrapeArxiv(fullBackfill = false) {
       console.log(`Papers to add after date filtering: ${papers.length}`);
 
       if (papers.length > 0) {
-          console.log(`🤖 Applying AI accuracy check to ${papers.length} potential papers...`);
-          const filteredPapers = [];
-
-          for (let i = 0; i < papers.length; i++) {
-              const paper = papers[i];
+          console.log(`🤖 Applying AI accuracy check to ${papers.length} potential papers (Parallelized)...`);
+          
+          // Use parallel processing with a concurrency limit
+          const CONCURRENCY_LIMIT = 5;
+          const processedPapers = [];
+          
+          for (let i = 0; i < papers.length; i += CONCURRENCY_LIMIT) {
+              const batch = papers.slice(i, i + CONCURRENCY_LIMIT);
+              const batchResults = await Promise.all(batch.map(async (paper) => {
+                  try {
+                      const { isRelevant, tags: aiTags } = await processPaperWithAI(paper.title, paper.abstract);
+                      if (isRelevant) {
+                          const ruleTags = await classifyPaper(paper.title, paper.abstract);
+                          paper.tags = Array.from(new Set([...ruleTags, ...aiTags]));
+                          return paper;
+                      }
+                      return null;
+                  } catch (err) {
+                      console.error(`Error processing paper "${paper.title}":`, err);
+                      return paper; // Keep it on error to be safe
+                  }
+              }));
               
-              // 1. First, check if AI thinks it's truly relevant
-              const isRelevant = await checkRelevanceWithAI(paper.title, paper.abstract);
-              
-              if (isRelevant) {
-                  // 2. If relevant, use AI to get high-quality tags
-                  const aiTags = await classifyWithAI(paper.title, paper.abstract);
-                  
-                  // Combine rule-based tags and AI tags, ensuring uniqueness
-                  const ruleTags = await classifyPaper(paper.title, paper.abstract);
-                  paper.tags = Array.from(new Set([...ruleTags, ...aiTags]));
-                  
-                  filteredPapers.push(paper);
-                  console.log(`   ✅ Kept: ${paper.title.substring(0, 40)}... (Tags: ${paper.tags.join(', ')})`);
-              } else {
-                  console.log(`   ❌ Filtered out (Irrelevant): ${paper.title.substring(0, 40)}...`);
-              }
-
-              // Small delay to be nice to AI API
-              await new Promise(resolve => setTimeout(resolve, 300));
+              processedPapers.push(...batchResults.filter(p => p !== null));
+              console.log(`   Progress: ${Math.min(i + CONCURRENCY_LIMIT, papers.length)}/${papers.length} processed`);
           }
           
           // Replace papers with AI-verified ones
           papers.length = 0;
-          papers.push(...filteredPapers);
+          papers.push(...processedPapers);
+          console.log(`   ✅ AI Check complete. Kept ${papers.length} relevant papers.`);
       }
 
       if (papers.length === 0 && !shouldContinue) {

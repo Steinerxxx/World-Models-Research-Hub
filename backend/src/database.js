@@ -15,6 +15,24 @@ const pool = new pg.Pool({
 let isDbConnected = false;
 const LOCAL_DB_PATH = path.join(process.cwd(), 'papers.json');
 
+// In-memory cache for paper list
+let paperCache = null;
+let lastCacheUpdate = 0;
+let tagsCache = null;
+let lastTagsCacheUpdate = 0;
+let trendsCache = null;
+let lastTrendsCacheUpdate = 0;
+const CACHE_DURATION = 60 * 1000; // 1 minute
+
+export const clearPaperCache = () => {
+  paperCache = null;
+  lastCacheUpdate = 0;
+  tagsCache = null;
+  lastTagsCacheUpdate = 0;
+  trendsCache = null;
+  lastTrendsCacheUpdate = 0;
+};
+
 // Export getter for DB status
 export const getDbStatus = () => isDbConnected;
 
@@ -134,6 +152,7 @@ export async function createFavoritesTable() {
 }
 
 export async function addPaper(paper) {
+  clearPaperCache();
   if (isDbConnected) {
     const { title, authors, abstract, url, publication_date, tags } = paper;
     const insertQuery = `
@@ -214,18 +233,59 @@ export async function getPaperById(id) {
 }
 
 export async function getAllPapers() {
+  const now = Date.now();
+  if (paperCache && (now - lastCacheUpdate < CACHE_DURATION)) {
+    return paperCache;
+  }
+
+  let result;
   if (isDbConnected) {
     const { rows } = await query('SELECT * FROM papers ORDER BY publication_date DESC');
-    return rows;
+    result = rows;
   } else {
     // Local JSON Fallback
     if (!fs.existsSync(LOCAL_DB_PATH)) return [];
     const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
-    return papers.sort((a, b) => new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime());
+    result = papers.sort((a, b) => new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime());
   }
+
+  paperCache = result;
+  lastCacheUpdate = now;
+  return result;
+}
+
+export async function getPaperTrends() {
+  const now = Date.now();
+  if (trendsCache && (now - lastTrendsCacheUpdate < CACHE_DURATION)) {
+    return trendsCache;
+  }
+
+  let result;
+  if (isDbConnected) {
+    // Only select fields needed for Trends page to reduce payload size
+    const { rows } = await query('SELECT id, publication_date, tags FROM papers ORDER BY publication_date DESC');
+    result = rows;
+  } else {
+    // Local JSON Fallback
+    if (!fs.existsSync(LOCAL_DB_PATH)) return [];
+    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
+    result = papers
+      .map(({ id, publication_date, tags }) => ({ id, publication_date, tags }))
+      .sort((a, b) => new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime());
+  }
+
+  trendsCache = result;
+  lastTrendsCacheUpdate = now;
+  return result;
 }
 
 export async function getAllTags() {
+  const now = Date.now();
+  if (tagsCache && (now - lastTagsCacheUpdate < CACHE_DURATION)) {
+    return tagsCache;
+  }
+
+  let result;
   if (isDbConnected) {
     const { rows } = await query(`
       SELECT tag, count(*) as count
@@ -234,7 +294,7 @@ export async function getAllTags() {
       GROUP BY tag
       ORDER BY count DESC, tag ASC
     `);
-    return rows; // Returns [{ tag: '...', count: '...' }, ...]
+    result = rows;
   } else {
     // Local JSON Fallback
     if (!fs.existsSync(LOCAL_DB_PATH)) return [];
@@ -245,10 +305,14 @@ export async function getAllTags() {
         tagCounts[t] = (tagCounts[t] || 0) + 1;
       });
     });
-    return Object.entries(tagCounts)
+    result = Object.entries(tagCounts)
       .map(([tag, count]) => ({ tag, count }))
       .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
   }
+
+  tagsCache = result;
+  lastTagsCacheUpdate = now;
+  return result;
 }
 
 export async function seedMockData() {
