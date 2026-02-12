@@ -17,7 +17,8 @@ import {
   TrendingUp,
   Star,
   LogIn,
-  LogOut
+  LogOut,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -195,7 +196,7 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
               }
             >
               <TrendingUp className="h-4 w-4" />
-              <span className="font-medium">Trends Dashboard</span>
+              <span className="font-medium">Trends</span>
             </NavLink>
 
             <button
@@ -234,13 +235,22 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
             </NavLink>
 
             {user ? (
-              <button
-                onClick={onLogoutClick}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    isActive 
+                      ? "bg-primary/10 text-primary font-medium" 
+                      : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                  }`
+                }
               >
-                <LogOut className="h-4 w-4" />
-                Logout ({user.username})
-              </button>
+                <User className="h-4 w-4" />
+                <div className="flex flex-col items-start leading-none">
+                  <span className="text-sm font-semibold">{user.username}</span>
+                  <span className="text-[10px] opacity-70">Account Settings</span>
+                </div>
+              </NavLink>
             ) : (
               <NavLink
                 to="/login"
