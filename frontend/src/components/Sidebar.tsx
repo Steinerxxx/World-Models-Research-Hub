@@ -154,17 +154,11 @@ const SidebarContent = ({ isMobile, onClose, onLogoutClick }: SidebarContentProp
               </button>
             )}
           </div>
-          {error && (
-            <div className="text-[8px] text-red-400/60 break-all leading-tight bg-red-500/5 p-1 rounded mt-1">
-              Error: {error}
+          {error && error.includes('404') && (
+            <div className="text-[7px] opacity-30 mt-0.5">
+              <div className="text-amber-500/50 font-medium">Hint: Please REDEPLOY on Sealos to update backend.</div>
             </div>
           )}
-          <div className="text-[7px] opacity-30 mt-0.5 flex flex-col gap-0.5">
-            <div>API: {API_BASE_URL}/api/tags</div>
-            {error && error.includes('404') && (
-              <div className="text-amber-500/50 font-medium">Hint: Please REDEPLOY on Sealos to update backend.</div>
-            )}
-          </div>
         </span>
       </div>
 
