@@ -1,18 +1,23 @@
 # --- 第一阶段：构建阶段 ---
 FROM node:20-slim AS builder
 
-WORKDIR /app
+# 安装构建基础工具 (git, python, make, g++)，防止依赖安装失败
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-# 安装必要的构建依赖（如果有的话）
-# RUN apt-get update && apt-get install -y python3 make g++
+WORKDIR /app
 
 # 复制 package.json
 COPY package*.json ./
 COPY frontend/package*.json ./frontend/
 
-# 安装所有依赖
-RUN npm install
-RUN cd frontend && npm install
+# 使用 --legacy-peer-deps 强制安装，防止版本冲突导致退出
+RUN npm install --legacy-peer-deps
+RUN cd frontend && npm install --legacy-peer-deps
 
 # 复制所有源代码
 COPY . .
@@ -33,9 +38,6 @@ COPY --from=builder /app/frontend/dist ./frontend/dist
 
 # 暴露端口
 EXPOSE 3000
-
-# 环境变量默认值（可以在 Sealos 覆盖）
-ENV NODE_ENV=production
 
 # 启动
 CMD ["npm", "start"]
