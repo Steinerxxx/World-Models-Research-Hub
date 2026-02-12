@@ -75,8 +75,9 @@ export default function Introduction() {
               <span className="inline-flex items-center gap-2 px-2 py-1 bg-accent/50 rounded-full border border-border/50">
                 <motion.div
                   layoutId="avatar"
+                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   onClick={() => setIsAvatarZoomed(true)}
-                  className="cursor-pointer"
+                  className="cursor-pointer will-change-transform"
                   whileHover={{ scale: 1.1 }}
                 >
                   <img 
@@ -171,13 +172,18 @@ export default function Introduction() {
       {/* Avatar Zoom Modal */}
       <AnimatePresence>
         {isAvatarZoomed && (
-          <div 
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
             onClick={() => setIsAvatarZoomed(false)}
           >
             <motion.div
               layoutId="avatar"
-              className="relative max-w-lg w-full aspect-square bg-transparent"
+              transition={{ type: "spring", stiffness: 350, damping: 30 }}
+              className="relative max-w-lg w-full aspect-square bg-transparent will-change-transform"
               onClick={(e) => e.stopPropagation()}
             >
               <img 
@@ -192,7 +198,7 @@ export default function Introduction() {
                 <X className="w-8 h-8" />
               </button>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
