@@ -8,7 +8,6 @@ import { PaperCard } from '@/components/PaperCard';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { API_BASE_URL } from '@/config';
-import { MOCK_PAPERS } from '@/data/mockData';
 import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
 
 // Define the type for a single paper
@@ -88,10 +87,11 @@ export default function Home() {
         setUsingMockData(false);
         setLoading(false);
       })
-      .catch(error => {
+      .catch(async (error) => {
         console.warn('Backend fetch failed, switching to Mock Data:', error);
         setFetchErrorDetail(error.message || 'Unknown Network Error');
-        // Fallback to mock data
+        // Fallback to mock data via dynamic import to optimize bundle
+        const { MOCK_PAPERS } = await import('@/data/mockData');
         setPapers(MOCK_PAPERS);
         setUsingMockData(true);
         setError(null); // Clear error to show content

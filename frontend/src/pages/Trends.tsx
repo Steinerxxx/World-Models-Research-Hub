@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '@/config';
-import { MOCK_PAPERS } from '@/data/mockData';
 import { 
   LineChart, 
   Line, 
@@ -60,8 +59,9 @@ export default function Trends() {
         setPapers(data);
         setLoading(false);
       })
-      .catch(err => {
+      .catch(async (err) => {
         console.warn('Backend fetch failed, switching to Mock Data:', err);
+        const { MOCK_PAPERS } = await import('@/data/mockData');
         setPapers(MOCK_PAPERS);
         setUsingMockData(true);
         setError(null);
