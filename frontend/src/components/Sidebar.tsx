@@ -175,7 +175,7 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
                 `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                   isActive 
                     ? "bg-cyan-500/10 text-cyan-500 font-medium" 
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground font-medium"
                 }`
               }
               onClick={() => setSelectedTags([])}
@@ -224,7 +224,7 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
                 `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                   isActive 
                     ? "bg-cyan-500/10 text-cyan-500 font-medium" 
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground font-medium"
                 }`
               }
             >
@@ -255,8 +255,8 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     isActive 
-                      ? "bg-primary/10 text-primary" 
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "bg-primary/10 text-primary font-medium" 
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground font-medium"
                   }`
                 }
               >
