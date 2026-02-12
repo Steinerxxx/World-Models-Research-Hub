@@ -204,6 +204,19 @@ const server = app.listen(Number(port), '0.0.0.0', () => {
   } catch (err) {
     console.error('Error checking database state:', err);
   }
+
+  // --- 4. Scheduled Tasks ---
+  // Schedule crawler to run every hour
+  console.log('⏰ Scheduling hourly crawler (0 * * * *)...');
+  cron.schedule('0 * * * *', async () => {
+    console.log('⏰ Running scheduled hourly crawler...');
+    try {
+      const result = await scrapeArxiv(false);
+      console.log('✅ Scheduled crawler finished:', result);
+    } catch (err) {
+      console.error('❌ Scheduled crawler failed:', err);
+    }
+  });
 })();
 
 // Auth middleware for admin endpoints
