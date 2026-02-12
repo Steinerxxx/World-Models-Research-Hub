@@ -32,8 +32,8 @@ const techNodes: TechNode[] = [
     id: 'backend',
     label: 'Backend',
     icon: <Server className="w-6 h-6" />,
-    description: 'Full-stack monolithic container hosted on Sealos DevBox.',
-    details: ['Node.js (LTS)', 'Express 4.x', 'Cheerio Scraper', 'Volcengine (北京)'],
+    description: 'Full-stack monolithic container hosted on Sealos Singapore.',
+    details: ['Node.js (LTS)', 'Express 4.x', 'Cheerio Scraper', 'Sealos (Singapore B)'],
     color: 'bg-green-500'
   },
   {
@@ -48,8 +48,8 @@ const techNodes: TechNode[] = [
     id: 'deployment',
     label: 'Deployment',
     icon: <Cloud className="w-6 h-6" />,
-    description: 'Optimized for extreme speed via Volcengine Beijing nodes.',
-    details: ['Sealos DevBox', 'Volcengine (火山引擎)', 'GitHub Actions CI/CD'],
+    description: 'Global accessibility via Sealos Singapore nodes.',
+    details: ['Sealos Cloud', 'Docker (GHCR)', 'GitHub Actions CI/CD'],
     color: 'bg-orange-500'
   }
 ];
