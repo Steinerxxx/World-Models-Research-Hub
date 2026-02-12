@@ -26,6 +26,7 @@ import { useFavorites } from '@/contexts/FavoritesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
 import { API_BASE_URL } from '@/config';
+import { MOCK_PAPERS } from '@/data/mockData';
 
 interface SidebarContentProps {
   isMobile: boolean;
@@ -87,7 +88,6 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
           setTimeout(() => setRetryCount(prev => prev + 1), 2000);
         }
 
-        const { MOCK_PAPERS } = await import('@/data/mockData');
         const tagCounts: Record<string, number> = {};
         MOCK_PAPERS.forEach(p => {
           (p.tags || []).forEach(t => {
