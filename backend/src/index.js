@@ -152,38 +152,7 @@ app.post('/api/papers/:id/analyze', async (req, res) => {
   }
 });
 
-// Manual seed endpoint
-app.post('/api/admin/seed', async (req, res) => {
-  try {
-    await seedMockData();
-    res.json({ message: 'Database seeded successfully' });
-  } catch (err) {
-    console.error('Seed error:', err);
-    res.status(500).json({ message: 'Seed failed' });
-  }
-});
 
-// API route to reclassify all existing papers
-app.post('/api/reclassify', async (req, res) => {
-  try {
-    const papers = await getAllPapers();
-    let count = 0;
-    
-    for (const paper of papers) {
-      const tags = await classifyPaper(paper.title, paper.abstract);
-      await updatePaperTags(paper.id, tags);
-      count++;
-    }
-    
-    res.json({ 
-      message: 'Reclassification completed successfully', 
-      processed_count: count 
-    });
-  } catch (err) {
-    console.error('Error reclassifying papers:', err);
-    res.status(500).json({ message: 'Failed to reclassify papers' });
-  }
-});
 
 // --- 2. Static Files ---
 const frontendPath = path.join(__dirname, '../../frontend/dist');
@@ -267,18 +236,6 @@ app.post('/api/reclassify', async (req, res) => {
   } catch (err) {
     console.error('Error reclassifying papers:', err);
     res.status(500).json({ message: 'Failed to reclassify papers' });
-  }
-});
-
-// Schedule automatic scraping every hour
-cron.schedule('0 * * * *', async () => {
-  const now = new Date().toLocaleString();
-  console.log(`[${now}] Running scheduled scraping task...`);
-  try {
-    const result = await scrapeArxiv();
-    console.log(`[${now}] Scheduled scraping completed:`, result);
-  } catch (err) {
-    console.error(`[${now}] Scheduled scraping failed:`, err);
   }
 });
 

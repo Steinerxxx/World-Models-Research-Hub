@@ -74,9 +74,23 @@ Do not include any other text or markdown formatting.
   }
 }
 
+const ALLOWED_TAGS = [
+  'Reinforcement Learning', 
+  'Generative Models', 
+  'Video Prediction', 
+  'Robotics', 
+  'Sim-to-Real',
+  'Planning', 
+  'Representation Learning',
+  'Transformers', 
+  'Diffusion Models', 
+  'RNN', 
+  'State Space Models'
+];
+
 /**
- * Combined function to check relevance and classify a paper in a single AI call.
- * This is significantly faster than calling two separate functions.
+ * Task 1: Check relevance to World Models / MBRL
+ * Task 2: Classify into specific categories
  */
 export async function processPaperWithAI(title, abstract) {
   if (!openai) {
@@ -92,7 +106,11 @@ Abstract: "${abstract}"
 Task 1: Determine if this paper is relevant to "World Models" or "Model-Based Reinforcement Learning" (MBRL).
 Relevant topics: dynamics models, planning/policy training with learned models, environment generative models, representation learning for world modeling.
 
-Task 2: If relevant, classify the paper into categories (e.g., Robotics, Planning, Transformers, Diffusion Models, Sim-to-Real, RNN, State Space Models, Offline RL, Safe RL).
+Task 2: If relevant, classify the paper into categories. 
+1. Use relevant tags from this CORE list: ${ALLOWED_TAGS.join(', ')}.
+2. You MAY also generate 1-3 highly specific "Discovery Tags" if the paper introduces significant new concepts (e.g., "Offline RL", "Safe RL", "Multi-Agent Systems", "Decision Transformers"). 
+3. Avoid generic tags like "Machine Learning" or "AI".
+4. Be concise and professional.
 
 Return ONLY a JSON object:
 {
@@ -105,10 +123,10 @@ DO NOT include "World Models" or "Model-Based RL" in tags.
     const response = await openai.chat.completions.create({
       model: modelName,
       messages: [
-        { role: 'system', content: 'You are a helpful assistant that outputs strict JSON objects.' },
+        { role: 'system', content: 'You are a helpful assistant that outputs strict JSON objects. You combine core categories with discovery tags.' },
         { role: 'user', content: prompt }
       ],
-      temperature: 0.1,
+      temperature: 0.2,
       max_tokens: 150,
     });
 
@@ -136,34 +154,19 @@ export async function classifyWithAI(title, abstract) {
 
   try {
     const prompt = `
-You are an expert academic researcher in Artificial Intelligence, specializing in World Models, Model-Based Reinforcement Learning (MBRL), and Generative AI.
-
+You are an expert academic researcher in Artificial Intelligence.
 Analyze the following research paper:
 Title: "${title}"
 Abstract: "${abstract}"
 
-Your task is to classify this paper into relevant categories.
-Choose from the following list of tags (you can select multiple, but only if they are strongly relevant):
-- Reinforcement Learning
-- Generative Models
-- Video Prediction
-- Robotics
-- Planning
-- Representation Learning
-- Transformers
-- Diffusion Models
-- Sim-to-Real
-- RNN
-- State Space Models
-
-Instructions:
-1. DO NOT include "World Models" or "Model-Based RL" as tags, as they are implied by the context of this platform.
-2. Focus on more specific sub-fields (e.g., "Robotics", "Planning", "Video Prediction").
-3. You may generate new, specific tags if they are significant (e.g., "Offline RL", "Safe RL").
-4. Return ONLY a JSON array of strings. Do not include any other text or markdown formatting.
+Your task is to classify this paper.
+1. Use relevant tags from this CORE list: ${ALLOWED_TAGS.join(', ')}.
+2. You SHOULD also generate 1-3 highly specific "Discovery Tags" for emerging research topics (e.g., "Active Inference", "Joint-Embedding", "World Models for Robotics").
+3. DO NOT include "World Models" or "Model-Based RL" as tags.
+4. Return ONLY a JSON array of strings.
 
 Example Output:
-["Robotics", "Planning", "Representation Learning"]
+["Robotics", "Planning", "Offline RL"]
     `;
 
     const response = await openai.chat.completions.create({
@@ -172,32 +175,21 @@ Example Output:
         { role: 'system', content: 'You are a helpful assistant that outputs strict JSON arrays.' },
         { role: 'user', content: prompt }
       ],
-      temperature: 0.1,
+      temperature: 0.2,
       max_tokens: 100,
     });
 
     const content = response.choices[0].message.content?.trim();
     if (!content) return [];
 
-    // Clean up potential markdown code blocks (e.g., ```json ... ```)
     const jsonStr = content.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
-
-    try {
-      const tags = JSON.parse(jsonStr);
-      if (Array.isArray(tags)) {
-        return tags;
-      }
-    } catch (parseError) {
-      console.error('Failed to parse AI response as JSON:', content);
-    }
-
-    return [];
+    const result = JSON.parse(jsonStr);
+    
+    if (!Array.isArray(result)) return [];
+    return result;
   } catch (error) {
-    if (error.status === 402) {
-      // Silent warning for balance issues to avoid log spam
-      return [];
-    }
-    console.error('Error calling AI service for classification:', error);
+    if (error.status === 402) return [];
+    console.error('Error in classifyWithAI:', error);
     return [];
   }
 }
