@@ -296,12 +296,14 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
             ))}
           </div>
 
-          {/* Promoted Tags (Emerging Research) */}
-          {prominentTags.length > 0 && (
+          {/* Emerging Research (Prominent & Minor Tags) */}
+          {(prominentTags.length > 0 || minorTags.length > 0) && (
             <div className="space-y-1">
               <h3 className="text-xs font-semibold text-orange-500/80 uppercase tracking-wider mb-2 mt-4 px-2 flex items-center gap-2">
                 <TrendingUp className="h-3 w-3" /> Emerging Research
               </h3>
+              
+              {/* Prominent Tags */}
               {prominentTags.map(({ tag }) => (
                 <button
                   key={tag}
@@ -323,69 +325,65 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
                   <span className="font-medium">{tag}</span>
                 </button>
               ))}
-            </div>
-          )}
 
-          {/* Minor Tags (Folded) */}
-          {minorTags.length > 0 && (
-            <div 
-              className="space-y-1"
-            >
-              {!prominentTags.length && (
-                <h3 className="text-xs font-semibold text-orange-500/80 uppercase tracking-wider mb-2 mt-4 px-2 flex items-center gap-2">
-                  <TrendingUp className="h-3 w-3" /> Emerging Research
-                </h3>
-              )}
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 group border border-dashed border-border/50 hover:border-orange-500/30"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="p-1 rounded bg-orange-500/5 group-hover:bg-orange-500/10">
-                    <List className="h-3 w-3 text-orange-500/70" />
-                  </div>
-                  <span>Discover More Topics</span>
-                  <span className="ml-1 text-[10px] px-1 rounded bg-muted text-muted-foreground group-hover:bg-orange-500/20 group-hover:text-orange-500">
-                    {minorTags.length}
-                  </span>
-                </div>
-                <ArrowUpDown className={`h-3 w-3 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-orange-500' : 'text-muted-foreground/50'}`} />
-              </button>
-              
-              <AnimatePresence initial={false}>
-                {isExpanded && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="overflow-hidden"
+              {/* Minor Tags (Folded Button) */}
+              {minorTags.length > 0 && (
+                <>
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 group border border-dashed border-border/50 hover:border-orange-500/30"
                   >
-                    <div className="pt-1 pb-2 space-y-0.5 pl-2 border-l-2 border-orange-500/10 ml-4 mt-1">
-                      {minorTags.map(({ tag, count }) => (
-                        <button
-                          key={tag}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            toggleTag(tag);
-                            navigate('/');
-                            if (isMobile) onClose();
-                            window.scrollTo(0, 0);
-                          }}
-                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md text-xs transition-all ${
-                            selectedTags.includes(tag)
-                              ? 'bg-orange-500/10 text-orange-500 font-medium'
-                              : 'text-muted-foreground/70 hover:bg-muted hover:text-foreground'
-                          }`}
-                        >
-                          <span className="truncate">{tag}</span>
-                          <span className="text-[10px] opacity-50 font-mono">{count}</span>
-                        </button>
-                      ))}
+                    <div className="flex items-center gap-2">
+                      <div className="p-1 rounded bg-orange-500/5 group-hover:bg-orange-500/10">
+                        <List className="h-3 w-3 text-orange-500/70" />
+                      </div>
+                      <span>Discover More Topics</span>
+                      <span className="ml-1 text-[10px] px-1 rounded bg-muted text-muted-foreground group-hover:bg-orange-500/20 group-hover:text-orange-500">
+                        {minorTags.length}
+                      </span>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                    <ArrowUpDown className={`h-3 w-3 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-orange-500' : 'text-muted-foreground/50'}`} />
+                  </button>
+                  
+                  <AnimatePresence initial={false}>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pt-1 pb-2 space-y-0.5 pl-2 border-l-2 border-orange-500/10 ml-4 mt-1">
+                          {minorTags.map(({ tag, count }) => (
+                            <button
+                              key={tag}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                toggleTag(tag);
+                                navigate('/');
+                                if (isMobile) onClose();
+                                window.scrollTo(0, 0);
+                              }}
+                              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md text-xs transition-all ${
+                                selectedTags.includes(tag)
+                                  ? 'bg-orange-500/10 text-orange-500 font-medium'
+                                  : 'text-muted-foreground/70 hover:bg-muted hover:text-foreground'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Tag className={`h-3 w-3 ${selectedTags.includes(tag) ? 'text-orange-500' : 'text-muted-foreground/40'}`} />
+                                <span>{tag}</span>
+                              </div>
+                              <span className="text-[10px] opacity-50">{count}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              )}
             </div>
           )}
 
