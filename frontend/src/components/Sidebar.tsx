@@ -496,8 +496,6 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
 };
 
 export function Sidebar() {
-  const { logout } = useAuth();
-
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.matchMedia('(max-width: 767px)').matches;
