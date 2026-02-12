@@ -3,31 +3,32 @@ FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# 安装必要的构建工具
+# 安装基础工具
 RUN apt-get update && apt-get install -y python3 make g++ git && rm -rf /var/lib/apt/lists/*
 
-# 1. 先安装后端依赖
+# 复制根目录 package.json
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
-
-# 2. 再安装前端依赖
+# 复制前端 package.json
 COPY frontend/package*.json ./frontend/
+
+# 安装依赖
+RUN npm install --legacy-peer-deps
 RUN cd frontend && npm install --legacy-peer-deps
 
-# 3. 复制所有代码
+# 复制所有源代码
 COPY . .
 
-# 4. 执行前端构建 (增加内存限制，防止 OOM)
-# 设置 NODE_OPTIONS 提高构建内存上限到 4GB
+# 关键：设置 CI=false 强制忽略构建中的非致命警告
+# 增加内存限制
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN cd frontend && npm run build
+RUN cd frontend && CI=false npm run build
 
 # --- 第二阶段：运行阶段 ---
 FROM node:20-slim
 
 WORKDIR /app
 
-# 只从构建阶段复制必要的文件
+# 复制构建产物
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/backend ./backend
