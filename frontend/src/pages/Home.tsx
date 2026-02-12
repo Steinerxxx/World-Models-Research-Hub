@@ -463,6 +463,18 @@ export default function Home() {
                 </Button>
               );
             })}
+            
+            {selectedTags.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedTags([])}
+                className="h-7 px-3 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors flex items-center gap-1.5"
+              >
+                <X className="h-3 w-3" />
+                Clear All
+              </Button>
+            )}
           </div>
           {!loading && !error && (
             <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">
