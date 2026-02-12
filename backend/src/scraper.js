@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { addPaper } from './database.js';
+import { addPaper, paperExists } from './database.js';
 import { classifyPaper } from './classifier.js';
 import { processPaperWithAI } from './ai_service.js';
 
@@ -154,6 +154,14 @@ export async function scrapeArxiv(fullBackfill = false) {
               const batch = papers.slice(i, i + CONCURRENCY_LIMIT);
               const batchResults = await Promise.all(batch.map(async (paper) => {
                   try {
+                      // Skip AI processing if paper already exists to avoid tag explosion
+                      const exists = await paperExists(paper.url);
+                      if (exists) {
+                          // If it exists, we don't need to re-classify or re-verify
+                          // We just return null so it's not "re-added" with new AI tags
+                          return null; 
+                      }
+
                       const { isRelevant, tags: aiTags } = await processPaperWithAI(paper.title, paper.abstract);
                       if (isRelevant) {
                           const ruleTags = await classifyPaper(paper.title, paper.abstract);

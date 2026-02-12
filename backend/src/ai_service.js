@@ -114,15 +114,16 @@ Task 1: Determine if this paper is relevant to "World Models" or "Model-Based Re
 Relevant topics: dynamics models, planning/policy training with learned models, environment generative models, representation learning for world modeling.
 
 Task 2: If relevant, classify the paper into categories. 
-1. Use relevant tags from this CORE list: ${ALLOWED_TAGS.join(', ')}.
-2. You MAY also generate 1-3 highly specific "Discovery Tags" if the paper introduces significant new concepts (e.g., "Offline RL", "Safe RL", "Multi-Agent Systems", "Decision Transformers"). 
-3. Avoid generic tags like "Machine Learning" or "AI".
-4. Be concise and professional.
+1. STICK TO this CORE list as much as possible: ${ALLOWED_TAGS.join(', ')}.
+2. You MAY generate ONE (at most) highly specific "Discovery Tag" ONLY if the paper introduces a significant new concept not covered by the core list.
+3. If you generate a Discovery Tag, use Title Case (e.g., "Offline RL", not "offline rl").
+4. Avoid generic tags like "Machine Learning", "AI", "Neural Networks".
+5. Return 2-4 tags in total.
 
 Return ONLY a JSON object:
 {
   "isRelevant": boolean,
-  "tags": string[] (empty if not relevant)
+  "tags": string[]
 }
 DO NOT include "World Models" or "Model-Based RL" in tags.
     `;
@@ -168,27 +169,15 @@ Title: "${title}"
 Abstract: "${abstract}"
 
 Your task is to classify this paper into relevant categories.
-Choose from the following list of tags (you can select multiple, but only if they are strongly relevant):
-- Reinforcement Learning
-- Generative Models
-- Video Prediction
-- Robotics
-- Planning
-- Representation Learning
-- Transformers
-- Diffusion Models
-- Sim-to-Real
-- RNN
-- State Space Models
+1. Primary Source: Select from this core list: ${ALLOWED_TAGS.join(', ')}.
+2. Secondary Source: You may generate ONE highly specific tag ONLY if the paper introduces a major new concept (e.g., "Offline RL", "Safe RL").
+3. Constraints:
+   - Total tags: 2-4.
+   - Use Title Case.
+   - NO "World Models" or "Model-Based RL".
+   - NO generic tags like "AI" or "Research".
 
-Instructions:
-1. DO NOT include "World Models" or "Model-Based RL" as tags, as they are implied by the context of this platform.
-2. Focus on more specific sub-fields (e.g., "Robotics", "Planning", "Video Prediction").
-3. You may generate new, specific tags if they are significant (e.g., "Offline RL", "Safe RL", "Multi-Agent Systems", "Active Inference", "Decision Transformers", "World Models for Robotics").
-4. Return ONLY a JSON array of strings. Do not include any other text or markdown formatting.
-
-Example Output:
-["Robotics", "Planning", "Representation Learning", "Offline RL"]
+Return ONLY a JSON array of strings.
     `;
 
     const response = await openai.chat.completions.create({

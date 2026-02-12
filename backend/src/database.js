@@ -35,6 +35,7 @@ export const clearPaperCache = () => {
 
 // Export getter for DB status
 export const getDbStatus = () => isDbConnected;
+export const getLocalDbPath = () => LOCAL_DB_PATH;
 
 pool.on('error', (err, client) => {
   console.error('Unexpected error on idle client', err);
@@ -217,6 +218,16 @@ export async function updatePaperSummary(id, analysis) {
       papers[paperIndex] = { ...papers[paperIndex], ...analysis };
       fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(papers, null, 2));
     }
+  }
+}
+
+export async function paperExists(url) {
+  if (isDbConnected) {
+    const { rows } = await query('SELECT 1 FROM papers WHERE url = $1', [url]);
+    return rows.length > 0;
+  } else {
+    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
+    return papers.some(p => p.url === url);
   }
 }
 

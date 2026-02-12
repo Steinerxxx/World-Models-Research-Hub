@@ -9,7 +9,6 @@
     "publication_date": "2018-03-27",
     "url": "https://arxiv.org/abs/1803.10122",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models"
     ],
@@ -28,8 +27,6 @@
     "publication_date": "2023-01-10",
     "url": "https://arxiv.org/abs/2301.04104",
     "tags": [
-      "Model-Based RL",
-      "World Models",
       "General Intelligence"
     ],
     "id": 1770819936436,
@@ -47,7 +44,6 @@
     "publication_date": "2020-10-01",
     "url": "https://arxiv.org/abs/2010.02193",
     "tags": [
-      "Model-Based RL",
       "Discrete Latents",
       "Atari"
     ],
@@ -66,9 +62,7 @@
     "url": "https://arxiv.org/pdf/2602.10104",
     "publication_date": "2026-02-10",
     "tags": [
-      "World Models",
       "Robotics",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -92,10 +86,8 @@
     "url": "https://arxiv.org/pdf/2602.10098",
     "publication_date": "2026-02-10",
     "tags": [
-      "World Models",
       "Robotics",
       "Representation Learning",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -118,10 +110,8 @@
     "url": "https://arxiv.org/pdf/2602.10090",
     "publication_date": "2026-02-10",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819938397,
@@ -140,8 +130,6 @@
     "url": "https://arxiv.org/pdf/2602.10044",
     "publication_date": "2026-02-10",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Generative Models"
@@ -168,8 +156,6 @@
     "url": "https://arxiv.org/pdf/2602.09878",
     "publication_date": "2026-02-10",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models",
       "Video Prediction",
@@ -195,11 +181,9 @@
     "url": "https://arxiv.org/pdf/2602.09856",
     "publication_date": "2026-02-10",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819938398,
@@ -219,14 +203,12 @@
     "url": "https://arxiv.org/pdf/2602.09600",
     "publication_date": "2026-02-10",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Video Prediction",
       "Robotics",
       "Representation Learning",
-      "Diffusion Models",
-      "Model-Based RL"
+      "Diffusion Models"
     ],
     "id": 1770819938399,
     "created_at": "2026-02-11T14:25:38.399Z"
@@ -251,11 +233,9 @@
     "url": "https://arxiv.org/pdf/2602.09022",
     "publication_date": "2026-02-09",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
-      "Video Prediction",
-      "Model-Based RL"
+      "Video Prediction"
     ],
     "id": 1770819938400,
     "created_at": "2026-02-11T14:25:38.400Z"
@@ -287,10 +267,8 @@
     "url": "https://arxiv.org/pdf/2602.08971",
     "publication_date": "2026-02-09",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819938400,
@@ -311,11 +289,9 @@
     "url": "https://arxiv.org/pdf/2602.08968",
     "publication_date": "2026-02-09",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819938401,
@@ -336,11 +312,9 @@
     "url": "https://arxiv.org/pdf/2602.08236",
     "publication_date": "2026-02-08",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819938402,
@@ -361,8 +335,6 @@
     "url": "https://arxiv.org/pdf/2602.08204",
     "publication_date": "2026-02-08",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models"
     ],
@@ -382,12 +354,10 @@
     "url": "https://arxiv.org/pdf/2602.08032",
     "publication_date": "2026-02-08",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Robotics",
-      "Diffusion Models",
-      "Model-Based RL"
+      "Diffusion Models"
     ],
     "id": 1770819938404,
     "created_at": "2026-02-11T14:25:38.404Z"
@@ -410,9 +380,7 @@
     "url": "https://arxiv.org/pdf/2602.08025",
     "publication_date": "2026-02-08",
     "tags": [
-      "World Models",
       "Robotics",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -437,12 +405,10 @@
     "url": "https://arxiv.org/pdf/2602.07854",
     "publication_date": "2026-02-08",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Representation Learning",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819938406,
@@ -457,10 +423,8 @@
     "url": "https://arxiv.org/pdf/2602.07672",
     "publication_date": "2026-02-07",
     "tags": [
-      "World Models",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -480,9 +444,7 @@
     "url": "https://arxiv.org/pdf/2602.07277",
     "publication_date": "2026-02-06",
     "tags": [
-      "World Models",
       "Planning",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -505,11 +467,9 @@
     "url": "https://arxiv.org/pdf/2602.07050",
     "publication_date": "2026-02-04",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819938409,
@@ -527,10 +487,8 @@
     "url": "https://arxiv.org/pdf/2602.07030",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
       "Generative Models",
       "Transformers",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819938409,
@@ -570,8 +528,6 @@
     "url": "https://arxiv.org/pdf/2602.06949",
     "publication_date": "2026-02-06",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Robotics",
       "Planning",
       "Generative Models",
@@ -592,8 +548,6 @@
     "url": "https://arxiv.org/pdf/2602.06923",
     "publication_date": "2026-02-06",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Transformers",
       "Generative Models",
       "Reinforcement Learning"
@@ -616,12 +570,10 @@
     "url": "https://arxiv.org/pdf/2602.06521",
     "publication_date": "2026-02-06",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
       "Representation Learning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819938412,
@@ -640,11 +592,9 @@
     "url": "https://arxiv.org/pdf/2602.06508",
     "publication_date": "2026-02-06",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819938413,
@@ -662,12 +612,10 @@
     "url": "https://arxiv.org/pdf/2602.06219",
     "publication_date": "2026-02-05",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Robotics",
-      "Diffusion Models",
-      "Model-Based RL"
+      "Diffusion Models"
     ],
     "id": 1770819938413,
     "created_at": "2026-02-11T14:25:38.413Z"
@@ -687,11 +635,9 @@
     "url": "https://arxiv.org/pdf/2602.06130",
     "publication_date": "2026-02-05",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Video Prediction",
       "Planning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819938414,
@@ -711,11 +657,9 @@
     "url": "https://arxiv.org/pdf/2602.06001",
     "publication_date": "2026-02-05",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819938415,
@@ -731,9 +675,7 @@
     "url": "https://arxiv.org/pdf/2602.05903",
     "publication_date": "2026-02-05",
     "tags": [
-      "World Models",
       "Generative Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819938416,
@@ -756,11 +698,9 @@
     "url": "https://arxiv.org/pdf/2602.05842",
     "publication_date": "2026-02-08",
     "tags": [
-      "World Models",
-      "Sim-to-Real",
+      "Sim To Real",
       "Representation Learning",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -780,10 +720,8 @@
     "url": "https://arxiv.org/pdf/2602.05557",
     "publication_date": "2026-02-05",
     "tags": [
-      "World Models",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -802,8 +740,6 @@
     "url": "https://arxiv.org/pdf/2602.05031",
     "publication_date": "2026-02-04",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Planning",
       "Representation Learning",
@@ -824,10 +760,8 @@
     "url": "https://arxiv.org/pdf/2602.04821",
     "publication_date": "2026-02-04",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819938419,
@@ -844,8 +778,6 @@
     "url": "https://arxiv.org/pdf/2602.04566",
     "publication_date": "2026-02-04",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
@@ -866,11 +798,9 @@
     "url": "https://arxiv.org/pdf/2602.04212",
     "publication_date": "2026-02-03",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Representation Learning",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819938425,
@@ -885,8 +815,6 @@
     "url": "https://arxiv.org/pdf/2602.03974",
     "publication_date": "2026-02-03",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Robotics",
       "Planning",
       "Generative Models",
@@ -914,13 +842,11 @@
     "url": "https://arxiv.org/pdf/2602.03793",
     "publication_date": "2026-02-03",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Robotics",
       "Planning",
       "Transformers",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819938427,
@@ -942,9 +868,7 @@
     "url": "https://arxiv.org/pdf/2602.03747",
     "publication_date": "2026-02-03",
     "tags": [
-      "World Models",
       "Generative Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819938428,
@@ -969,12 +893,10 @@
     "url": "https://arxiv.org/pdf/2602.03604",
     "publication_date": "2026-02-06",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Planning",
       "Representation Learning",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819938428,
@@ -994,9 +916,7 @@
     "url": "https://arxiv.org/pdf/2602.03569",
     "publication_date": "2026-02-03",
     "tags": [
-      "World Models",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -1015,8 +935,6 @@
     "url": "https://arxiv.org/pdf/2602.03501",
     "publication_date": "2026-02-03",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models",
       "Robotics"
@@ -1036,9 +954,7 @@
     "url": "https://arxiv.org/pdf/2602.03490",
     "publication_date": "2026-02-03",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819938432,
@@ -1058,10 +974,8 @@
     "url": "https://arxiv.org/pdf/2602.03242",
     "publication_date": "2026-02-03",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819938433,
@@ -1077,11 +991,9 @@
     "url": "https://arxiv.org/pdf/2602.03213",
     "publication_date": "2026-02-09",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Robotics",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819938434,
@@ -1105,8 +1017,6 @@
     "url": "https://arxiv.org/pdf/2602.03201",
     "publication_date": "2026-02-10",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Planning",
       "Generative Models"
@@ -1123,8 +1033,6 @@
     "url": "https://arxiv.org/pdf/2602.03146",
     "publication_date": "2026-02-03",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -1142,8 +1050,6 @@
     "url": "https://arxiv.org/pdf/2602.02857",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
@@ -1164,8 +1070,6 @@
     "url": "https://arxiv.org/pdf/2602.02799",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -1186,11 +1090,9 @@
     "url": "https://arxiv.org/pdf/2602.02454",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
-      "Sim-to-Real",
-      "Model-Based RL",
+      "Sim To Real",
       "Generative Models"
     ],
     "id": 1770819938439,
@@ -1215,9 +1117,7 @@
     "url": "https://arxiv.org/pdf/2602.02393",
     "publication_date": "2026-02-03",
     "tags": [
-      "World Models",
       "Robotics",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -1238,9 +1138,7 @@
     "url": "https://arxiv.org/pdf/2602.02381",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
       "Representation Learning",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -1257,9 +1155,7 @@
     "url": "https://arxiv.org/pdf/2602.02283",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819938442,
@@ -1279,8 +1175,6 @@
     "url": "https://arxiv.org/pdf/2602.02110",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Planning",
       "Representation Learning",
       "Transformers",
@@ -1311,8 +1205,6 @@
     "url": "https://arxiv.org/pdf/2602.02002",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models",
       "Transformers"
@@ -1331,12 +1223,10 @@
     "url": "https://arxiv.org/pdf/2602.01960",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819940628,
@@ -1356,11 +1246,9 @@
     "url": "https://arxiv.org/pdf/2602.01801",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
       "Generative Models",
       "Transformers",
       "Diffusion Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819940629,
@@ -1380,11 +1268,9 @@
     "url": "https://arxiv.org/pdf/2602.01780",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
       "Robotics",
       "Planning",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -1405,10 +1291,8 @@
     "url": "https://arxiv.org/pdf/2602.01725",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Planning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819940633,
@@ -1428,12 +1312,10 @@
     "url": "https://arxiv.org/pdf/2602.01644",
     "publication_date": "2026-02-02",
     "tags": [
-      "World Models",
       "Robotics",
       "Planning",
       "Transformers",
       "State Space Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -1474,8 +1356,6 @@
     "url": "https://arxiv.org/pdf/2602.01630",
     "publication_date": "2026-02-01",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -1495,9 +1375,7 @@
     "url": "https://arxiv.org/pdf/2602.01576",
     "publication_date": "2026-02-01",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819940637,
@@ -1519,13 +1397,11 @@
     "url": "https://arxiv.org/pdf/2602.01536",
     "publication_date": "2026-02-01",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Planning",
       "Representation Learning",
       "Transformers",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819940638,
@@ -1546,8 +1422,6 @@
     "url": "https://arxiv.org/pdf/2602.01270",
     "publication_date": "2026-02-01",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Video Prediction",
       "Transformers",
@@ -1565,11 +1439,9 @@
     "url": "https://arxiv.org/pdf/2602.00785",
     "publication_date": "2026-01-31",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819940640,
@@ -1589,9 +1461,7 @@
     "url": "https://arxiv.org/pdf/2602.00608",
     "publication_date": "2026-01-31",
     "tags": [
-      "World Models",
       "Generative Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819940641,
@@ -1610,14 +1480,12 @@
     "url": "https://arxiv.org/pdf/2602.00558",
     "publication_date": "2026-01-31",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Video Prediction",
       "Robotics",
       "Planning",
-      "Diffusion Models",
-      "Model-Based RL"
+      "Diffusion Models"
     ],
     "id": 1770819940642,
     "created_at": "2026-02-11T14:25:40.642Z"
@@ -1635,11 +1503,9 @@
     "url": "https://arxiv.org/pdf/2602.00475",
     "publication_date": "2026-01-30",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819940643,
@@ -1657,12 +1523,10 @@
     "url": "https://arxiv.org/pdf/2602.00440",
     "publication_date": "2026-01-30",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Planning",
       "Transformers",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819940645,
@@ -1682,11 +1546,9 @@
     "url": "https://arxiv.org/pdf/2602.00148",
     "publication_date": "2026-01-29",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
-      "Video Prediction",
-      "Model-Based RL"
+      "Video Prediction"
     ],
     "id": 1770819940647,
     "created_at": "2026-02-11T14:25:40.647Z"
@@ -1714,10 +1576,8 @@
     "url": "https://arxiv.org/pdf/2602.00096",
     "publication_date": "2026-01-24",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819940648,
@@ -1735,8 +1595,6 @@
     "url": "https://arxiv.org/pdf/2601.22647",
     "publication_date": "2026-01-30",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -1761,8 +1619,6 @@
     "url": "https://arxiv.org/pdf/2601.22149",
     "publication_date": "2026-01-29",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Transformers",
       "Generative Models"
@@ -1786,10 +1642,8 @@
     "url": "https://arxiv.org/pdf/2601.22130",
     "publication_date": "2026-01-29",
     "tags": [
-      "World Models",
       "Video Prediction",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -1812,12 +1666,10 @@
     "url": "https://arxiv.org/pdf/2601.22128",
     "publication_date": "2026-01-29",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Representation Learning",
       "Transformers",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819940653,
@@ -1835,12 +1687,10 @@
     "url": "https://arxiv.org/pdf/2601.22086",
     "publication_date": "2026-01-29",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Video Prediction",
-      "Robotics",
-      "Model-Based RL"
+      "Robotics"
     ],
     "id": 1770819940655,
     "created_at": "2026-02-11T14:25:40.655Z"
@@ -1862,12 +1712,10 @@
     "url": "https://arxiv.org/pdf/2601.22032",
     "publication_date": "2026-01-29",
     "tags": [
-      "World Models",
       "Robotics",
       "Planning",
       "Representation Learning",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -1894,13 +1742,11 @@
     "url": "https://arxiv.org/pdf/2601.21998",
     "publication_date": "2026-01-29",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Robotics",
       "Representation Learning",
-      "Transformers",
-      "Model-Based RL"
+      "Transformers"
     ],
     "id": 1770819940657,
     "created_at": "2026-02-11T14:25:40.657Z"
@@ -1919,8 +1765,6 @@
     "url": "https://arxiv.org/pdf/2601.21363",
     "publication_date": "2026-01-29",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Generative Models"
@@ -1941,8 +1785,6 @@
     "url": "https://arxiv.org/pdf/2601.21306",
     "publication_date": "2026-01-29",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models"
     ],
@@ -1967,12 +1809,10 @@
     "url": "https://arxiv.org/pdf/2601.21282",
     "publication_date": "2026-01-29",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819940661,
@@ -2010,13 +1850,11 @@
     "url": "https://arxiv.org/pdf/2601.20540",
     "publication_date": "2026-01-28",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Video Prediction",
       "Robotics",
-      "Transformers",
-      "Model-Based RL"
+      "Transformers"
     ],
     "id": 1770819940662,
     "created_at": "2026-02-11T14:25:40.662Z"
@@ -2032,11 +1870,9 @@
     "url": "https://arxiv.org/pdf/2601.20539",
     "publication_date": "2026-01-29",
     "tags": [
-      "World Models",
       "Robotics",
       "Planning",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -2053,10 +1889,8 @@
     "url": "https://arxiv.org/pdf/2601.20071",
     "publication_date": "2026-01-30",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
-      "Generative Models",
-      "Model-Based RL"
+      "Generative Models"
     ],
     "id": 1770819940665,
     "created_at": "2026-02-11T14:25:40.665Z"
@@ -2077,11 +1911,9 @@
     "url": "https://arxiv.org/pdf/2601.19839",
     "publication_date": "2026-01-27",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819940667,
@@ -2105,10 +1937,8 @@
     "url": "https://arxiv.org/pdf/2601.19834",
     "publication_date": "2026-01-27",
     "tags": [
-      "World Models",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -2129,8 +1959,6 @@
     "url": "https://arxiv.org/pdf/2601.19822",
     "publication_date": "2026-01-27",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Representation Learning",
@@ -2148,10 +1976,8 @@
     "url": "https://arxiv.org/pdf/2601.19819",
     "publication_date": "2026-01-27",
     "tags": [
-      "World Models",
       "Generative Models",
       "Transformers",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819940671,
@@ -2172,8 +1998,6 @@
     "url": "https://arxiv.org/pdf/2601.19752",
     "publication_date": "2026-01-27",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -2194,11 +2018,9 @@
     "url": "https://arxiv.org/pdf/2601.19484",
     "publication_date": "2026-01-27",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Diffusion Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819940675,
@@ -2218,8 +2040,6 @@
     "url": "https://arxiv.org/pdf/2601.19336",
     "publication_date": "2026-01-27",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Generative Models"
@@ -2242,9 +2062,7 @@
     "url": "https://arxiv.org/pdf/2601.18987",
     "publication_date": "2026-01-28",
     "tags": [
-      "World Models",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -2264,9 +2082,7 @@
     "url": "https://arxiv.org/pdf/2601.18620",
     "publication_date": "2026-01-26",
     "tags": [
-      "World Models",
       "Planning",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -2291,13 +2107,11 @@
     "url": "https://arxiv.org/pdf/2601.18323",
     "publication_date": "2026-01-26",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Video Prediction",
       "Robotics",
-      "Planning",
-      "Model-Based RL"
+      "Planning"
     ],
     "id": 1770819940681,
     "created_at": "2026-02-11T14:25:40.681Z"
@@ -2312,8 +2126,6 @@
     "url": "https://arxiv.org/pdf/2601.18107",
     "publication_date": "2026-01-25",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models",
       "Robotics",
@@ -2334,8 +2146,6 @@
     "url": "https://arxiv.org/pdf/2601.18069",
     "publication_date": "2026-01-25",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models",
       "Robotics",
@@ -2353,10 +2163,8 @@
     "url": "https://arxiv.org/pdf/2601.17796",
     "publication_date": "2026-01-25",
     "tags": [
-      "World Models",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -2376,8 +2184,6 @@
     "url": "https://arxiv.org/pdf/2601.17507",
     "publication_date": "2026-01-24",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Video Prediction",
       "Robotics",
@@ -2417,12 +2223,10 @@
     "url": "https://arxiv.org/pdf/2601.17323",
     "publication_date": "2026-01-28",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Video Prediction",
-      "Transformers",
-      "Model-Based RL"
+      "Transformers"
     ],
     "id": 1770819940688,
     "created_at": "2026-02-11T14:25:40.688Z"
@@ -2436,12 +2240,10 @@
     "url": "https://arxiv.org/pdf/2601.17094",
     "publication_date": "2026-01-23",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Representation Learning",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819940690,
@@ -2469,10 +2271,8 @@
     "url": "https://arxiv.org/pdf/2601.17067",
     "publication_date": "2026-01-22",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819940691,
@@ -2487,8 +2287,6 @@
     "url": "https://arxiv.org/pdf/2601.16985",
     "publication_date": "2026-01-01",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
@@ -2516,8 +2314,6 @@
     "url": "https://arxiv.org/pdf/2601.16163",
     "publication_date": "2026-01-22",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Video Prediction",
       "Robotics",
@@ -2555,11 +2351,9 @@
     "url": "https://arxiv.org/pdf/2601.16007",
     "publication_date": "2026-01-22",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Transformers",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942608,
@@ -2575,12 +2369,10 @@
     "url": "https://arxiv.org/pdf/2601.15533",
     "publication_date": "2026-01-21",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Video Prediction",
-      "Planning",
-      "Model-Based RL"
+      "Planning"
     ],
     "id": 1770819942611,
     "created_at": "2026-02-11T14:25:42.611Z"
@@ -2598,8 +2390,6 @@
     "url": "https://arxiv.org/pdf/2601.15363",
     "publication_date": "2026-01-21",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models"
     ],
@@ -2620,12 +2410,10 @@
     "url": "https://arxiv.org/pdf/2601.15284",
     "publication_date": "2026-01-21",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Robotics",
       "Diffusion Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942614,
@@ -2648,11 +2436,9 @@
     "url": "https://arxiv.org/pdf/2601.15281",
     "publication_date": "2026-01-21",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Robotics",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942615,
@@ -2671,10 +2457,8 @@
     "url": "https://arxiv.org/pdf/2601.14514",
     "publication_date": "2026-01-20",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Planning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819942617,
@@ -2689,12 +2473,10 @@
     "url": "https://arxiv.org/pdf/2601.14354",
     "publication_date": "2026-01-20",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Planning",
       "Representation Learning",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942618,
@@ -2717,10 +2499,8 @@
     "url": "https://arxiv.org/pdf/2601.13304",
     "publication_date": "2026-01-19",
     "tags": [
-      "World Models",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -2741,9 +2521,7 @@
     "url": "https://arxiv.org/pdf/2601.13247",
     "publication_date": "2026-01-19",
     "tags": [
-      "World Models",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -2763,11 +2541,9 @@
     "url": "https://arxiv.org/pdf/2601.12939",
     "publication_date": "2026-01-19",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819942624,
@@ -2807,13 +2583,11 @@
     "url": "https://arxiv.org/pdf/2601.12538",
     "publication_date": "2026-01-18",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Robotics",
       "Planning",
-      "Transformers",
-      "Model-Based RL"
+      "Transformers"
     ],
     "id": 1770819942627,
     "created_at": "2026-02-11T14:25:42.627Z"
@@ -2834,10 +2608,8 @@
     "url": "https://arxiv.org/pdf/2601.12428",
     "publication_date": "2026-01-18",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819942629,
@@ -2856,13 +2628,11 @@
     "url": "https://arxiv.org/pdf/2601.12277",
     "publication_date": "2026-01-18",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Planning",
       "Transformers",
       "Diffusion Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942630,
@@ -2878,8 +2648,6 @@
     "url": "https://arxiv.org/pdf/2601.10905",
     "publication_date": "2026-01-15",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models"
     ],
@@ -2903,11 +2671,9 @@
     "url": "https://arxiv.org/pdf/2601.10592",
     "publication_date": "2026-01-15",
     "tags": [
-      "World Models",
       "Generative Models",
       "Representation Learning",
       "Transformers",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942634,
@@ -2931,12 +2697,10 @@
     "url": "https://arxiv.org/pdf/2601.10553",
     "publication_date": "2026-01-15",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Representation Learning",
       "Diffusion Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942636,
@@ -2955,13 +2719,11 @@
     "url": "https://arxiv.org/pdf/2601.09452",
     "publication_date": "2026-01-14",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Robotics",
       "Transformers",
-      "Diffusion Models",
-      "Model-Based RL"
+      "Diffusion Models"
     ],
     "id": 1770819942638,
     "created_at": "2026-02-11T14:25:42.638Z"
@@ -2979,10 +2741,8 @@
     "url": "https://arxiv.org/pdf/2601.08955",
     "publication_date": "2026-01-13",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Planning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819942640,
@@ -2997,10 +2757,8 @@
     "url": "https://arxiv.org/pdf/2601.08388",
     "publication_date": "2026-01-13",
     "tags": [
-      "World Models",
       "Generative Models",
       "Transformers",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942642,
@@ -3015,10 +2773,8 @@
     "url": "https://arxiv.org/pdf/2601.07964",
     "publication_date": "2026-01-12",
     "tags": [
-      "World Models",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3045,13 +2801,11 @@
     "url": "https://arxiv.org/pdf/2601.07823",
     "publication_date": "2026-01-12",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Video Prediction",
       "Robotics",
-      "Planning",
-      "Model-Based RL"
+      "Planning"
     ],
     "id": 1770819942647,
     "created_at": "2026-02-11T14:25:42.647Z"
@@ -3072,8 +2826,6 @@
     "url": "https://arxiv.org/pdf/2601.07821",
     "publication_date": "2026-01-12",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Transformers",
@@ -3094,8 +2846,6 @@
     "url": "https://arxiv.org/pdf/2601.07463",
     "publication_date": "2026-01-12",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models"
     ],
@@ -3113,8 +2863,6 @@
     "url": "https://arxiv.org/pdf/2601.06604",
     "publication_date": "2026-01-10",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Planning",
       "Generative Models"
@@ -3131,14 +2879,12 @@
     "url": "https://arxiv.org/pdf/2601.06212",
     "publication_date": "2026-01-08",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Representation Learning",
       "Transformers",
       "Diffusion Models",
       "State Space Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942655,
@@ -3160,8 +2906,6 @@
     "url": "https://arxiv.org/pdf/2601.05930",
     "publication_date": "2026-01-09",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3185,12 +2929,10 @@
     "url": "https://arxiv.org/pdf/2601.05848",
     "publication_date": "2026-01-09",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942660,
@@ -3209,9 +2951,7 @@
     "url": "https://arxiv.org/pdf/2601.05653",
     "publication_date": "2026-01-09",
     "tags": [
-      "World Models",
       "Robotics",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3232,10 +2972,8 @@
     "url": "https://arxiv.org/pdf/2601.05230",
     "publication_date": "2026-01-20",
     "tags": [
-      "World Models",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3256,11 +2994,9 @@
     "url": "https://arxiv.org/pdf/2601.05138",
     "publication_date": "2026-01-08",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Diffusion Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942666,
@@ -3279,8 +3015,6 @@
     "url": "https://arxiv.org/pdf/2601.04887",
     "publication_date": "2026-01-08",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models"
     ],
@@ -3296,8 +3030,6 @@
     "url": "https://arxiv.org/pdf/2601.04695",
     "publication_date": "2026-01-08",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
@@ -3318,8 +3050,6 @@
     "url": "https://arxiv.org/pdf/2601.04686",
     "publication_date": "2026-01-08",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
@@ -3344,11 +3074,9 @@
     "url": "https://arxiv.org/pdf/2601.04453",
     "publication_date": "2026-01-07",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942675,
@@ -3383,11 +3111,9 @@
     "url": "https://arxiv.org/pdf/2601.04137",
     "publication_date": "2026-01-07",
     "tags": [
-      "World Models",
       "Video Prediction",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3411,8 +3137,6 @@
     "url": "https://arxiv.org/pdf/2601.04035",
     "publication_date": "2026-01-07",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models"
     ],
@@ -3438,8 +3162,6 @@
     "url": "https://arxiv.org/pdf/2601.03905",
     "publication_date": "2026-01-07",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3461,10 +3183,8 @@
     "url": "https://arxiv.org/pdf/2601.03782",
     "publication_date": "2026-01-07",
     "tags": [
-      "World Models",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3503,8 +3223,6 @@
     "url": "https://arxiv.org/pdf/2601.03517",
     "publication_date": "2026-01-06",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Video Prediction",
       "Robotics",
@@ -3526,8 +3244,6 @@
     "url": "https://arxiv.org/pdf/2601.03486",
     "publication_date": "2026-01-13",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
@@ -3546,11 +3262,9 @@
     "url": "https://arxiv.org/pdf/2601.02714",
     "publication_date": "2026-01-06",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819942699,
@@ -3590,12 +3304,10 @@
     "url": "https://arxiv.org/pdf/2601.02456",
     "publication_date": "2026-01-05",
     "tags": [
-      "World Models",
       "Video Prediction",
       "Robotics",
-      "Sim-to-Real",
+      "Sim To Real",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3615,9 +3327,7 @@
     "url": "https://arxiv.org/pdf/2601.02378",
     "publication_date": "2025-12-17",
     "tags": [
-      "World Models",
       "Robotics",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3633,11 +3343,9 @@
     "url": "https://arxiv.org/pdf/2601.01743",
     "publication_date": "2026-01-04",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942706,
@@ -3657,9 +3365,7 @@
     "url": "https://arxiv.org/pdf/2601.01705",
     "publication_date": "2026-01-11",
     "tags": [
-      "World Models",
       "Robotics",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3678,12 +3384,10 @@
     "url": "https://arxiv.org/pdf/2601.01577",
     "publication_date": "2026-01-04",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
       "Representation Learning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819942711,
@@ -3703,13 +3407,11 @@
     "url": "https://arxiv.org/pdf/2601.01528",
     "publication_date": "2026-01-04",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Robotics",
       "Planning",
       "Transformers",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819942713,
@@ -3749,11 +3451,9 @@
     "url": "https://arxiv.org/pdf/2601.01321",
     "publication_date": "2026-01-03",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819942716,
@@ -3772,8 +3472,6 @@
     "url": "https://arxiv.org/pdf/2601.01075",
     "publication_date": "2026-01-03",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3792,9 +3490,7 @@
     "url": "https://arxiv.org/pdf/2601.00930",
     "publication_date": "2026-01-01",
     "tags": [
-      "World Models",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3811,9 +3507,7 @@
     "url": "https://arxiv.org/pdf/2601.00911",
     "publication_date": "2026-01-23",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819944650,
@@ -3832,12 +3526,10 @@
     "url": "https://arxiv.org/pdf/2601.00844",
     "publication_date": "2025-12-28",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
       "Representation Learning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819944654,
@@ -3853,8 +3545,6 @@
     "url": "https://arxiv.org/pdf/2601.00755",
     "publication_date": "2026-01-02",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3874,8 +3564,6 @@
     "url": "https://arxiv.org/pdf/2601.00476",
     "publication_date": "2026-01-01",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Representation Learning",
@@ -3898,11 +3586,9 @@
     "url": "https://arxiv.org/pdf/2601.00393",
     "publication_date": "2026-01-01",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Robotics",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819944663,
@@ -3942,12 +3628,10 @@
     "url": "https://arxiv.org/pdf/2601.00051",
     "publication_date": "2025-12-31",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Video Prediction",
-      "Planning",
-      "Model-Based RL"
+      "Planning"
     ],
     "id": 1770819944667,
     "created_at": "2026-02-11T14:25:44.667Z"
@@ -3968,10 +3652,8 @@
     "url": "https://arxiv.org/pdf/2512.24712",
     "publication_date": "2026-01-03",
     "tags": [
-      "World Models",
       "Representation Learning",
       "State Space Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -3991,11 +3673,9 @@
     "url": "https://arxiv.org/pdf/2512.24497",
     "publication_date": "2026-01-08",
     "tags": [
-      "World Models",
       "Robotics",
       "Planning",
       "Representation Learning",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4012,9 +3692,7 @@
     "url": "https://arxiv.org/pdf/2512.24329",
     "publication_date": "2025-12-30",
     "tags": [
-      "World Models",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4034,10 +3712,8 @@
     "url": "https://arxiv.org/pdf/2512.24149",
     "publication_date": "2025-12-30",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819944683,
@@ -4077,13 +3753,11 @@
     "url": "https://arxiv.org/pdf/2512.23994",
     "publication_date": "2025-12-30",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Robotics",
       "Transformers",
       "State Space Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819944687,
@@ -4104,9 +3778,7 @@
     "url": "https://arxiv.org/pdf/2512.23864",
     "publication_date": "2025-12-29",
     "tags": [
-      "World Models",
       "Robotics",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4126,10 +3798,8 @@
     "url": "https://arxiv.org/pdf/2512.23722",
     "publication_date": "2025-12-18",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819944693,
@@ -4149,11 +3819,9 @@
     "url": "https://arxiv.org/pdf/2512.23676",
     "publication_date": "2025-12-29",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819944696,
@@ -4175,9 +3843,7 @@
     "url": "https://arxiv.org/pdf/2512.23541",
     "publication_date": "2025-12-29",
     "tags": [
-      "World Models",
       "Robotics",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4204,12 +3870,10 @@
     "url": "https://arxiv.org/pdf/2512.23421",
     "publication_date": "2025-12-30",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819944703,
@@ -4228,8 +3892,6 @@
     "url": "https://arxiv.org/pdf/2512.23419",
     "publication_date": "2025-12-29",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Transformers",
       "Generative Models"
@@ -4256,10 +3918,8 @@
     "url": "https://arxiv.org/pdf/2512.23180",
     "publication_date": "2026-01-11",
     "tags": [
-      "World Models",
       "Generative Models",
       "Representation Learning",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819944711,
@@ -4287,10 +3947,8 @@
     "url": "https://arxiv.org/pdf/2512.23162",
     "publication_date": "2026-01-04",
     "tags": [
-      "World Models",
       "Video Prediction",
       "Robotics",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4312,8 +3970,6 @@
     "url": "https://arxiv.org/pdf/2512.22973",
     "publication_date": "2025-12-31",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4340,8 +3996,6 @@
     "url": "https://arxiv.org/pdf/2512.22336",
     "publication_date": "2025-12-26",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Planning",
       "Reinforcement Learning"
@@ -4360,10 +4014,8 @@
     "url": "https://arxiv.org/pdf/2512.22129",
     "publication_date": "2025-12-05",
     "tags": [
-      "World Models",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4393,10 +4045,8 @@
     "url": "https://arxiv.org/pdf/2512.21887",
     "publication_date": "2026-01-02",
     "tags": [
-      "World Models",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4424,11 +4074,9 @@
     "url": "https://arxiv.org/pdf/2512.21714",
     "publication_date": "2025-12-25",
     "tags": [
-      "World Models",
       "Generative Models",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819944733,
@@ -4452,9 +4100,7 @@
     "url": "https://arxiv.org/pdf/2512.21577",
     "publication_date": "2026-02-03",
     "tags": [
-      "World Models",
       "Planning",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4476,9 +4122,7 @@
     "url": "https://arxiv.org/pdf/2512.21201",
     "publication_date": "2025-12-24",
     "tags": [
-      "World Models",
       "Robotics",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4500,9 +4144,7 @@
     "url": "https://arxiv.org/pdf/2512.21129",
     "publication_date": "2025-12-24",
     "tags": [
-      "World Models",
       "Generative Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819944752,
@@ -4520,10 +4162,8 @@
     "url": "https://arxiv.org/pdf/2512.20732",
     "publication_date": "2025-12-23",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819944756,
@@ -4546,10 +4186,8 @@
     "url": "https://arxiv.org/pdf/2512.20615",
     "publication_date": "2025-12-23",
     "tags": [
-      "World Models",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4573,9 +4211,7 @@
     "url": "https://arxiv.org/pdf/2512.20013",
     "publication_date": "2025-12-22",
     "tags": [
-      "World Models",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4600,12 +4236,10 @@
     "url": "https://arxiv.org/pdf/2512.19133",
     "publication_date": "2025-12-22",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
       "Representation Learning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819944767,
@@ -4644,8 +4278,6 @@
     "url": "https://arxiv.org/pdf/2512.18850",
     "publication_date": "2025-12-27",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Generative Models"
     ],
@@ -4671,11 +4303,9 @@
     "url": "https://arxiv.org/pdf/2512.18832",
     "publication_date": "2025-12-21",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819944777,
@@ -4694,11 +4324,9 @@
     "url": "https://arxiv.org/pdf/2512.18741",
     "publication_date": "2025-12-23",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Diffusion Models",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819944780,
@@ -4719,9 +4347,7 @@
     "url": "https://arxiv.org/pdf/2512.18658",
     "publication_date": "2025-12-21",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819944784,
@@ -4737,8 +4363,6 @@
     "url": "https://arxiv.org/pdf/2512.18619",
     "publication_date": "2025-12-21",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Reinforcement Learning",
       "Robotics",
       "Planning",
@@ -4759,9 +4383,7 @@
     "url": "https://arxiv.org/pdf/2512.18489",
     "publication_date": "2025-12-20",
     "tags": [
-      "World Models",
       "Transformers",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4780,11 +4402,9 @@
     "url": "https://arxiv.org/pdf/2512.18477",
     "publication_date": "2025-12-20",
     "tags": [
-      "World Models",
       "Video Prediction",
       "Robotics",
       "Planning",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4829,11 +4449,9 @@
     "url": "https://arxiv.org/pdf/2512.17992",
     "publication_date": "2025-12-19",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819944801,
@@ -4851,12 +4469,10 @@
     "url": "https://arxiv.org/pdf/2512.17907",
     "publication_date": "2025-12-19",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
       "Robotics",
       "Transformers",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819944804,
@@ -4875,12 +4491,10 @@
     "url": "https://arxiv.org/pdf/2512.17796",
     "publication_date": "2025-12-18",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Generative Models",
       "Video Prediction",
-      "Robotics",
-      "Model-Based RL"
+      "Robotics"
     ],
     "id": 1770819944807,
     "created_at": "2026-02-11T14:25:44.807Z"
@@ -4896,8 +4510,6 @@
     "url": "https://arxiv.org/pdf/2512.17582",
     "publication_date": "2025-12-19",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -4917,8 +4529,6 @@
     "url": "https://arxiv.org/pdf/2512.17250",
     "publication_date": "2025-12-19",
     "tags": [
-      "World Models",
-      "Model-Based RL",
       "Robotics",
       "Planning",
       "Transformers",
@@ -4943,10 +4553,8 @@
     "url": "https://arxiv.org/pdf/2512.17152",
     "publication_date": "2025-12-18",
     "tags": [
-      "World Models",
       "Generative Models",
       "Video Prediction",
-      "Model-Based RL",
       "Reinforcement Learning"
     ],
     "id": 1770819944818,
@@ -4975,10 +4583,8 @@
     "url": "https://arxiv.org/pdf/2512.16924",
     "publication_date": "2025-12-18",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Robotics",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819944825,
@@ -4996,10 +4602,8 @@
     "url": "https://arxiv.org/pdf/2512.16461",
     "publication_date": "2025-12-18",
     "tags": [
-      "World Models",
       "Video Prediction",
       "Robotics",
-      "Model-Based RL",
       "Generative Models",
       "Reinforcement Learning"
     ],
@@ -5021,11 +4625,9 @@
     "url": "https://arxiv.org/pdf/2512.15946",
     "publication_date": "2026-01-09",
     "tags": [
-      "World Models",
       "Reinforcement Learning",
       "Planning",
       "State Space Models",
-      "Model-Based RL",
       "Generative Models"
     ],
     "id": 1770819944833,
