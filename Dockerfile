@@ -22,7 +22,7 @@ ENV CI=false
 RUN cd frontend && npm run build
 
 # --- 第二阶段：运行阶段 ---
-FROM node:18-slim
+FROM node:20-slim
 
 WORKDIR /app
 
