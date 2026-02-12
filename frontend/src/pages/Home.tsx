@@ -343,8 +343,10 @@ export default function Home() {
         <div className="absolute -top-6 -right-2 md:right-0 z-10 hidden sm:block">
           <motion.div 
             layoutId="tongji-logo"
-            transition={{ type: "spring", stiffness: 350, damping: 30 }}
-            className="bg-white rounded-full p-2 shadow-lg w-16 h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden cursor-pointer hover:scale-105 transition-transform will-change-transform"
+            transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-white rounded-full p-2 shadow-lg w-16 h-16 md:w-20 md:h-20 flex items-center justify-center overflow-hidden cursor-pointer will-change-transform"
             onClick={() => setIsLogoZoomed(true)}
           >
             <img 
@@ -607,22 +609,22 @@ export default function Home() {
       </footer>
 
       {/* Logo Zoom Modal */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isLogoZoomed && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
             onClick={() => setIsLogoZoomed(false)}
           >
             <div className="relative w-full max-w-lg flex flex-col items-center justify-center">
               <div className="relative w-full aspect-square flex items-center justify-center">
                 <motion.div
                   layoutId="tongji-logo"
-                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  className="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden cursor-pointer will-change-transform"
+                  transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+                  className="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden cursor-pointer shadow-2xl will-change-transform"
                   onClick={(e) => e.stopPropagation()}
                   onDoubleClick={() => window.open('https://www.tongji.edu.cn/', '_blank')}
                 >
