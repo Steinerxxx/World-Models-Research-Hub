@@ -24,6 +24,37 @@ let lastTagsCacheUpdate = 0;
 let trendsCache = null;
 let lastTrendsCacheUpdate = 0;
 const CACHE_DURATION = 60 * 1000; // 1 minute
+const EMBEDDING_DIMENSIONS = Number(process.env.EMBEDDING_DIMENSIONS || 1536);
+const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL || 'text-embedding-3-small';
+let isVectorSearchReady = false;
+let vectorSearchError = null;
+
+const sortByPublicationDateDesc = (a, b) =>
+  new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime();
+
+function ensureLocalDbFile() {
+  if (!fs.existsSync(LOCAL_DB_PATH)) {
+    console.log('📂 Creating local papers.json fallback...');
+    fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify([], null, 2));
+  }
+}
+
+function readLocalPapers() {
+  ensureLocalDbFile();
+  return JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
+}
+
+function writeLocalPapers(papers) {
+  fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(papers, null, 2));
+}
+
+async function withPaperStorage({ postgres, local }) {
+  if (isDbConnected) {
+    return postgres();
+  }
+  ensureLocalDbFile();
+  return local();
+}
 
 export const clearPaperCache = () => {
   paperCache = null;
@@ -37,6 +68,12 @@ export const clearPaperCache = () => {
 // Export getter for DB status
 export const getDbStatus = () => isDbConnected;
 export const getLocalDbPath = () => LOCAL_DB_PATH;
+export const getVectorSearchStatus = () => ({
+  enabled: isVectorSearchReady,
+  dimensions: EMBEDDING_DIMENSIONS,
+  model: EMBEDDING_MODEL,
+  error: vectorSearchError
+});
 
 pool.on('error', (err, client) => {
   console.error('Unexpected error on idle client', err);
@@ -62,22 +99,20 @@ export async function initDatabase() {
     await createPapersTable();
     await createUsersTable();
     await createFavoritesTable();
+    await createPaperEmbeddingsTable();
   } catch (err) {
     console.error('❌ Database connection FAILED.');
     console.error('---------------------------------------------------');
     console.error('Error Details:', err.message);
     if (err.code) console.error('Error Code:', err.code);
     if (err.detail) console.error('Error Detail:', err.detail);
-    console.error('Hint: Check your Render Environment Variables (DATABASE_URL).');
+    console.error('Hint: Check your DATABASE_URL environment variable.');
     console.error('---------------------------------------------------');
     
     isDbConnected = false;
-    
-    // Initialize local JSON if not exists
-    if (!fs.existsSync(LOCAL_DB_PATH)) {
-      console.log('📂 Creating local papers.json fallback...');
-      fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify([], null, 2));
-    }
+    isVectorSearchReady = false;
+    vectorSearchError = err.message;
+    ensureLocalDbFile();
   }
 }
 
@@ -153,95 +188,280 @@ export async function createFavoritesTable() {
   }
 }
 
+export async function createPaperEmbeddingsTable() {
+  if (!isDbConnected) {
+    isVectorSearchReady = false;
+    vectorSearchError = 'Database is disconnected';
+    return;
+  }
+
+  try {
+    await query('CREATE EXTENSION IF NOT EXISTS vector');
+    await query(`
+      CREATE TABLE IF NOT EXISTS paper_embeddings (
+        paper_id INTEGER PRIMARY KEY REFERENCES papers(id) ON DELETE CASCADE,
+        embedding vector(${EMBEDDING_DIMENSIONS}) NOT NULL,
+        embedding_model TEXT NOT NULL,
+        embedding_version TEXT,
+        source_hash TEXT NOT NULL,
+        source_text TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    await query(`
+      CREATE INDEX IF NOT EXISTS paper_embeddings_embedding_idx
+      ON paper_embeddings
+      USING ivfflat (embedding vector_cosine_ops)
+      WITH (lists = 100);
+    `);
+    await query(`
+      ALTER TABLE paper_embeddings
+      ALTER COLUMN embedding TYPE vector(${EMBEDDING_DIMENSIONS})
+      USING embedding::vector(${EMBEDDING_DIMENSIONS});
+    `);
+    isVectorSearchReady = true;
+    vectorSearchError = null;
+    console.log('"paper_embeddings" table created or updated.');
+  } catch (err) {
+    isVectorSearchReady = false;
+    vectorSearchError = `paper_embeddings init failed: ${err.message}`;
+    console.warn('Vector search initialization skipped:', err.message);
+  }
+}
+
+function embeddingToVectorLiteral(embedding) {
+  return `[${embedding.join(',')}]`;
+}
+
+export async function getEmbeddingMetadataMap() {
+  if (!isDbConnected || !isVectorSearchReady) {
+    return new Map();
+  }
+
+  const { rows } = await query('SELECT paper_id, source_hash, embedding_model, updated_at FROM paper_embeddings');
+  return new Map(rows.map((row) => [row.paper_id, row]));
+}
+
+export async function getPaperEmbeddingsByIds(paperIds = []) {
+  if (!isDbConnected || !isVectorSearchReady || !Array.isArray(paperIds) || paperIds.length === 0) {
+    return [];
+  }
+
+  const normalizedIds = Array.from(new Set(paperIds.map((id) => Number(id)).filter((id) => Number.isInteger(id))));
+  if (normalizedIds.length === 0) {
+    return [];
+  }
+
+  const { rows } = await query(
+    `
+      SELECT paper_id, embedding
+      FROM paper_embeddings
+      WHERE paper_id = ANY($1::int[])
+    `,
+    [normalizedIds]
+  );
+
+  return rows.map((row) => ({
+    paper_id: Number(row.paper_id),
+    embedding: String(row.embedding)
+      .replace(/^\[/, '')
+      .replace(/\]$/, '')
+      .split(',')
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value))
+  }));
+}
+
+export async function upsertPaperEmbedding({
+  paperId,
+  embedding,
+  sourceHash,
+  sourceText,
+  embeddingModel = EMBEDDING_MODEL,
+  embeddingVersion = null
+}) {
+  if (!isDbConnected || !isVectorSearchReady) {
+    return false;
+  }
+
+  if (!Array.isArray(embedding) || embedding.length !== EMBEDDING_DIMENSIONS) {
+    throw new Error(`Embedding dimensions mismatch. Expected ${EMBEDDING_DIMENSIONS}, received ${embedding?.length || 0}.`);
+  }
+
+  await query(
+    `
+      INSERT INTO paper_embeddings (
+        paper_id,
+        embedding,
+        embedding_model,
+        embedding_version,
+        source_hash,
+        source_text
+      )
+      VALUES ($1, $2::vector, $3, $4, $5, $6)
+      ON CONFLICT (paper_id) DO UPDATE SET
+        embedding = EXCLUDED.embedding,
+        embedding_model = EXCLUDED.embedding_model,
+        embedding_version = EXCLUDED.embedding_version,
+        source_hash = EXCLUDED.source_hash,
+        source_text = EXCLUDED.source_text,
+        updated_at = CURRENT_TIMESTAMP
+    `,
+    [paperId, embeddingToVectorLiteral(embedding), embeddingModel, embeddingVersion, sourceHash, sourceText]
+  );
+
+  return true;
+}
+
+export async function findSimilarPapers({
+  embedding,
+  limit = 25,
+  filters = {}
+}) {
+  if (!isDbConnected || !isVectorSearchReady) {
+    return [];
+  }
+
+  const params = [embeddingToVectorLiteral(embedding)];
+  const conditions = [];
+
+  if (filters.tag) {
+    params.push(`%${filters.tag}%`);
+    conditions.push(`EXISTS (SELECT 1 FROM unnest(p.tags) AS tag WHERE tag ILIKE $${params.length})`);
+  }
+
+  if (filters.author) {
+    params.push(`%${filters.author}%`);
+    conditions.push(`EXISTS (SELECT 1 FROM unnest(p.authors) AS author WHERE author ILIKE $${params.length})`);
+  }
+
+  if (filters.year) {
+    params.push(Number(filters.year));
+    conditions.push(`EXTRACT(YEAR FROM p.publication_date) = $${params.length}`);
+  }
+
+  params.push(limit);
+
+  const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const { rows } = await query(
+    `
+      SELECT
+        p.*,
+        1 - (pe.embedding <=> $1::vector) AS similarity
+      FROM paper_embeddings pe
+      INNER JOIN papers p ON p.id = pe.paper_id
+      ${whereClause}
+      ORDER BY pe.embedding <=> $1::vector
+      LIMIT $${params.length}
+    `,
+    params
+  );
+
+  return rows.map((row) => ({
+    ...row,
+    similarity: Number(row.similarity)
+  }));
+}
+
 export async function addPaper(paper) {
   clearPaperCache();
-  if (isDbConnected) {
-    const { title, authors, abstract, url, publication_date, tags } = paper;
-    const insertQuery = `
-      INSERT INTO papers (title, authors, abstract, url, publication_date, tags)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      ON CONFLICT (url) DO UPDATE SET 
-        tags = EXCLUDED.tags,
-        publication_date = EXCLUDED.publication_date;
-    `;
-    await query(insertQuery, [title, authors, abstract, url, publication_date, tags || []]);
-  } else {
-    // Local JSON Fallback
-    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
-    const existingIndex = papers.findIndex((p) => p.url === paper.url);
-    
-    const newPaper = {
-      ...paper,
-      id: existingIndex >= 0 ? papers[existingIndex].id : Date.now(), // Mock ID
-      created_at: existingIndex >= 0 ? papers[existingIndex].created_at : new Date().toISOString()
-    };
+  await withPaperStorage({
+    postgres: async () => {
+      const { title, authors, abstract, url, publication_date, tags } = paper;
+      const insertQuery = `
+        INSERT INTO papers (title, authors, abstract, url, publication_date, tags)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        ON CONFLICT (url) DO UPDATE SET 
+          tags = EXCLUDED.tags,
+          publication_date = EXCLUDED.publication_date;
+      `;
+      await query(insertQuery, [title, authors, abstract, url, publication_date, tags || []]);
+    },
+    local: async () => {
+      const papers = readLocalPapers();
+      const existingIndex = papers.findIndex((existingPaper) => existingPaper.url === paper.url);
 
-    if (existingIndex >= 0) {
-      papers[existingIndex] = { ...papers[existingIndex], ...newPaper };
-    } else {
-      papers.push(newPaper);
+      const newPaper = {
+        ...paper,
+        id: existingIndex >= 0 ? papers[existingIndex].id : Date.now(),
+        created_at: existingIndex >= 0 ? papers[existingIndex].created_at : new Date().toISOString()
+      };
+
+      if (existingIndex >= 0) {
+        papers[existingIndex] = { ...papers[existingIndex], ...newPaper };
+      } else {
+        papers.push(newPaper);
+      }
+
+      writeLocalPapers(papers);
     }
-    
-    fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(papers, null, 2));
-  }
+  });
 }
 
 export async function updatePaperTags(id, tags) {
-  if (isDbConnected) {
-    const updateQuery = `
-      UPDATE papers SET tags = $1 WHERE id = $2;
-    `;
-    await query(updateQuery, [tags, id]);
-  } else {
-    // Local JSON Fallback
-    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
-    const paperIndex = papers.findIndex((p) => p.id === id);
-    if (paperIndex >= 0) {
-      papers[paperIndex].tags = tags;
-      fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(papers, null, 2));
+  await withPaperStorage({
+    postgres: async () => {
+      await query('UPDATE papers SET tags = $1 WHERE id = $2;', [tags, id]);
+    },
+    local: async () => {
+      const papers = readLocalPapers();
+      const paperIndex = papers.findIndex((paper) => paper.id === id);
+      if (paperIndex >= 0) {
+        papers[paperIndex].tags = tags;
+        writeLocalPapers(papers);
+      }
     }
-  }
+  });
 }
 
 export async function updatePaperSummary(id, analysis) {
-  if (isDbConnected) {
-    const updateQuery = `
-      UPDATE papers 
-      SET summary = $1, contribution = $2, limitations = $3 
-      WHERE id = $4;
-    `;
-    await query(updateQuery, [analysis.summary, analysis.contribution, analysis.limitations, id]);
-  } else {
-    // Local JSON Fallback
-    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
-    const paperIndex = papers.findIndex((p) => p.id === id);
-    if (paperIndex >= 0) {
-      papers[paperIndex] = { ...papers[paperIndex], ...analysis };
-      fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(papers, null, 2));
+  await withPaperStorage({
+    postgres: async () => {
+      await query(
+        `
+          UPDATE papers 
+          SET summary = $1, contribution = $2, limitations = $3 
+          WHERE id = $4;
+        `,
+        [analysis.summary, analysis.contribution, analysis.limitations, id]
+      );
+    },
+    local: async () => {
+      const papers = readLocalPapers();
+      const paperIndex = papers.findIndex((paper) => paper.id === id);
+      if (paperIndex >= 0) {
+        papers[paperIndex] = { ...papers[paperIndex], ...analysis };
+        writeLocalPapers(papers);
+      }
     }
-  }
+  });
 }
 
 export async function paperExists(url) {
-  if (isDbConnected) {
-    const { rows } = await query('SELECT 1 FROM papers WHERE url = $1', [url]);
-    return rows.length > 0;
-  } else {
-    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
-    return papers.some(p => p.url === url);
-  }
+  return withPaperStorage({
+    postgres: async () => {
+      const { rows } = await query('SELECT 1 FROM papers WHERE url = $1', [url]);
+      return rows.length > 0;
+    },
+    local: async () => {
+      const papers = readLocalPapers();
+      return papers.some((paper) => paper.url === url);
+    }
+  });
 }
 
 export async function getPaperById(id) {
-  if (isDbConnected) {
-    const { rows } = await query('SELECT * FROM papers WHERE id = $1', [id]);
-    return rows[0];
-  } else {
-    // Local JSON Fallback
-    if (!fs.existsSync(LOCAL_DB_PATH)) return null;
-    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
-    return papers.find((p) => p.id === Number(id));
-  }
+  return withPaperStorage({
+    postgres: async () => {
+      const { rows } = await query('SELECT * FROM papers WHERE id = $1', [id]);
+      return rows[0];
+    },
+    local: async () => {
+      const papers = readLocalPapers();
+      return papers.find((paper) => paper.id === Number(id)) || null;
+    }
+  });
 }
 
 export async function getAllPapers() {
@@ -250,16 +470,16 @@ export async function getAllPapers() {
     return paperCache;
   }
 
-  let result;
-  if (isDbConnected) {
-    const { rows } = await query('SELECT * FROM papers ORDER BY publication_date DESC');
-    result = rows;
-  } else {
-    // Local JSON Fallback
-    if (!fs.existsSync(LOCAL_DB_PATH)) return [];
-    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
-    result = papers.sort((a, b) => new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime());
-  }
+  const result = await withPaperStorage({
+    postgres: async () => {
+      const { rows } = await query('SELECT * FROM papers ORDER BY publication_date DESC');
+      return rows;
+    },
+    local: async () => {
+      const papers = readLocalPapers();
+      return papers.sort(sortByPublicationDateDesc);
+    }
+  });
 
   paperCache = result;
   lastCacheUpdate = now;
@@ -272,19 +492,18 @@ export async function getPaperTrends() {
     return trendsCache;
   }
 
-  let result;
-  if (isDbConnected) {
-    // Only select fields needed for Trends page to reduce payload size
-    const { rows } = await query('SELECT id, publication_date, tags FROM papers ORDER BY publication_date DESC');
-    result = rows;
-  } else {
-    // Local JSON Fallback
-    if (!fs.existsSync(LOCAL_DB_PATH)) return [];
-    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
-    result = papers
-      .map(({ id, publication_date, tags }) => ({ id, publication_date, tags }))
-      .sort((a, b) => new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime());
-  }
+  const result = await withPaperStorage({
+    postgres: async () => {
+      const { rows } = await query('SELECT id, publication_date, tags FROM papers ORDER BY publication_date DESC');
+      return rows;
+    },
+    local: async () => {
+      const papers = readLocalPapers();
+      return papers
+        .map(({ id, publication_date, tags }) => ({ id, publication_date, tags }))
+        .sort(sortByPublicationDateDesc);
+    }
+  });
 
   trendsCache = result;
   lastTrendsCacheUpdate = now;
@@ -297,30 +516,30 @@ export async function getAllTags() {
     return tagsCache;
   }
 
-  let result;
-  if (isDbConnected) {
-    const { rows } = await query(`
-      SELECT tag, count(*) as count
-      FROM (SELECT unnest(tags) as tag FROM papers) t
-      WHERE tag IS NOT NULL
-      GROUP BY tag
-      ORDER BY count DESC, tag ASC
-    `);
-    result = rows;
-  } else {
-    // Local JSON Fallback
-    if (!fs.existsSync(LOCAL_DB_PATH)) return [];
-    const papers = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
-    const tagCounts = {};
-    papers.forEach(p => {
-      (p.tags || []).forEach(t => {
-        tagCounts[t] = (tagCounts[t] || 0) + 1;
+  const result = await withPaperStorage({
+    postgres: async () => {
+      const { rows } = await query(`
+        SELECT tag, count(*) as count
+        FROM (SELECT unnest(tags) as tag FROM papers) t
+        WHERE tag IS NOT NULL
+        GROUP BY tag
+        ORDER BY count DESC, tag ASC
+      `);
+      return rows;
+    },
+    local: async () => {
+      const papers = readLocalPapers();
+      const tagCounts = {};
+      papers.forEach((paper) => {
+        (paper.tags || []).forEach((tag) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
       });
-    });
-    result = Object.entries(tagCounts)
-      .map(([tag, count]) => ({ tag, count }))
-      .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
-  }
+      return Object.entries(tagCounts)
+        .map(([tag, count]) => ({ tag, count }))
+        .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+    }
+  });
 
   tagsCache = result;
   lastTagsCacheUpdate = now;

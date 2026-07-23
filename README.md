@@ -202,7 +202,6 @@ docker run -p 3001:3001 --env-file .env world-models-hub
 ### 云平台部署
 - **Sealos**：参考 `LAF_DEPLOYMENT.md` 文档
 - **Hugging Face Spaces**：参考 `HUGGINGFACE_DEPLOY.md` 文档
-- **Vercel**：前端自动部署，后端配置环境变量
 
 ## 🔧 维护管理
 
@@ -214,7 +213,7 @@ docker run -p 3001:3001 --env-file .env world-models-hub
 ### 数据管理
 - **手动抓取**：访问 `/api/scrape` 触发抓取任务
 - **重新分类**：访问 `/api/reclassify` 批量重新分类
-- **数据库清理**：运行 `clean_db.js` 清理无效数据
+- **标签规范化**：运行 `normalize_tags.js` 清理和标准化标签
 - **标签恢复**：运行 `restore_tags.js` 从备份恢复标签
 
 ### 安全管理

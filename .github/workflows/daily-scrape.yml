@@ -1,9 +1,6 @@
 name: Daily Paper Scrape
 
 on:
-  schedule:
-    # Run every hour
-    - cron: '0 * * * *'
   workflow_dispatch: # Allow manual trigger from GitHub UI
 
 jobs:
@@ -12,7 +9,8 @@ jobs:
     steps:
       - name: Trigger Scrape Endpoint
         run: |
-          # Use secret for backend URL to avoid hardcoding and handle migrations
+          # Use secret for backend URL to avoid hardcoding and keep this workflow
+          # as a manual recovery tool. Production scheduling is handled by the app cron.
           BACKEND_URL="${{ secrets.BACKEND_URL }}"
           if [ -z "$BACKEND_URL" ]; then
             echo "⚠️ BACKEND_URL secret is not set. Skipping external trigger."

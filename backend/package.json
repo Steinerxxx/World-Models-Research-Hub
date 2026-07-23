@@ -11,6 +11,8 @@
     "start": "node src/index.js",
     "build": "echo 'No build required for Pure JS Backend'",
     "dev": "nodemon src/index.js",
+    "smoke": "node --input-type=module -e \"import('./src/app.js').then(() => console.log('backend app import ok'))\"",
+    "test": "node --test",
     "scrape": "node src/scraper.js",
     "retag": "node src/retag.js"
   },

@@ -11,44 +11,51 @@ interface FavoritesContextType {
   setShowFavoritesOnly: (show: boolean) => void;
 }
 
+type FavoriteResponse = number[] | Array<{ paper_id: number }>;
+
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
+function getStoredFavorites(): number[] {
+  const stored = localStorage.getItem('favorites');
+  if (!stored) {
+    return [];
+  }
+
+  try {
+    return JSON.parse(stored);
+  } catch (e) {
+    console.error('Failed to parse favorites', e);
+    return [];
+  }
+}
+
 export function FavoritesProvider({ children }: { children: ReactNode }) {
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const [favorites, setFavorites] = useState<number[]>(() => getStoredFavorites());
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const { user, token } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   // Load from API if logged in, otherwise localStorage
   useEffect(() => {
-    if (user && token) {
+    if (user && isAuthenticated) {
       fetch(`${API_BASE_URL}/api/favorites`, {
-        headers: { Authorization: `Bearer ${token}` }
+        credentials: 'include'
       })
       .then(res => {
         if (res.ok) return res.json();
         throw new Error('Failed to fetch favorites');
       })
-      .then(data => {
+      .then((data: FavoriteResponse) => {
         // Backend returns an array of numbers (IDs) directly
         if (Array.isArray(data) && (data.length === 0 || typeof data[0] === 'number')) {
-          setFavorites(data);
+          setFavorites(data as number[]);
         } else {
           // Fallback for object array format
-          setFavorites(data.map((f: any) => f.paper_id));
+          setFavorites((data as Array<{ paper_id: number }>).map((favorite) => favorite.paper_id));
         }
       })
       .catch(console.error);
-    } else {
-      const stored = localStorage.getItem('favorites');
-      if (stored) {
-        try {
-          setFavorites(JSON.parse(stored));
-        } catch (e) {
-          console.error('Failed to parse favorites', e);
-        }
-      }
     }
-  }, [user, token]);
+  }, [user, isAuthenticated]);
 
   // Save to localStorage ONLY if NOT logged in
   useEffect(() => {
@@ -58,7 +65,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   }, [favorites, user]);
 
   const addFavorite = async (id: number) => {
-    if (user && token) {
+    if (user && isAuthenticated) {
       // Optimistic update
       const prevFavorites = [...favorites];
       setFavorites(prev => {
@@ -69,9 +76,9 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       try {
         const res = await fetch(`${API_BASE_URL}/api/favorites/${id}`, {
           method: 'POST',
+          credentials: 'include',
           headers: { 
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}` 
+            'Content-Type': 'application/json'
           }
         });
         if (!res.ok) throw new Error('Failed to add favorite');
@@ -90,7 +97,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   };
 
   const removeFavorite = async (id: number) => {
-    if (user && token) {
+    if (user && isAuthenticated) {
       // Optimistic update
       const prevFavorites = [...favorites];
       setFavorites(prev => prev.filter(fid => fid !== id));
@@ -98,7 +105,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       try {
         const res = await fetch(`${API_BASE_URL}/api/favorites/${id}`, {
           method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
+          credentials: 'include'
         });
         if (!res.ok) throw new Error('Failed to remove favorite');
       } catch (error) {
@@ -128,6 +135,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useFavorites() {
   const context = useContext(FavoritesContext);
   if (context === undefined) {

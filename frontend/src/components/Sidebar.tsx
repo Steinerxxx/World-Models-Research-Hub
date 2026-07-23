@@ -25,8 +25,9 @@ import { useFilter } from '@/contexts/FilterContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
-import { API_BASE_URL } from '@/config';
-import { MOCK_PAPERS } from '@/data/mockData';
+import { FRONTEND_VERSION } from '@/config';
+import { fetchHealthVersion, fetchTagsWithFallback } from '@/lib/api';
+import type { TagCount } from '@/types/paper';
 
 interface SidebarContentProps {
   isMobile: boolean;
@@ -40,7 +41,7 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
   const { showFavoritesOnly, setShowFavoritesOnly, favorites } = useFavorites();
   const { user } = useAuth();
   
-  const [allBackendTags, setAllBackendTags] = useState<{tag: string, count: number}[]>([]);
+  const [allBackendTags, setAllBackendTags] = useState<TagCount[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -48,60 +49,37 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
   const [backendVersion, setBackendVersion] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check backend health and version
-    fetch(`${API_BASE_URL}/health`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.version) setBackendVersion(data.version);
-      })
-      .catch(() => setBackendVersion(null));
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+    let isCancelled = false;
 
-    const fetchTags = async () => {
-      try {
-        console.log('Fetching tags from:', `${API_BASE_URL}/api/tags`);
-        const response = await fetch(`${API_BASE_URL}/api/tags?t=${Date.now()}`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const tags = await response.json();
-        
-        if (!Array.isArray(tags)) throw new Error('Invalid data format');
+    const loadSidebarData = async () => {
+      const version = await fetchHealthVersion();
+      if (!isCancelled) {
+        setBackendVersion(version);
+      }
 
-        const formattedTags = tags
-          .filter(t => t && (typeof t === 'string' ? t.trim() : t.tag && t.tag.trim()))
-          .map(t => 
-            typeof t === 'string' ? { tag: t, count: 0 } : { tag: t.tag, count: Number(t.count) }
-          );
+      const result = await fetchTagsWithFallback();
+      if (isCancelled) {
+        return;
+      }
 
-        const filteredTags = formattedTags.filter(t => 
-          !['World Models', 'Model-Based RL'].map(s => s.toLowerCase()).includes(t.tag.toLowerCase())
-        );
-        
-        setAllBackendTags(filteredTags);
-        setIsLive(true);
-        setError(null);
-      } catch (err) {
-        console.error('Fetch error:', err);
-        setError(err instanceof Error ? err.message : 'Fetch failed');
-        setIsLive(false);
-        
-        // Retry logic for connection issues
-        if (retryCount < 3) {
-          setTimeout(() => setRetryCount(prev => prev + 1), 2000);
-        }
+      setAllBackendTags(result.data);
+      setIsLive(!result.usingMockData);
+      setError(result.usingMockData ? result.errorDetail : null);
 
-        const tagCounts: Record<string, number> = {};
-        MOCK_PAPERS.forEach(p => {
-          (p.tags || []).forEach(t => {
-            tagCounts[t] = (tagCounts[t] || 0) + 1;
-          });
-        });
-        const filteredMockTags = Object.entries(tagCounts)
-          .filter(([tag]) => !['World Models', 'Model-Based RL'].map(s => s.toLowerCase()).includes(tag.toLowerCase()))
-          .map(([tag, count]) => ({ tag, count }));
-        setAllBackendTags(filteredMockTags);
+      if (result.usingMockData && retryCount < 3) {
+        retryTimer = setTimeout(() => setRetryCount((prev) => prev + 1), 2000);
       }
     };
 
-    fetchTags();
+    void loadSidebarData();
+
+    return () => {
+      isCancelled = true;
+      if (retryTimer) {
+        clearTimeout(retryTimer);
+      }
+    };
   }, [retryCount]);
 
   const extraTags = allBackendTags.filter(t => 
@@ -111,16 +89,6 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
 
   const prominentTags = extraTags.filter(t => Number(t.count) >= 5);
   const minorTags = extraTags.filter(t => Number(t.count) < 5);
-
-  console.log('Sidebar render stats:', {
-    allCount: allBackendTags.length,
-    extraCount: extraTags.length,
-    prominentCount: prominentTags.length,
-    minorCount: minorTags.length,
-    prominentSample: prominentTags.slice(0, 3),
-    subjects: SUBJECT_TAGS,
-    architectures: ARCHITECTURE_TAGS
-  });
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -138,7 +106,7 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
         </div>
         <span className="text-[10px] text-muted-foreground mt-1 flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
-            FE: v3.5.2
+            FE: {FRONTEND_VERSION}
             <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
             {backendVersion && (
               <span className="text-[9px] opacity-70">BE: {backendVersion}</span>

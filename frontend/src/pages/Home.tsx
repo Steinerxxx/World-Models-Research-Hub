@@ -1,49 +1,132 @@
 import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X, Star, AlertTriangle } from "lucide-react";
+import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X, Star, AlertTriangle, Brain, Bot, Sparkles, SlidersHorizontal, Calendar, Users, Tag, WandSparkles } from "lucide-react";
 import { useFilter } from '@/contexts/FilterContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { PaperCard } from '@/components/PaperCard';
 import { motion, AnimatePresence } from 'framer-motion';
-
-import { API_BASE_URL } from '@/config';
-import { MOCK_PAPERS } from '@/data/mockData';
+import { API_BASE_URL, FRONTEND_VERSION } from '@/config';
+import { fetchAiRecommendations, fetchPapersWithFallback, fetchSimilarPaperRecommendations, hybridSearchPapers, semanticSearchPapers, triggerScrape } from '@/lib/api';
+import { getPaginationPages } from '@/lib/papers';
 import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
+import { usePaperBrowser } from '@/hooks/usePaperBrowser';
+import type { Paper, ParseSearchQueryResponse, RecommendationResponse, SearchFilters, SearchWeights, SemanticSearchResponse, SimilarPaperRecommendationResponse } from '@/types/paper';
 
-// Define the type for a single paper
-interface Paper {
-  id: number;
-  title: string;
-  authors: string[];
-  abstract: string;
-  publication_date: string;
-  url: string;
-  tags?: string[];
-  summary?: string;
-  contribution?: string;
-  limitations?: string;
+const DEFAULT_HYBRID_WEIGHTS: SearchWeights = {
+  semantic: 0.55,
+  keyword: 0.3,
+  recency: 0.15
+};
+
+const SEARCH_SETTINGS_KEY = 'ai-search-settings-v4';
+const HYBRID_PRESETS: Array<{ key: string; label: string; weights: SearchWeights }> = [
+  {
+    key: 'balanced',
+    label: 'Balanced',
+    weights: DEFAULT_HYBRID_WEIGHTS
+  },
+  {
+    key: 'semantic',
+    label: 'Semantic First',
+    weights: { semantic: 0.75, keyword: 0.15, recency: 0.1 }
+  },
+  {
+    key: 'keyword',
+    label: 'Keyword First',
+    weights: { semantic: 0.35, keyword: 0.5, recency: 0.15 }
+  },
+  {
+    key: 'recent',
+    label: 'Recent First',
+    weights: { semantic: 0.35, keyword: 0.2, recency: 0.45 }
+  }
+];
+
+function formatWeight(value: number) {
+  return `${Math.round(value * 100)}%`;
+}
+
+function sanitizeFilters(filters?: SearchFilters): SearchFilters {
+  return {
+    tag: filters?.tag?.trim() || undefined,
+    author: filters?.author?.trim() || undefined,
+    year: filters?.year?.trim() || undefined
+  };
+}
+
+function filtersEqual(left: SearchFilters, right: SearchFilters) {
+  return (left.tag || '') === (right.tag || '')
+    && (left.author || '') === (right.author || '')
+    && (left.year || '') === (right.year || '');
+}
+
+function weightsEqual(left: SearchWeights, right: SearchWeights) {
+  return left.semantic === right.semantic
+    && left.keyword === right.keyword
+    && left.recency === right.recency;
+}
+
+function loadInitialSearchSettings() {
+  try {
+    const saved = localStorage.getItem(SEARCH_SETTINGS_KEY);
+    if (!saved) {
+      return {
+        filters: {} as SearchFilters,
+        weights: DEFAULT_HYBRID_WEIGHTS
+      };
+    }
+
+    const parsed = JSON.parse(saved) as {
+      filters?: SearchFilters;
+      weights?: SearchWeights;
+    };
+
+    return {
+      filters: sanitizeFilters(parsed.filters),
+      weights: parsed.weights || DEFAULT_HYBRID_WEIGHTS
+    };
+  } catch (err) {
+    console.warn('Failed to restore AI search settings:', err);
+    return {
+      filters: {} as SearchFilters,
+      weights: DEFAULT_HYBRID_WEIGHTS
+    };
+  }
 }
 
 export default function Home() {
+  const initialSettings = loadInitialSearchSettings();
+  const [allPapers, setAllPapers] = useState<Paper[]>([]);
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [usingMockData, setUsingMockData] = useState(false);
   const [fetchErrorDetail, setFetchErrorDetail] = useState<string>('');
+  const [semanticResult, setSemanticResult] = useState<SemanticSearchResponse | null>(null);
+  const [isSemanticSearching, setIsSemanticSearching] = useState(false);
+  const [parsedIntent, setParsedIntent] = useState<ParseSearchQueryResponse | null>(null);
+  const [draftFilters, setDraftFilters] = useState<SearchFilters>(initialSettings.filters);
+  const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialSettings.filters);
+  const [draftHybridWeights, setDraftHybridWeights] = useState<SearchWeights>(initialSettings.weights);
+  const [appliedHybridWeights, setAppliedHybridWeights] = useState<SearchWeights>(initialSettings.weights);
+  const [recommendationResult, setRecommendationResult] = useState<RecommendationResponse | null>(null);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+  const [similarPaperResult, setSimilarPaperResult] = useState<SimilarPaperRecommendationResponse | null>(null);
+  const [isLoadingSimilarPapers, setIsLoadingSimilarPapers] = useState(false);
 
   // Use context for filters
-  const { searchTerm, setSearchTerm, selectedTags, setSelectedTags, toggleTag, itemsPerPage, sortBy } = useFilter();
+  const { searchTerm, setSearchTerm, searchMode, setSearchMode, selectedTags, setSelectedTags, toggleTag, itemsPerPage, sortBy } = useFilter();
   const { favorites, showFavoritesOnly, setShowFavoritesOnly } = useFavorites();
   
   // Local state for debounced search to prevent lag
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
 
-  // Sync local state when context changes (e.g. when cleared via button)
-  useEffect(() => {
-    setLocalSearchTerm(searchTerm);
-  }, [searchTerm]);
+  const updateSearchTerm = (value: string) => {
+    setLocalSearchTerm(value);
+    setSearchTerm(value);
+  };
 
   // Debounce search updates
   useEffect(() => {
@@ -58,316 +141,260 @@ export default function Home() {
   
   const [isLogoZoomed, setIsLogoZoomed] = useState(false);
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [inputPage, setInputPage] = useState('');
-  // itemsPerPage is now controlled by FilterContext
+  useEffect(() => {
+    localStorage.setItem(SEARCH_SETTINGS_KEY, JSON.stringify({
+      filters: appliedFilters,
+      weights: appliedHybridWeights
+    }));
+  }, [appliedFilters, appliedHybridWeights]);
 
-  const fetchPapers = () => {
+  const fetchPapers = async () => {
     setLoading(true);
     setFetchErrorDetail('');
-    
-    console.log(`[Debug] Fetching from: ${API_BASE_URL}/api/papers`);
-    
-    fetch(`${API_BASE_URL}/api/papers`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        // Filter out common tags that appear in almost all papers to reduce noise
-        const processedData = data.map((paper: Paper) => ({
-          ...paper,
-          tags: paper.tags?.filter(tag => 
-            !['World Models', 'Model-Based RL'].includes(tag)
-          )
-        }));
-        setPapers(processedData);
-        setUsingMockData(false);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.warn('Backend fetch failed, switching to Mock Data:', error);
-        setFetchErrorDetail(error.message || 'Unknown Network Error');
-        // Fallback to mock data
-        setPapers(MOCK_PAPERS);
-        setUsingMockData(true);
-        setError(null); // Clear error to show content
-        setLoading(false);
-      });
+
+    const result = await fetchPapersWithFallback();
+    setAllPapers(result.data);
+    setPapers(result.data);
+    setUsingMockData(result.usingMockData);
+    setFetchErrorDetail(result.errorDetail);
+    setSemanticResult(null);
+    setError(null);
+    setLoading(false);
   };
 
   useEffect(() => {
-    fetchPapers();
+    const loadInitialPapers = async () => {
+      const result = await fetchPapersWithFallback();
+      setAllPapers(result.data);
+      setPapers(result.data);
+      setUsingMockData(result.usingMockData);
+      setFetchErrorDetail(result.errorDetail);
+      setSemanticResult(null);
+      setError(null);
+      setLoading(false);
+    };
+
+    void loadInitialPapers();
   }, []);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetch(`${API_BASE_URL}/api/scrape`, {
-      method: 'POST',
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch new papers');
-        }
-        return response.json();
-      })
+    triggerScrape()
       .then(() => {
-        // After scraping, fetch the updated list of papers
         fetchPapers();
       })
       .catch(err => {
         console.error('Error scraping papers:', err);
-        // Still try to fetch papers even if scrape fails, to ensure we show what we have
-        fetchPapers(); 
+        fetchPapers();
       })
       .finally(() => {
         setRefreshing(false);
       });
   };
 
-  const copyBibTeX = async (paper: Paper) => {
-    try {
-      const year = new Date(paper.publication_date).getFullYear();
-      const authors = paper.authors || [];
-      const firstAuthor = authors.length > 0 
-        ? authors[0].split(' ').pop() || 'Author' 
-        : 'Author';
-      
-      const titleSlug = paper.title
-        .replace(/\s+/g, '_')
-        .substring(0, 20)
-        .replace(/[^a-zA-Z0-9_]/g, '');
-        
-      const id = `${firstAuthor}${year}${titleSlug}`;
-      
-      // Extract arXiv ID more reliably (handle .pdf suffix and different URL formats)
-      let arxivId = paper.url.split('/').pop()?.replace('.pdf', '') || '';
-      if (!arxivId && paper.url.includes('arxiv.org/abs/')) {
-        arxivId = paper.url.split('arxiv.org/abs/').pop() || '';
+  useEffect(() => {
+    const runSemanticSearch = async () => {
+      if (searchMode !== 'semantic') {
+        if (searchMode === 'keyword') {
+          setPapers(allPapers);
+          setSemanticResult(null);
+          setParsedIntent(null);
+          setError(null);
+        }
+        return;
       }
-      
-      const bibtex = `@article{${id},
-  title={${paper.title}},
-  author={${authors.join(' and ')}},
-  journal={arXiv preprint arXiv:${arxivId}},
-  year={${year}},
-  url={${paper.url}}
-}`;
 
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(bibtex);
-        return true;
-      } else {
-        // Fallback for non-secure contexts
-        const textArea = document.createElement("textarea");
-        textArea.value = bibtex;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-9999px";
-        textArea.style.top = "-9999px";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        const successful = document.execCommand('copy');
-        document.body.removeChild(textArea);
-        return successful;
+      const trimmed = searchTerm.trim();
+      if (!trimmed) {
+        setPapers(allPapers);
+        setSemanticResult(null);
+        setParsedIntent(null);
+        setError(null);
+        return;
       }
-    } catch (err) {
-      console.error('Copy failed:', err);
-      return false;
-    }
+
+      setIsSemanticSearching(true);
+      try {
+        const result = await semanticSearchPapers(trimmed, appliedFilters);
+        setSemanticResult(result);
+        setPapers(result.items);
+        setUsingMockData(false);
+        setFetchErrorDetail('');
+        setError(null);
+      } catch (err) {
+        console.error('Semantic search failed:', err);
+        setPapers(allPapers);
+        setSemanticResult(null);
+        setParsedIntent(null);
+        setError('AI semantic search failed');
+      } finally {
+        setIsSemanticSearching(false);
+      }
+    };
+
+    runSemanticSearch();
+  }, [allPapers, appliedFilters, searchMode, searchTerm]);
+
+  useEffect(() => {
+    const runHybridSearch = async () => {
+      if (searchMode !== 'hybrid') {
+        if (searchMode === 'keyword') {
+          setPapers(allPapers);
+          setSemanticResult(null);
+          setParsedIntent(null);
+          setError(null);
+        }
+        return;
+      }
+
+      const trimmed = searchTerm.trim();
+      if (!trimmed) {
+        setPapers(allPapers);
+        setSemanticResult(null);
+        setParsedIntent(null);
+        setError(null);
+        return;
+      }
+
+      setIsSemanticSearching(true);
+      try {
+        const result = await hybridSearchPapers(trimmed, appliedFilters, appliedHybridWeights);
+        setParsedIntent(result.ai ? {
+          raw: result.parsed,
+          ai: result.ai
+        } : null);
+        setSemanticResult(result);
+        setPapers(result.items);
+        setUsingMockData(false);
+        setFetchErrorDetail('');
+        setError(null);
+      } catch (err) {
+        console.error('Hybrid search failed:', err);
+        setPapers(allPapers);
+        setParsedIntent(null);
+        setSemanticResult(null);
+        setError('AI hybrid search failed');
+      } finally {
+        setIsSemanticSearching(false);
+      }
+    };
+
+    runHybridSearch();
+  }, [allPapers, appliedFilters, appliedHybridWeights, searchMode, searchTerm]);
+
+  useEffect(() => {
+    const runRecommendations = async () => {
+      if (allPapers.length === 0) {
+        setRecommendationResult(null);
+        return;
+      }
+
+      const normalizedQuery = searchTerm.trim() || 'Recommend useful world model papers for my current research direction';
+      setIsLoadingRecommendations(true);
+      try {
+        const result = await fetchAiRecommendations(normalizedQuery, favorites, 6);
+        setRecommendationResult(result);
+      } catch (err) {
+        console.error('AI recommendations failed:', err);
+        setRecommendationResult(null);
+      } finally {
+        setIsLoadingRecommendations(false);
+      }
+    };
+
+    void runRecommendations();
+  }, [allPapers.length, favorites, searchTerm]);
+
+  const updateDraftFilter = (key: keyof SearchFilters, value: string) => {
+    setDraftFilters(prev => ({
+      ...prev,
+      [key]: value.trim() || undefined
+    }));
   };
 
+  const applyDraftFilters = () => {
+    setAppliedFilters(sanitizeFilters(draftFilters));
+  };
+
+  const clearStructuredFilters = () => {
+    setDraftFilters({});
+    setAppliedFilters({});
+  };
+
+  const applySuggestedFilters = () => {
+    const nextFilters = sanitizeFilters(parsedIntent?.ai.filters);
+    setDraftFilters(nextFilters);
+    setAppliedFilters(nextFilters);
+  };
+
+  const updateDraftHybridWeight = (key: keyof SearchWeights, value: number) => {
+    setDraftHybridWeights(prev => ({
+      ...prev,
+      [key]: value / 100
+    }));
+  };
+
+  const applyDraftHybridWeights = () => {
+    setAppliedHybridWeights(draftHybridWeights);
+  };
+
+  const applyHybridPreset = (weights: SearchWeights) => {
+    setDraftHybridWeights(weights);
+    setAppliedHybridWeights(weights);
+  };
+
+  const resetHybridWeights = () => {
+    setDraftHybridWeights(DEFAULT_HYBRID_WEIGHTS);
+    setAppliedHybridWeights(DEFAULT_HYBRID_WEIGHTS);
+  };
+
+  const hasPendingFilterChanges = !filtersEqual(draftFilters, appliedFilters);
+  const hasPendingWeightChanges = !weightsEqual(draftHybridWeights, appliedHybridWeights);
+
   const handlePaperUpdate = (updatedPaper: Paper) => {
+    setAllPapers(prevPapers =>
+      prevPapers.map(p => p.id === updatedPaper.id ? updatedPaper : p)
+    );
     setPapers(prevPapers => 
       prevPapers.map(p => p.id === updatedPaper.id ? updatedPaper : p)
     );
   };
 
-  // Helper to parse search query
-  const parseSearchQuery = (query: string) => {
-    const filters: { tag?: string; author?: string; year?: string } = {};
-    let general = query;
-
-    // Extract tag: (supports tag:Robotics or tag:"Reinforcement Learning")
-    const tagMatch = general.match(/tag:(?:"([^"]+)"|(\S+))/i);
-    if (tagMatch) {
-      filters.tag = tagMatch[1] || tagMatch[2];
-      general = general.replace(tagMatch[0], '');
+  const handleRecommendSimilar = async (paper: Paper) => {
+    setIsLoadingSimilarPapers(true);
+    try {
+      const result = await fetchSimilarPaperRecommendations(paper.id, paper.title, 6);
+      setSimilarPaperResult(result);
+    } catch (err) {
+      console.error('Similar paper recommendations failed:', err);
+      setSimilarPaperResult(null);
+    } finally {
+      setIsLoadingSimilarPapers(false);
     }
-
-    // Extract author:
-    const authorMatch = general.match(/author:(?:"([^"]+)"|(\S+))/i);
-    if (authorMatch) {
-      filters.author = authorMatch[1] || authorMatch[2];
-      general = general.replace(authorMatch[0], '');
-    }
-
-    // Extract year:
-    const yearMatch = general.match(/year:(\d{4})/i);
-    if (yearMatch) {
-      filters.year = yearMatch[1];
-      general = general.replace(yearMatch[0], '');
-    }
-
-    return { general: general.trim(), filters };
   };
 
-  // Filter papers based on the search term and selected tag
-  const { general: searchGeneral, filters: searchFilters } = parseSearchQuery(searchTerm);
-
-  // Prepare terms for highlighting
-  // Use the full search phrase for highlighting to match the search logic (which treats it as a phrase)
-  // This prevents highlighting individual words like "Zhang" when searching for "Kevin Zhang"
-  const searchTerms = searchGeneral.trim() ? [searchGeneral.trim()] : [];
-  
-  // Add specific filters to highlights
-  if (searchFilters.author) {
-    searchTerms.push(searchFilters.author);
-  }
-  if (searchFilters.tag) {
-    searchTerms.push(searchFilters.tag);
-  }
-
-  // Add selectedTags to highlights
-  const allHighlights = [...searchTerms, ...selectedTags];
-
-  const filteredPapers = papers.filter(paper => {
-    // 0. Check favorites filter
-    if (showFavoritesOnly && !favorites.includes(paper.id)) return false;
-
-    // 1. Check advanced filters
-    if (searchFilters.tag) {
-      if (!paper.tags?.some(t => t.toLowerCase().includes(searchFilters.tag!.toLowerCase()))) return false;
-    }
-    if (searchFilters.author) {
-      if (!paper.authors.some(a => a.toLowerCase().includes(searchFilters.author!.toLowerCase()))) return false;
-    }
-    if (searchFilters.year) {
-      if (new Date(paper.publication_date).getFullYear().toString() !== searchFilters.year) return false;
-    }
-
-    // 2. Check general search term
-    // If the search term contains spaces, treat it as a single phrase search first
-    // This allows searching for full names like "Kevin Zhang" without matching just "Zhang"
-    const trimmedSearch = searchGeneral.trim();
-    const terms = [trimmedSearch];
-    
-    // A paper must match the search term (as a phrase)
-    const matchesAllTerms = terms.every(term => {
-      // Create regex for this specific term with word boundary
-      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      let patternStr = escaped;
-      // If term starts with a word character, enforce word boundary at start
-      if (/^\w/.test(term)) patternStr = `\\b${patternStr}`;
-      // If term ends with a word character, enforce word boundary at end
-      if (/\w$/.test(term)) patternStr = `${patternStr}\\b`;
-      
-      const termPattern = new RegExp(patternStr, 'i');
-
-      const inTitle = termPattern.test(paper.title);
-      const inAuthors = termPattern.test(paper.authors.join(' '));
-      const inAbstract = termPattern.test(paper.abstract);
-      return inTitle || inAuthors || inAbstract;
-    });
-
-    const tagMatch = selectedTags.length > 0 
-      ? selectedTags.every(tag => paper.tags?.includes(tag))
-      : true;
-    
-    return matchesAllTerms && tagMatch;
-  }).sort((a, b) => {
-    if (sortBy === 'newest') {
-      return new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime();
-    } else if (sortBy === 'oldest') {
-      return new Date(a.publication_date).getTime() - new Date(b.publication_date).getTime();
-    }
-    // Fallback to newest
-    return new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime();
+  const {
+    allHighlights,
+    currentPage,
+    currentPapers,
+    filteredPapers,
+    inputPage,
+    setInputPage,
+    totalPages,
+    handleGoToPage,
+    handlePageChange,
+    copyBibTeX
+  } = usePaperBrowser({
+    papers,
+    searchTerm,
+    highlightTerm: searchMode === 'keyword' ? undefined : (semanticResult?.ai?.rewrittenQuery || semanticResult?.parsed.general || searchTerm),
+    selectedTags,
+    itemsPerPage,
+    sortBy,
+    favorites,
+    showFavoritesOnly,
+    disableTextSearch: searchMode !== 'keyword'
   });
-
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, selectedTags, itemsPerPage, sortBy, showFavoritesOnly]);
-
-  // Pagination logic
-  const totalPages = Math.ceil(filteredPapers.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentPapers = filteredPapers.slice(startIndex, startIndex + itemsPerPage);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    // Scroll the main content container to top
-    const mainContent = document.getElementById('main-content');
-    if (mainContent) {
-      mainContent.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  const handleGoToPage = () => {
-    const pageNumber = parseInt(inputPage);
-    if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= totalPages) {
-      handlePageChange(pageNumber);
-      setInputPage('');
-    }
-  };
-
-  // Helper to generate page numbers
-  const getPageNumbers = () => {
-    const pageNumbers: (number | string)[] = [];
-    // Always show first, last, current, and neighbors
-    // Logic: 1 ... (current-1) current (current+1) ... total
-    
-    // If total pages is small, show all
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-      }
-      return pageNumbers;
-    }
-
-    // Always add first page
-    pageNumbers.push(1);
-
-    // Calculate start and end of middle range
-    let startPage = Math.max(2, currentPage - 1);
-    let endPage = Math.min(totalPages - 1, currentPage + 1);
-
-    // Adjust if near beginning
-    if (currentPage <= 3) {
-      endPage = 4; // Ensure we see at least up to page 4
-    }
-
-    // Adjust if near end
-    if (currentPage >= totalPages - 2) {
-      startPage = totalPages - 3;
-    }
-
-    // Add ellipsis before middle range if needed
-    if (startPage > 2) {
-      pageNumbers.push('...');
-    }
-
-    // Add middle pages
-    for (let i = startPage; i <= endPage; i++) {
-      if (i > 1 && i < totalPages) {
-        pageNumbers.push(i);
-      }
-    }
-
-    // Add ellipsis after middle range if needed
-    if (endPage < totalPages - 1) {
-      pageNumbers.push('...');
-    }
-
-    // Always add last page
-    pageNumbers.push(totalPages);
-
-    return pageNumbers;
-  };
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -400,7 +427,7 @@ export default function Home() {
                 Tracking the latest advancements in <span className="text-foreground font-medium whitespace-nowrap">World Models</span> and <span className="text-foreground font-medium whitespace-nowrap">Model-Based RL</span>
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                v3.5.2
+                {FRONTEND_VERSION}
               </span>
             </div>
           </div>
@@ -441,14 +468,14 @@ export default function Home() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
           <Input
             type="text"
-            placeholder="Search by title, authors, or abstract..."
+            placeholder={searchMode === 'keyword' ? 'Search by title, authors, or abstract...' : 'Describe what kind of papers you want...'}
             className="w-full pl-10 pr-10 py-6 text-lg bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/50 rounded-xl shadow-lg backdrop-blur-sm transition-all duration-300"
             value={localSearchTerm}
             onChange={(e) => setLocalSearchTerm(e.target.value)}
           />
           {searchTerm && (
             <button
-              onClick={() => setSearchTerm('')}
+              onClick={() => updateSearchTerm('')}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition-colors"
               aria-label="Clear search"
             >
@@ -456,6 +483,236 @@ export default function Home() {
             </button>
           )}
         </div>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button
+            variant={searchMode === 'keyword' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSearchMode('keyword')}
+            className="rounded-full"
+          >
+            <Search className="h-4 w-4 mr-1.5" />
+            Keyword Search
+          </Button>
+          <Button
+            variant={searchMode === 'semantic' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSearchMode('semantic')}
+            className="rounded-full"
+          >
+            <Brain className="h-4 w-4 mr-1.5" />
+            AI Semantic Search
+          </Button>
+          <Button
+            variant={searchMode === 'hybrid' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSearchMode('hybrid')}
+            className="rounded-full"
+          >
+            <Sparkles className="h-4 w-4 mr-1.5" />
+            Hybrid Search
+          </Button>
+        </div>
+        {(searchMode === 'semantic' || searchMode === 'hybrid') && (
+          <div className="space-y-4 text-center text-sm text-muted-foreground">
+            <p>Use natural language to describe the papers you want. Example: recent robot world model papers focused on planning.</p>
+            {semanticResult && (
+              <p>
+                Search source: {semanticResult.status.enabled ? 'pgvector semantic retrieval' : 'fallback semantic matching'}
+                {semanticResult.usedFallbackEmbedding ? ' (fallback mode)' : ''}
+              </p>
+            )}
+            <div className="mx-auto grid max-w-3xl gap-4 text-left md:grid-cols-2">
+              <div className="rounded-xl border border-border/60 bg-card/60 p-4">
+                <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
+                  <SlidersHorizontal className="h-4 w-4" />
+                  Structured Filters
+                </div>
+                <div className="grid gap-3">
+                  <label className="grid gap-1 text-xs">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <Tag className="h-3.5 w-3.5" />
+                      Tag
+                    </span>
+                    <Input
+                      value={draftFilters.tag || ''}
+                      onChange={(e) => updateDraftFilter('tag', e.target.value)}
+                      placeholder="robotics"
+                      className="h-9"
+                    />
+                  </label>
+                  <label className="grid gap-1 text-xs">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <Users className="h-3.5 w-3.5" />
+                      Author
+                    </span>
+                    <Input
+                      value={draftFilters.author || ''}
+                      onChange={(e) => updateDraftFilter('author', e.target.value)}
+                      placeholder="Hafner"
+                      className="h-9"
+                    />
+                  </label>
+                  <label className="grid gap-1 text-xs">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <Calendar className="h-3.5 w-3.5" />
+                      Year
+                    </span>
+                    <Input
+                      value={draftFilters.year || ''}
+                      onChange={(e) => updateDraftFilter('year', e.target.value.replace(/[^\d]/g, '').slice(0, 4))}
+                      placeholder="2025"
+                      className="h-9"
+                    />
+                  </label>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
+                      Applied: {[
+                        appliedFilters.tag ? `tag=${appliedFilters.tag}` : '',
+                        appliedFilters.author ? `author=${appliedFilters.author}` : '',
+                        appliedFilters.year ? `year=${appliedFilters.year}` : ''
+                      ].filter(Boolean).join(' · ') || 'none'}
+                    </span>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={clearStructuredFilters} className="h-8 px-2 text-xs">
+                        Clear
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={applyDraftFilters}
+                        disabled={!hasPendingFilterChanges}
+                        className="h-8 px-3 text-xs"
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                  </div>
+                  {hasPendingFilterChanges && (
+                    <p className="text-xs text-amber-600">You have unapplied filter changes.</p>
+                  )}
+                </div>
+              </div>
+              {searchMode === 'hybrid' && (
+                <div className="rounded-xl border border-border/60 bg-card/60 p-4">
+                  <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
+                    <Sparkles className="h-4 w-4" />
+                    Hybrid Weights
+                  </div>
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    {HYBRID_PRESETS.map((preset) => (
+                      <Button
+                        key={preset.key}
+                        variant={weightsEqual(appliedHybridWeights, preset.weights) ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => applyHybridPreset(preset.weights)}
+                        className="h-8 rounded-full px-3 text-xs"
+                      >
+                        {preset.label}
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="space-y-3">
+                    <label className="grid gap-1 text-xs">
+                      <span className="flex items-center justify-between text-muted-foreground">
+                        <span>Semantic</span>
+                        <span>{formatWeight(draftHybridWeights.semantic)}</span>
+                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={Math.round(draftHybridWeights.semantic * 100)}
+                        onChange={(e) => updateDraftHybridWeight('semantic', Number(e.target.value))}
+                      />
+                    </label>
+                    <label className="grid gap-1 text-xs">
+                      <span className="flex items-center justify-between text-muted-foreground">
+                        <span>Keyword</span>
+                        <span>{formatWeight(draftHybridWeights.keyword)}</span>
+                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={Math.round(draftHybridWeights.keyword * 100)}
+                        onChange={(e) => updateDraftHybridWeight('keyword', Number(e.target.value))}
+                      />
+                    </label>
+                    <label className="grid gap-1 text-xs">
+                      <span className="flex items-center justify-between text-muted-foreground">
+                        <span>Recency</span>
+                        <span>{formatWeight(draftHybridWeights.recency)}</span>
+                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={Math.round(draftHybridWeights.recency * 100)}
+                        onChange={(e) => updateDraftHybridWeight('recency', Number(e.target.value))}
+                      />
+                    </label>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-xs text-muted-foreground">
+                        Applied: {semanticResult?.weights ? `${formatWeight(semanticResult.weights.semantic)} / ${formatWeight(semanticResult.weights.keyword)} / ${formatWeight(semanticResult.weights.recency)}` : `${formatWeight(appliedHybridWeights.semantic)} / ${formatWeight(appliedHybridWeights.keyword)} / ${formatWeight(appliedHybridWeights.recency)}`}
+                      </span>
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="sm" onClick={resetHybridWeights} className="h-8 px-2 text-xs">
+                          Reset
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={applyDraftHybridWeights}
+                          disabled={!hasPendingWeightChanges}
+                          className="h-8 px-3 text-xs"
+                        >
+                          Apply
+                        </Button>
+                      </div>
+                    </div>
+                    {hasPendingWeightChanges && (
+                      <p className="text-xs text-amber-600">You have unapplied weight changes.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            {parsedIntent?.ai && (
+              <div className="mx-auto max-w-3xl rounded-xl border border-primary/20 bg-primary/5 p-4 text-left">
+                <div className="flex items-center gap-2 text-primary font-medium mb-2">
+                  <Bot className="h-4 w-4" />
+                  AI Query Interpretation
+                </div>
+                <p className="text-foreground/90">{parsedIntent.ai.explanation}</p>
+                <p className="mt-2 text-xs">
+                  Rewritten query: <span className="font-medium text-foreground">{parsedIntent.ai.rewrittenQuery}</span>
+                </p>
+                {parsedIntent.ai.keywords.length > 0 && (
+                  <p className="mt-1 text-xs">
+                    Keywords: <span className="font-medium text-foreground">{parsedIntent.ai.keywords.join(', ')}</span>
+                  </p>
+                )}
+                {(parsedIntent.ai.filters.tag || parsedIntent.ai.filters.author || parsedIntent.ai.filters.year) && (
+                  <>
+                    <p className="mt-1 text-xs">
+                      Suggested filters:
+                      <span className="font-medium text-foreground">
+                        {[
+                          parsedIntent.ai.filters.tag ? ` tag=${parsedIntent.ai.filters.tag}` : '',
+                          parsedIntent.ai.filters.author ? ` author=${parsedIntent.ai.filters.author}` : '',
+                          parsedIntent.ai.filters.year ? ` year=${parsedIntent.ai.filters.year}` : ''
+                        ].join('')}
+                      </span>
+                    </p>
+                    <div className="mt-3 flex justify-end">
+                      <Button size="sm" onClick={applySuggestedFilters} className="h-8 px-3 text-xs">
+                        Apply Suggested Filters
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
         
         {/* Active Filter Indicator */}
         <div className="flex flex-col items-center gap-2">
@@ -514,7 +771,7 @@ export default function Home() {
           </div>
           {!loading && !error && (
             <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">
-              Found {filteredPapers.length} papers
+              {isSemanticSearching ? 'Running semantic search...' : `Found ${filteredPapers.length} papers`}
             </p>
           )}
         </div>
@@ -538,18 +795,127 @@ export default function Home() {
         
         {!loading && !error && (
           <>
+            {recommendationResult && recommendationResult.items.length > 0 && (
+              <section className="mb-10 rounded-2xl border border-primary/15 bg-primary/5 p-5">
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <WandSparkles className="h-4 w-4" />
+                      AI Recommendations
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {recommendationResult.usedVectorRecommendations
+                        ? '基于你的收藏 embedding 做个性化向量推荐'
+                        : recommendationResult.basedOnFavorites
+                          ? '基于你的收藏偏好和当前搜索意图推荐'
+                          : '基于你当前搜索意图推荐'}
+                    </p>
+                    <p className="mt-2 text-xs text-foreground/80">
+                      {recommendationResult.ai.explanation}
+                    </p>
+                  </div>
+                  {isLoadingRecommendations && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Refreshing
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {recommendationResult.items.map((paper) => (
+                    <div key={`recommendation-${paper.id}`} className="space-y-2">
+                      {paper.match_reasons && paper.match_reasons.length > 0 && (
+                        <div className="rounded-lg border border-primary/15 bg-background/70 px-3 py-2 text-xs text-left text-muted-foreground">
+                          <span className="font-medium text-foreground">Why recommended:</span> {paper.match_reasons.join(' · ')}
+                        </div>
+                      )}
+                      <PaperCard
+                        paper={paper}
+                        allHighlights={paper.match_reasons || []}
+                        selectedTags={selectedTags}
+                        toggleTag={toggleTag}
+                        setSearchTerm={updateSearchTerm}
+                        copyBibTeX={copyBibTeX}
+                        onPaperUpdate={handlePaperUpdate}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {(similarPaperResult || isLoadingSimilarPapers) && (
+              <section className="mb-10 rounded-2xl border border-border/60 bg-card/60 p-5">
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Brain className="h-4 w-4" />
+                      Similar Papers
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {similarPaperResult
+                        ? `基于论文《${similarPaperResult.paperTitle}》的相似论文推荐`
+                        : '正在生成相似论文推荐'}
+                    </p>
+                  </div>
+                  {isLoadingSimilarPapers && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading
+                    </div>
+                  )}
+                </div>
+
+                {similarPaperResult && similarPaperResult.items.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {similarPaperResult.items.map((paper) => (
+                      <div key={`similar-${paper.id}`} className="space-y-2">
+                        {paper.match_reasons && paper.match_reasons.length > 0 && (
+                          <div className="rounded-lg border border-primary/15 bg-background/70 px-3 py-2 text-xs text-left text-muted-foreground">
+                            <span className="font-medium text-foreground">Why similar:</span> {paper.match_reasons.join(' · ')}
+                          </div>
+                        )}
+                        <PaperCard
+                          paper={paper}
+                          allHighlights={paper.match_reasons || []}
+                          selectedTags={selectedTags}
+                          toggleTag={toggleTag}
+                          setSearchTerm={updateSearchTerm}
+                          copyBibTeX={copyBibTeX}
+                          onPaperUpdate={handlePaperUpdate}
+                          onRecommendSimilar={handleRecommendSimilar}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  !isLoadingSimilarPapers && (
+                    <p className="text-sm text-muted-foreground">No similar papers were found for this item yet.</p>
+                  )
+                )}
+              </section>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {currentPapers.map(paper => (
-                <PaperCard 
-                  key={paper.id} 
-                  paper={paper} 
-                  allHighlights={allHighlights}
-                  selectedTags={selectedTags}
-                  toggleTag={toggleTag}
-                  setSearchTerm={setSearchTerm}
-                  copyBibTeX={copyBibTeX}
-                  onPaperUpdate={handlePaperUpdate}
-                />
+                <div key={paper.id} className="space-y-2">
+                  {(searchMode === 'semantic' || searchMode === 'hybrid') && paper.match_reasons && paper.match_reasons.length > 0 && (
+                    <div className="rounded-lg border border-primary/15 bg-primary/5 px-3 py-2 text-xs text-left text-muted-foreground">
+                      <span className="font-medium text-foreground">Why it matched:</span> {paper.match_reasons.join(' · ')}
+                    </div>
+                  )}
+                  <PaperCard 
+                    paper={paper} 
+                    allHighlights={allHighlights}
+                    selectedTags={selectedTags}
+                    toggleTag={toggleTag}
+                    setSearchTerm={updateSearchTerm}
+                    copyBibTeX={copyBibTeX}
+                    onPaperUpdate={handlePaperUpdate}
+                    onRecommendSimilar={handleRecommendSimilar}
+                  />
+                </div>
               ))}
             </div>
 
@@ -567,7 +933,7 @@ export default function Home() {
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   
-                  {getPageNumbers().map((page, index) => (
+                  {getPaginationPages(currentPage, totalPages).map((page, index) => (
                     <Button
                       key={index}
                       variant={page === currentPage ? "secondary" : "outline"}

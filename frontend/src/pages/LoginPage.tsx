@@ -5,6 +5,10 @@ import { Input } from '@/components/ui/input';
 import { useNavigate, Link } from 'react-router-dom';
 import { API_BASE_URL } from '@/config';
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -20,16 +24,17 @@ export default function LoginPage() {
       const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ username, password })
       });
       
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Login failed');
       
-      login(data.token, data.user);
+      login(data.user);
       navigate('/');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Login failed'));
     }
   };
 

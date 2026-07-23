@@ -1,4 +1,6 @@
-export const MOCK_PAPERS = [
+import type { Paper } from '@/types/paper';
+
+export const MOCK_PAPERS: Paper[] = [
   {
     id: 1,
     title: "World Models",

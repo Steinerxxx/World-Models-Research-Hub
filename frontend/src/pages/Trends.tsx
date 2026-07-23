@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { API_BASE_URL } from '@/config';
-import { MOCK_PAPERS } from '@/data/mockData';
+import { fetchTrendsWithFallback } from '@/lib/api';
 import { 
   LineChart, 
   Line, 
@@ -14,14 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, TrendingUp } from "lucide-react";
 import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
-
-interface Paper {
-  id: number;
-  title: string;
-  authors: string[];
-  publication_date: string;
-  tags?: string[];
-}
+import type { Paper } from '@/types/paper';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
@@ -51,22 +43,12 @@ export default function Trends() {
   const [usingMockData, setUsingMockData] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/papers/trends?t=${Date.now()}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch data');
-        return res.json();
-      })
-      .then(data => {
-        setPapers(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.warn('Backend fetch failed, switching to Mock Data:', err);
-        setPapers(MOCK_PAPERS);
-        setUsingMockData(true);
-        setError(null);
-        setLoading(false);
-      });
+    fetchTrendsWithFallback().then((result) => {
+      setPapers(result.data);
+      setUsingMockData(result.usingMockData);
+      setError(null);
+      setLoading(false);
+    });
   }, []);
 
   const monthlyData = useMemo(() => {

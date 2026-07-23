@@ -7,6 +7,70 @@ import { API_BASE_URL } from '@/config';
 import { LogOut, Save, User, Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
+function LogoutModal({
+  open,
+  onCancel,
+  onConfirm
+}: {
+  open: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={onCancel}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            className="bg-card border border-border rounded-xl shadow-2xl p-6 w-full max-w-sm relative z-10"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-full bg-destructive/10 text-destructive">
+                <LogOut className="h-5 w-5" />
+              </div>
+              <h3 className="text-xl font-bold">Confirm Logout</h3>
+            </div>
+
+            <p className="text-muted-foreground mb-6">
+              Are you sure you want to log out of your account?
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={onCancel}
+                className="rounded-lg"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={onConfirm}
+                className="rounded-lg px-6"
+              >
+                Logout
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export default function Profile() {
   const { user, login, logout } = useAuth();
   const navigate = useNavigate();
@@ -45,9 +109,9 @@ export default function Profile() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/auth/update`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
           newUsername: newUsername !== user.username ? newUsername : undefined, 
@@ -59,14 +123,13 @@ export default function Profile() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Update failed');
       
-      // Update local context with new token and user info
-      login(data.token, data.user);
+      login(data.user);
       setSuccess('Profile updated successfully!');
       setNewPassword('');
       setConfirmPassword('');
       setCurrentPassword('');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Update failed'));
     } finally {
       setIsLoading(false);
     }
@@ -81,56 +144,6 @@ export default function Profile() {
     navigate('/');
     setShowLogoutConfirm(false);
   };
-
-  const LogoutModal = () => (
-    <AnimatePresence>
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowLogoutConfirm(false)}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="bg-card border border-border rounded-xl shadow-2xl p-6 w-full max-w-sm relative z-10"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-full bg-destructive/10 text-destructive">
-                <LogOut className="h-5 w-5" />
-              </div>
-              <h3 className="text-xl font-bold">Confirm Logout</h3>
-            </div>
-            
-            <p className="text-muted-foreground mb-6">
-              Are you sure you want to log out of your account?
-            </p>
-            
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowLogoutConfirm(false)}
-                className="rounded-lg"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={confirmLogout}
-                className="rounded-lg px-6"
-              >
-                Logout
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  );
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-background p-4 pt-12 md:pt-24">
@@ -255,7 +268,7 @@ export default function Profile() {
           </div>
         </div>
       </div>
-      <LogoutModal />
+      <LogoutModal open={showLogoutConfirm} onCancel={() => setShowLogoutConfirm(false)} onConfirm={confirmLogout} />
     </div>
   );
 }

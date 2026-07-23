@@ -1,26 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Calendar, Users, Copy, Tag, Sparkles, Loader2, Star, Check } from "lucide-react";
+import { ExternalLink, Calendar, Users, Copy, Tag, Sparkles, Loader2, Star, Check, Orbit } from "lucide-react";
 import { HighlightText } from './HighlightText';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useToast } from '@/contexts/ToastContext';
 import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
-
-import { API_BASE_URL } from '@/config';
-
-interface Paper {
-  id: number;
-  title: string;
-  authors: string[];
-  abstract: string;
-  publication_date: string;
-  url: string;
-  tags?: string[];
-  summary?: string;
-  contribution?: string;
-  limitations?: string;
-}
+import { analyzePaper } from '@/lib/api';
+import type { Paper } from '@/types/paper';
 
 interface PaperCardProps {
   paper: Paper;
@@ -30,6 +17,7 @@ interface PaperCardProps {
   setSearchTerm: (term: string) => void;
   copyBibTeX: (paper: Paper) => Promise<boolean>;
   onPaperUpdate?: (updatedPaper: Paper) => void;
+  onRecommendSimilar?: (paper: Paper) => void;
 }
 
 export function PaperCard({ 
@@ -39,7 +27,8 @@ export function PaperCard({
   toggleTag, 
   setSearchTerm, 
   copyBibTeX,
-  onPaperUpdate
+  onPaperUpdate,
+  onRecommendSimilar
 }: PaperCardProps) {
   const [isAuthorsTruncated, setIsAuthorsTruncated] = useState(false);
   const [isAbstractTruncated, setIsAbstractTruncated] = useState(false);
@@ -72,17 +61,11 @@ export function PaperCard({
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/papers/${paper.id}/analyze`, {
-        method: 'POST'
-      });
-      
-      if (!res.ok) throw new Error('Analysis failed');
-      
-      const data = await res.json();
-      if (data.analysis && onPaperUpdate) {
+      const analysis = await analyzePaper(paper.id);
+      if (analysis && onPaperUpdate) {
         onPaperUpdate({
           ...paper,
-          ...data.analysis
+          ...analysis
         });
         showToast('AI analysis generated successfully!');
       }
@@ -352,6 +335,17 @@ export function PaperCard({
         )}
       </CardContent>
       <CardFooter className="pt-4 border-t border-border/50 flex gap-2">
+        {onRecommendSimilar && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => onRecommendSimilar(paper)}
+            title="Recommend similar papers"
+            className="border-primary/20 hover:bg-primary/10 hover:text-primary"
+          >
+            <Orbit className="h-4 w-4" />
+          </Button>
+        )}
         <Button 
           asChild 
           className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"

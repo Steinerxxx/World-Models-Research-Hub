@@ -1,8 +1,11 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
+import type { SearchMode } from '@/types/paper';
 
 interface FilterContextType {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
+  searchMode: SearchMode;
+  setSearchMode: (mode: SearchMode) => void;
   selectedTags: string[];
   setSelectedTags: (tags: string[]) => void;
   toggleTag: (tag: string) => void;
@@ -16,6 +19,7 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export function FilterProvider({ children }: { children: ReactNode }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchMode, setSearchMode] = useState<SearchMode>('keyword');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('newest');
 
@@ -40,7 +44,9 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   return (
     <FilterContext.Provider value={{ 
       searchTerm, 
-      setSearchTerm, 
+      setSearchTerm,
+      searchMode,
+      setSearchMode,
       selectedTags, 
       setSelectedTags,
       toggleTag,

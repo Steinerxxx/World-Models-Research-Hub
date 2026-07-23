@@ -12,7 +12,8 @@ dotenv.config({ path: path.join(__dirname, '../.env') }); // backend/.env
 
 const apiKey = process.env.AI_API_KEY;
 const baseURL = process.env.AI_BASE_URL || 'https://api.deepseek.com';
-const modelName = process.env.AI_MODEL_NAME || 'deepseek-chat';
+const defaultModelName = process.env.AI_MODEL_NAME || 'deepseek-chat';
+const searchModelName = process.env.AI_SEARCH_MODEL_NAME || 'deepseek-v4-pro';
 
 if (!apiKey) {
   console.warn('AI_API_KEY is not set. AI features will be disabled.');
@@ -22,6 +23,22 @@ const openai = apiKey ? new OpenAI({
   apiKey: apiKey,
   baseURL: baseURL,
 }) : null;
+
+function buildFallbackSearchIntent(query, explanation) {
+  const keywords = query.split(/\s+/).filter(Boolean).slice(0, 8);
+
+  return {
+    query,
+    intent: 'search',
+    rewrittenQuery: query,
+    filters: {},
+    keywords,
+    focusAreas: keywords.slice(0, 4),
+    excludeTerms: [],
+    timePreference: 'balanced',
+    explanation
+  };
+}
 
 export async function generatePaperAnalysis(title, abstract) {
   if (!openai) {
@@ -45,7 +62,7 @@ Do not include any other text or markdown formatting.
     `;
 
     const response = await openai.chat.completions.create({
-      model: modelName,
+      model: defaultModelName,
       messages: [
         { role: 'system', content: 'You are a helpful assistant that outputs strict JSON objects.' },
         { role: 'user', content: prompt }
@@ -134,7 +151,7 @@ Return ONLY a JSON object:
     `;
 
     const response = await openai.chat.completions.create({
-      model: modelName,
+      model: defaultModelName,
       messages: [
         { role: 'system', content: 'You are a strict academic classifier that outputs ONLY JSON. You follow negative constraints religiously.' },
         { role: 'user', content: prompt }
@@ -184,7 +201,7 @@ Return ONLY a JSON array of strings.
     `;
 
     const response = await openai.chat.completions.create({
-      model: modelName,
+      model: defaultModelName,
       messages: [
         { role: 'system', content: 'You are a strict academic classifier that outputs ONLY JSON arrays.' },
         { role: 'user', content: prompt }
@@ -239,7 +256,7 @@ Return ONLY a JSON object with a single key "is_relevant" (boolean).
     `;
 
     const response = await openai.chat.completions.create({
-      model: modelName,
+      model: defaultModelName,
       messages: [
         { role: 'system', content: 'You are a strict filtering assistant that outputs JSON.' },
         { role: 'user', content: prompt }
@@ -257,5 +274,81 @@ Return ONLY a JSON object with a single key "is_relevant" (boolean).
   } catch (error) {
     console.error('Error checking relevance with AI:', error);
     return true; // Fallback to true on error
+  }
+}
+
+export async function parseSearchIntentWithAI(query) {
+  if (!openai) {
+    return buildFallbackSearchIntent(query, 'AI query parsing is unavailable, using the original query.');
+  }
+
+  try {
+    const prompt = `
+You are an academic search assistant. Parse the following natural language search request into structured fields.
+
+Query: "${query}"
+
+Return ONLY a JSON object with this schema:
+{
+  "intent": "search",
+  "rewrittenQuery": string,
+  "filters": {
+    "tag": string | null,
+    "author": string | null,
+    "year": string | null
+  },
+  "keywords": string[],
+  "focusAreas": string[],
+  "excludeTerms": string[],
+  "timePreference": "recent" | "balanced" | "classic",
+  "explanation": string
+}
+
+Rules:
+- rewrittenQuery should be concise and optimized for semantic search.
+- filters should only include values if clearly present in the query.
+- keywords should contain 2-8 short terms useful for keyword ranking.
+- focusAreas should contain 1-4 short phrases describing preferred themes.
+- excludeTerms should contain terms or directions the user seems to avoid.
+- timePreference should be "recent" for freshness-sensitive requests, "classic" for foundational work, otherwise "balanced".
+- explanation should be one sentence explaining how the query was interpreted.
+`;
+
+    const response = await openai.chat.completions.create({
+      model: searchModelName,
+      messages: [
+        { role: 'system', content: 'You are a strict JSON search parser.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.1,
+      max_tokens: 250
+    });
+
+    const content = response.choices[0].message.content?.trim();
+    if (!content) {
+      throw new Error('Empty AI search parsing response');
+    }
+
+    const jsonStr = content.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+    const result = JSON.parse(jsonStr);
+
+    return {
+      query,
+      intent: 'search',
+      rewrittenQuery: result.rewrittenQuery || query,
+      filters: {
+        tag: result.filters?.tag || undefined,
+        author: result.filters?.author || undefined,
+        year: result.filters?.year || undefined
+      },
+      keywords: Array.isArray(result.keywords) ? result.keywords.filter(Boolean) : [],
+      focusAreas: Array.isArray(result.focusAreas) ? result.focusAreas.filter(Boolean).slice(0, 4) : [],
+      excludeTerms: Array.isArray(result.excludeTerms) ? result.excludeTerms.filter(Boolean).slice(0, 6) : [],
+      timePreference: result.timePreference === 'recent' || result.timePreference === 'classic' ? result.timePreference : 'balanced',
+      explanation: result.explanation || 'AI parsed the query into semantic intent and optional filters.'
+    };
+  } catch (error) {
+    console.error('Error parsing search intent with AI:', error);
+    return buildFallbackSearchIntent(query, 'AI query parsing failed, so the original query was used.');
   }
 }

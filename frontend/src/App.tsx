@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { FilterProvider } from '@/contexts/FilterContext';
@@ -5,12 +6,21 @@ import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { Layout } from '@/components/Layout';
-import Home from '@/pages/Home';
-import Introduction from '@/pages/Introduction';
-import Trends from '@/pages/Trends';
-import LoginPage from '@/pages/LoginPage';
-import RegisterPage from '@/pages/RegisterPage';
-import Profile from '@/pages/Profile';
+
+const Home = lazy(() => import('@/pages/Home'));
+const Introduction = lazy(() => import('@/pages/Introduction'));
+const Trends = lazy(() => import('@/pages/Trends'));
+const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
+const Profile = lazy(() => import('@/pages/Profile'));
+
+function AppFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
+      <div className="text-sm text-muted-foreground">Loading page...</div>
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -20,16 +30,18 @@ function App() {
           <AuthProvider>
             <FavoritesProvider>
               <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Layout />}>
-                    <Route index element={<Home />} />
-                    <Route path="introduction" element={<Introduction />} />
-                    <Route path="trends" element={<Trends />} />
-                    <Route path="login" element={<LoginPage />} />
-                    <Route path="register" element={<RegisterPage />} />
-                    <Route path="profile" element={<Profile />} />
-                  </Route>
-                </Routes>
+                <Suspense fallback={<AppFallback />}>
+                  <Routes>
+                    <Route path="/" element={<Layout />}>
+                      <Route index element={<Home />} />
+                      <Route path="introduction" element={<Introduction />} />
+                      <Route path="trends" element={<Trends />} />
+                      <Route path="login" element={<LoginPage />} />
+                      <Route path="register" element={<RegisterPage />} />
+                      <Route path="profile" element={<Profile />} />
+                    </Route>
+                  </Routes>
+                </Suspense>
               </BrowserRouter>
             </FavoritesProvider>
           </AuthProvider>
