@@ -24,6 +24,18 @@ const openai = apiKey ? new OpenAI({
   baseURL: baseURL,
 }) : null;
 
+function extractJsonObject(text) {
+  const cleaned = text.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+  const start = cleaned.indexOf('{');
+  const end = cleaned.lastIndexOf('}');
+
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error('No JSON object found in AI response');
+  }
+
+  return cleaned.slice(start, end + 1);
+}
+
 function buildFallbackSearchIntent(query, explanation) {
   const keywords = query.split(/\s+/).filter(Boolean).slice(0, 8);
 
@@ -37,6 +49,24 @@ function buildFallbackSearchIntent(query, explanation) {
     excludeTerms: [],
     timePreference: 'balanced',
     explanation
+  };
+}
+
+function normalizeSearchIntent(query, result) {
+  return {
+    query,
+    intent: 'search',
+    rewrittenQuery: result.rewrittenQuery || query,
+    filters: {
+      tag: result.filters?.tag || undefined,
+      author: result.filters?.author || undefined,
+      year: result.filters?.year || undefined
+    },
+    keywords: Array.isArray(result.keywords) ? result.keywords.filter(Boolean) : [],
+    focusAreas: Array.isArray(result.focusAreas) ? result.focusAreas.filter(Boolean).slice(0, 4) : [],
+    excludeTerms: Array.isArray(result.excludeTerms) ? result.excludeTerms.filter(Boolean).slice(0, 6) : [],
+    timePreference: result.timePreference === 'recent' || result.timePreference === 'classic' ? result.timePreference : 'balanced',
+    explanation: result.explanation || 'AI parsed the query into semantic intent and optional filters.'
   };
 }
 
@@ -282,8 +312,7 @@ export async function parseSearchIntentWithAI(query) {
     return buildFallbackSearchIntent(query, 'AI query parsing is unavailable, using the original query.');
   }
 
-  try {
-    const prompt = `
+  const prompt = `
 You are an academic search assistant. Parse the following natural language search request into structured fields.
 
 Query: "${query}"
@@ -314,41 +343,44 @@ Rules:
 - explanation should be one sentence explaining how the query was interpreted.
 `;
 
-    const response = await openai.chat.completions.create({
-      model: searchModelName,
-      messages: [
-        { role: 'system', content: 'You are a strict JSON search parser.' },
-        { role: 'user', content: prompt }
-      ],
-      temperature: 0.1,
-      max_tokens: 250
-    });
-
-    const content = response.choices[0].message.content?.trim();
-    if (!content) {
-      throw new Error('Empty AI search parsing response');
-    }
-
-    const jsonStr = content.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
-    const result = JSON.parse(jsonStr);
-
-    return {
-      query,
-      intent: 'search',
-      rewrittenQuery: result.rewrittenQuery || query,
-      filters: {
-        tag: result.filters?.tag || undefined,
-        author: result.filters?.author || undefined,
-        year: result.filters?.year || undefined
-      },
-      keywords: Array.isArray(result.keywords) ? result.keywords.filter(Boolean) : [],
-      focusAreas: Array.isArray(result.focusAreas) ? result.focusAreas.filter(Boolean).slice(0, 4) : [],
-      excludeTerms: Array.isArray(result.excludeTerms) ? result.excludeTerms.filter(Boolean).slice(0, 6) : [],
-      timePreference: result.timePreference === 'recent' || result.timePreference === 'classic' ? result.timePreference : 'balanced',
-      explanation: result.explanation || 'AI parsed the query into semantic intent and optional filters.'
-    };
-  } catch (error) {
-    console.error('Error parsing search intent with AI:', error);
-    return buildFallbackSearchIntent(query, 'AI query parsing failed, so the original query was used.');
+  const modelsToTry = [searchModelName];
+  if (defaultModelName !== searchModelName) {
+    modelsToTry.push(defaultModelName);
   }
+
+  let lastError = null;
+
+  for (const modelName of modelsToTry) {
+    try {
+      const response = await openai.chat.completions.create({
+        model: modelName,
+        messages: [
+          { role: 'system', content: 'You are a strict JSON search parser.' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0,
+        max_tokens: 250
+      });
+
+      const choice = response.choices?.[0];
+      const content = choice?.message?.content?.trim();
+
+      if (!content) {
+        const finishReason = choice?.finish_reason || 'unknown';
+        const hasReasoningOnly = Boolean(choice?.message?.reasoning_content?.trim());
+        throw new Error(
+          `Empty AI search parsing response from ${modelName} (finish_reason=${finishReason}, reasoning_only=${hasReasoningOnly})`
+        );
+      }
+
+      const result = JSON.parse(extractJsonObject(content));
+      return normalizeSearchIntent(query, result);
+    } catch (error) {
+      lastError = error;
+      console.warn(`Search intent parsing failed with model ${modelName}:`, error.message);
+    }
+  }
+
+  console.error('Error parsing search intent with AI:', lastError);
+  return buildFallbackSearchIntent(query, 'AI query parsing failed, so the original query was used.');
 }
