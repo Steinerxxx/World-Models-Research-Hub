@@ -30,8 +30,8 @@ const TOOL_LABELS: Record<string, string> = {
 const SUGGESTIONS = [
   { icon: <Search className="h-3.5 w-3.5" />, text: 'Find papers about world models for robotics' },
   { icon: <WandSparkles className="h-3.5 w-3.5" />, text: 'Recommend papers based on my favorites' },
-  { icon: <Telescope className="h-3.5 w-3.5" />, text: 'Analyze the paper Dream to Control' },
-  { icon: <GitBranch className="h-3.5 w-3.5" />, text: "What's similar to DayDreamer?" },
+  { icon: <Telescope className="h-3.5 w-3.5" />, text: 'Analyze the paper DreamerV3' },
+  { icon: <GitBranch className="h-3.5 w-3.5" />, text: 'What papers are similar to DreamerV3?' },
 ];
 
 const STORAGE_KEY = 'research-chat-messages';

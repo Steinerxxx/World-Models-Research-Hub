@@ -189,6 +189,8 @@ function formatToolResultsFallback(results) {
 async function executeTool(call, favorites, context) {
   const { tool, args } = call;
 
+  const cleanTitle = (t) => (t || '').replace(/[?!.,;:]+$/g, '').trim();
+
   switch (tool) {
     case 'SEARCH': {
       const [query, mode = 'hybrid', tag, author, year] = args;
@@ -239,7 +241,8 @@ async function executeTool(call, favorites, context) {
     }
 
     case 'ANALYZE': {
-      const [paperTitle] = args;
+      const [rawTitle] = args;
+      const paperTitle = cleanTitle(rawTitle);
       if (!paperTitle) return 'Please specify a paper title to analyze.';
 
       const { getAllPapers } = await import('./database.js');
@@ -273,7 +276,8 @@ async function executeTool(call, favorites, context) {
     }
 
     case 'SIMILAR': {
-      const [paperTitle] = args;
+      const [rawTitle] = args;
+      const paperTitle = cleanTitle(rawTitle);
       if (!paperTitle) return 'Please specify a paper title.';
 
       const { getAllPapers } = await import('./database.js');
