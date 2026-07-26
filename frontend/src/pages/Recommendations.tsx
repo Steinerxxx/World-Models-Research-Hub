@@ -1,36 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Loader2, WandSparkles } from 'lucide-react';
+import { Loader2, WandSparkles } from 'lucide-react';
 import { PaperCard } from '@/components/PaperCard';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useFilter } from '@/contexts/FilterContext';
-import { fetchAiRecommendations, fetchPapersWithFallback, fetchSimilarPaperRecommendations } from '@/lib/api';
+import { fetchAiRecommendations, fetchSimilarPaperRecommendations } from '@/lib/api';
 import type { Paper, RecommendationResponse, SimilarPaperRecommendationResponse } from '@/types/paper';
 
 export default function Recommendations() {
   const { favorites } = useFavorites();
   const { selectedTags, toggleTag } = useFilter();
-  const [allPapers, setAllPapers] = useState<Paper[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(false);
+  const loadedRef = useRef(true);
   const [recommendations, setRecommendations] = useState<RecommendationResponse | null>(null);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const [similarPaperResult, setSimilarPaperResult] = useState<SimilarPaperRecommendationResponse | null>(null);
   const [isLoadingSimilarPapers, setIsLoadingSimilarPapers] = useState(false);
   const [context, setContext] = useState('');
+  const [submittedContext, setSubmittedContext] = useState('');
+
+  const triggerContextSearch = () => {
+    setSubmittedContext(context.trim());
+  };
 
   useEffect(() => {
-    void (async () => {
-      const result = await fetchPapersWithFallback();
-      setAllPapers(result.data);
-      setLoading(false);
-    })();
-  }, []);
-
-  useEffect(() => {
-    if (allPapers.length === 0) return;
+    if (!loadedRef.current) return;
     
-    const query = context.trim() || 'Recommend useful world model papers';
+    const query = submittedContext || 'Recommend useful world model papers';
     void (async () => {
       setIsLoadingRecommendations(true);
       try {
@@ -43,7 +40,7 @@ export default function Recommendations() {
         setIsLoadingRecommendations(false);
       }
     })();
-  }, [allPapers.length, favorites, context]);
+  }, [favorites, submittedContext]);
 
   const handleRecommendSimilar = async (paper: Paper) => {
     setIsLoadingSimilarPapers(true);
@@ -59,7 +56,6 @@ export default function Recommendations() {
   };
 
   const handlePaperUpdate = (updatedPaper: Paper) => {
-    setAllPapers(prev => prev.map(p => p.id === updatedPaper.id ? updatedPaper : p));
     setRecommendations(prev => prev ? {
       ...prev,
       items: prev.items.map(p => p.id === updatedPaper.id ? updatedPaper : p)
@@ -95,8 +91,8 @@ export default function Recommendations() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <header className="mb-8 ml-2">
-        <h1 className="text-3xl font-bold text-foreground">AI Recommendations</h1>
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">AI Recommendations</h1>
         <p className="mt-2 text-muted-foreground">
           {favorites.length > 0
             ? '基于你的收藏论文，为你推荐语义上最相近的研究'
@@ -104,19 +100,26 @@ export default function Recommendations() {
         </p>
       </header>
 
-      <div className="mb-8 max-w-xl ml-2">
+      <div className="mb-8 max-w-xl">
         <p className="mb-2 text-sm text-muted-foreground">
           输入你当前的研究方向，AI 会据此调整推荐结果的侧重
         </p>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+        <div className="flex gap-2">
           <Input
             type="text"
             placeholder="e.g. robot manipulation, video diffusion, RL planning..."
-            className="w-full pl-10 pr-4 py-6 text-lg bg-background/50 rounded-xl"
+            className="flex-1 py-6 text-lg bg-background/50 rounded-xl"
             value={context}
             onChange={(e) => setContext(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && triggerContextSearch()}
           />
+          <Button
+            onClick={triggerContextSearch}
+            disabled={isLoadingRecommendations}
+            className="h-auto px-6 rounded-xl text-base font-semibold"
+          >
+            Apply
+          </Button>
         </div>
       </div>
 

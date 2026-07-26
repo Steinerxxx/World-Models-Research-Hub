@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X, Star, AlertTriangle, Brain, Bot, Sparkles, SlidersHorizontal, Calendar, Users, Tag } from "lucide-react";
@@ -98,6 +98,7 @@ function loadInitialSearchSettings() {
 export default function Home() {
   const initialSettings = loadInitialSearchSettings();
   const [allPapers, setAllPapers] = useState<Paper[]>([]);
+  const allPapersRef = useRef<Paper[]>([]);
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -185,11 +186,13 @@ export default function Home() {
       });
   };
 
+  useEffect(() => { allPapersRef.current = allPapers; }, [allPapers]);
+
   useEffect(() => {
     const runSemanticSearch = async () => {
       if (searchMode !== 'semantic') {
         if (searchMode === 'keyword') {
-          setPapers(allPapers);
+          setPapers(allPapersRef.current);
           setSemanticResult(null);
           setParsedIntent(null);
           setError(null);
@@ -199,7 +202,7 @@ export default function Home() {
 
       const trimmed = submittedSearchTerm;
       if (!trimmed) {
-        setPapers(allPapers);
+        setPapers(allPapersRef.current);
         setSemanticResult(null);
         setParsedIntent(null);
         setError(null);
@@ -216,7 +219,7 @@ export default function Home() {
         setError(null);
       } catch (err) {
         console.error('Semantic search failed:', err);
-        setPapers(allPapers);
+        setPapers(allPapersRef.current);
         setSemanticResult(null);
         setParsedIntent(null);
         setError('AI semantic search failed');
@@ -226,13 +229,13 @@ export default function Home() {
     };
 
     runSemanticSearch();
-  }, [allPapers, appliedFilters, searchMode, submittedSearchTerm]);
+  }, [appliedFilters, searchMode, submittedSearchTerm]);
 
   useEffect(() => {
     const runHybridSearch = async () => {
       if (searchMode !== 'hybrid') {
         if (searchMode === 'keyword') {
-          setPapers(allPapers);
+          setPapers(allPapersRef.current);
           setSemanticResult(null);
           setParsedIntent(null);
           setError(null);
@@ -242,7 +245,7 @@ export default function Home() {
 
       const trimmed = submittedSearchTerm;
       if (!trimmed) {
-        setPapers(allPapers);
+        setPapers(allPapersRef.current);
         setSemanticResult(null);
         setParsedIntent(null);
         setError(null);
@@ -268,7 +271,7 @@ export default function Home() {
         setError(null);
       } catch (err) {
         console.error('Hybrid search failed:', err);
-        setPapers(allPapers);
+        setPapers(allPapersRef.current);
         setParsedIntent(null);
         setSemanticResult(null);
         setError('AI hybrid search failed');
@@ -278,7 +281,7 @@ export default function Home() {
     };
 
     runHybridSearch();
-  }, [allPapers, appliedFilters, appliedHybridWeights, searchMode, submittedSearchTerm]);
+  }, [appliedFilters, appliedHybridWeights, searchMode, submittedSearchTerm]);
 
   const updateDraftFilter = (key: keyof SearchFilters, value: string) => {
     setDraftFilters(prev => ({
