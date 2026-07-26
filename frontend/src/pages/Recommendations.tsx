@@ -1,22 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2, WandSparkles } from 'lucide-react';
 import { PaperCard } from '@/components/PaperCard';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useFilter } from '@/contexts/FilterContext';
-import { fetchAiRecommendations, fetchSimilarPaperRecommendations } from '@/lib/api';
-import type { Paper, RecommendationResponse, SimilarPaperRecommendationResponse } from '@/types/paper';
+import { fetchAiRecommendations } from '@/lib/api';
+import type { Paper, RecommendationResponse } from '@/types/paper';
 
 export default function Recommendations() {
   const { favorites } = useFavorites();
   const { selectedTags, toggleTag } = useFilter();
-  const [loading] = useState(false);
-  const loadedRef = useRef(true);
+  const navigate = useNavigate();
+  const [initialLoading, setInitialLoading] = useState(true);
   const [recommendations, setRecommendations] = useState<RecommendationResponse | null>(null);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
-  const [similarPaperResult, setSimilarPaperResult] = useState<SimilarPaperRecommendationResponse | null>(null);
-  const [isLoadingSimilarPapers, setIsLoadingSimilarPapers] = useState(false);
   const [context, setContext] = useState('');
   const [submittedContext, setSubmittedContext] = useState('');
 
@@ -25,8 +24,6 @@ export default function Recommendations() {
   };
 
   useEffect(() => {
-    if (!loadedRef.current) return;
-    
     const query = submittedContext || 'Recommend useful world model papers';
     void (async () => {
       setIsLoadingRecommendations(true);
@@ -38,29 +35,17 @@ export default function Recommendations() {
         setRecommendations(null);
       } finally {
         setIsLoadingRecommendations(false);
+        setInitialLoading(false);
       }
     })();
   }, [favorites, submittedContext]);
 
-  const handleRecommendSimilar = async (paper: Paper) => {
-    setIsLoadingSimilarPapers(true);
-    try {
-      const result = await fetchSimilarPaperRecommendations(paper.id, paper.title, 6);
-      setSimilarPaperResult(result);
-    } catch (err) {
-      console.error('Similar paper recommendations failed:', err);
-      setSimilarPaperResult(null);
-    } finally {
-      setIsLoadingSimilarPapers(false);
-    }
+  const handleRecommendSimilar = (paper: Paper) => {
+    navigate('/', { state: { similarPaper: paper } });
   };
 
   const handlePaperUpdate = (updatedPaper: Paper) => {
     setRecommendations(prev => prev ? {
-      ...prev,
-      items: prev.items.map(p => p.id === updatedPaper.id ? updatedPaper : p)
-    } : prev);
-    setSimilarPaperResult(prev => prev ? {
       ...prev,
       items: prev.items.map(p => p.id === updatedPaper.id ? updatedPaper : p)
     } : prev);
@@ -78,26 +63,38 @@ export default function Recommendations() {
     }
   };
 
-  if (loading) {
+  if (initialLoading) {
     return (
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
-          <p className="text-lg text-muted-foreground">Loading...</p>
+          <div className="relative">
+            <Loader2 className="h-12 w-12 text-primary animate-spin" />
+            <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-primary/20 animate-ping" />
+          </div>
+          <p className="mt-6 text-lg text-muted-foreground animate-pulse">
+            正在生成个性化推荐...
+          </p>
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 w-full max-w-5xl">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 rounded-xl bg-muted/30 animate-pulse" />
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12 max-w-7xl">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">AI Recommendations</h1>
-        <p className="mt-2 text-muted-foreground">
-          {favorites.length > 0
-            ? '基于你的收藏论文，为你推荐语义上最相近的研究'
-            : '收藏一些论文后，AI 将基于你的兴趣做个性化推荐'}
-        </p>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-bold tracking-tight">AI Recommendations</h1>
+          <p className="text-muted-foreground">
+            {favorites.length > 0
+              ? '基于你的收藏论文，为你推荐语义上最相近的研究'
+              : '收藏一些论文后，AI 将基于你的兴趣做个性化推荐'}
+          </p>
+        </div>
       </header>
 
       <div className="mb-8 max-w-xl">
@@ -169,65 +166,6 @@ export default function Recommendations() {
                 </div>
               ))}
             </div>
-          </section>
-        )}
-
-        {(similarPaperResult || isLoadingSimilarPapers) && (
-          <section className="mb-10 rounded-2xl border border-border/60 bg-card/60 p-5">
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 text-primary font-semibold">
-                  <WandSparkles className="h-4 w-4" />
-                  Similar Papers
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {similarPaperResult
-                    ? `基于论文《${similarPaperResult.paperTitle}》的相似论文推荐`
-                    : '正在生成相似论文推荐'}
-                </p>
-              </div>
-              {isLoadingSimilarPapers && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading
-                </div>
-              )}
-              {similarPaperResult && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSimilarPaperResult(null)}
-                  className="h-7 px-2 text-xs text-muted-foreground"
-                >
-                  ✕
-                </Button>
-              )}
-            </div>
-
-            {similarPaperResult && similarPaperResult.items.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {similarPaperResult.items.map((paper) => (
-                  <div key={`sim-${paper.id}`}>
-                    <PaperCard
-                      paper={paper}
-                      allHighlights={paper.match_reasons || []}
-                      selectedTags={selectedTags}
-                      toggleTag={toggleTag}
-                      setSearchTerm={() => {}}
-                      copyBibTeX={copyBibTeX}
-                      onPaperUpdate={handlePaperUpdate}
-                      onRecommendSimilar={handleRecommendSimilar}
-                      matchReasons={paper.match_reasons}
-                      reasonLabel="Why similar"
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              !isLoadingSimilarPapers && (
-                <p className="text-sm text-muted-foreground">No similar papers were found for this item yet.</p>
-              )
-            )}
           </section>
         )}
 

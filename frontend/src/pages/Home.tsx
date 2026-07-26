@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X, Star, AlertTriangle, Brain, Bot, Sparkles, SlidersHorizontal, Calendar, Users, Tag } from "lucide-react";
@@ -119,6 +120,7 @@ export default function Home() {
   // Use context for filters
   const { searchTerm, setSearchTerm, searchMode, setSearchMode, selectedTags, setSelectedTags, toggleTag, itemsPerPage, sortBy } = useFilter();
   const { favorites, showFavoritesOnly, setShowFavoritesOnly } = useFavorites();
+  const location = useLocation();
 
   const updateSearchTerm = (value: string) => {
     setSearchTerm(value);
@@ -354,6 +356,18 @@ export default function Home() {
       setIsLoadingSimilarPapers(false);
     }
   };
+
+  // Detect similar paper request from Recommendations page navigation
+  const similarPaperTriggered = useRef(false);
+  useEffect(() => {
+    const state = location.state as { similarPaper?: Paper } | null;
+    if (state?.similarPaper && !similarPaperTriggered.current) {
+      similarPaperTriggered.current = true;
+      handleRecommendSimilar(state.similarPaper);
+      // Clear the state so it doesn't re-trigger on refresh
+      window.history.replaceState({}, '');
+    }
+  }, [location.state]);
 
   const {
     allHighlights,
