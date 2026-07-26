@@ -46,11 +46,17 @@ Then wait for results. After receiving results, provide your final answer in nat
 If no tools are needed, just answer directly.`;
 
 function parseToolCalls(text) {
-  const match = text.match(/---TOOLS\n([\s\S]*?)\n---END/);
-  if (!match) return null;
+  // Match ---TOOLS block flexibly (handle \r\n, extra spaces, etc.)
+  const match = text.match(/---TOOLS\s*\n([\s\S]*?)\n\s*---END/);
+  if (!match) {
+    if (text.includes('---TOOLS')) {
+      console.error('[parseToolCalls] Found ---TOOLS but regex failed. Raw text:', JSON.stringify(text.slice(0, 500)));
+    }
+    return null;
+  }
 
   const calls = [];
-  const lines = match[1].trim().split('\n');
+  const lines = match[1].trim().split(/\r?\n/);
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
@@ -77,6 +83,10 @@ function parseToolCalls(text) {
     if (current.trim()) args.push(current.trim());
 
     calls.push({ tool, args: args.map(a => a.replace(/^"|"$/g, '')) });
+  }
+
+  if (calls.length === 0) {
+    console.error('[parseToolCalls] Parsed TOOLS block but found no valid tool calls. Content:', JSON.stringify(match[1].slice(0, 300)));
   }
 
   return calls.length > 0 ? calls : null;
@@ -114,12 +124,16 @@ export async function chatWithAgent(userMessage, favorites, context) {
     return { answer: 'I was unable to process your request. Please try rephrasing.' };
   }
 
+  console.log('[chatWithAgent] AI response (first 500 chars):', content.slice(0, 500));
+
   const toolCalls = parseToolCalls(content);
 
   if (!toolCalls) {
-    // No tools needed — direct answer
+    // No tools needed — direct answer (strip any ---TOOLS block just in case)
     const answer = content.replace(/---TOOLS[\s\S]*?---END/g, '').trim();
-    return { answer: answer || content };
+    if (answer) return { answer };
+    // If the entire response was a TOOLS block we couldn't parse, apologise
+    return { answer: 'I encountered an issue processing your request. Please try again or rephrase your question.' };
   }
 
   // Step 2: Execute tools
@@ -204,8 +218,8 @@ async function executeTool(call, favorites, context) {
       const [query = '', limit = 5] = args;
       const { recommendPapersFromFavorites } = await import('./vector_service.js');
       const result = await recommendPapersFromFavorites({
-        favoriteIds: favorites,
-        contextQuery: query || context || undefined,
+        favorites,
+        query: query || context || undefined,
         limit: parseInt(limit) || 5,
       });
 
@@ -272,7 +286,7 @@ async function executeTool(call, favorites, context) {
       if (!paper) return `Could not find a paper matching "${paperTitle}".`;
 
       const result = await recommendPapersFromFavorites({
-        favoriteIds: [paper.id],
+        sourcePaperIds: [paper.id],
         limit: 5,
       });
 

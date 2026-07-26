@@ -1,14 +1,23 @@
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, Send, Bot, User } from 'lucide-react';
+import { Loader2, Send, Bot, User, Search, WandSparkles, GitBranch, Telescope } from 'lucide-react';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { API_BASE_URL } from '@/config';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  toolsUsed?: string[];
 }
+
+const TOOL_ICONS: Record<string, React.ReactNode> = {
+  SEARCH: <Search className="h-3 w-3" />,
+  RECOMMEND: <WandSparkles className="h-3 w-3" />,
+  ANALYZE: <Telescope className="h-3 w-3" />,
+  SIMILAR: <GitBranch className="h-3 w-3" />,
+};
 
 export default function Chat() {
   const { favorites } = useFavorites();
@@ -43,7 +52,8 @@ export default function Chat() {
       const data = await response.json();
       const assistantMessage: Message = {
         role: 'assistant',
-        content: data.answer || 'Sorry, I could not process your request.'
+        content: data.answer || 'Sorry, I could not process your request.',
+        toolsUsed: data.toolsUsed,
       };
       setMessages(prev => [...prev, assistantMessage]);
     } catch (err) {
@@ -95,14 +105,33 @@ export default function Chat() {
                 <Bot className="h-4 w-4 text-primary" />
               </div>
             )}
-            <div
-              className={`max-w-[80%] rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
-                msg.role === 'user'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted/60 text-foreground'
-              }`}
-            >
-              {msg.content}
+            <div className={`max-w-[85%] space-y-1.5`}>
+              {msg.toolsUsed && msg.toolsUsed.length > 0 && (
+                <div className="flex items-center gap-2">
+                  {msg.toolsUsed.map(tool => (
+                    <span
+                      key={tool}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary"
+                    >
+                      {TOOL_ICONS[tool]}
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div
+                className={`rounded-xl px-4 py-3 text-sm leading-relaxed ${
+                  msg.role === 'user'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted/60 text-foreground prose prose-sm dark:prose-invert max-w-none'
+                }`}
+              >
+                {msg.role === 'assistant' ? (
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                ) : (
+                  msg.content
+                )}
+              </div>
             </div>
             {msg.role === 'user' && (
               <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary flex items-center justify-center mt-1">
