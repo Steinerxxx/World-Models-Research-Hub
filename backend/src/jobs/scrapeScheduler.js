@@ -9,9 +9,9 @@ export function startScrapeScheduler() {
     return scheduledTask;
   }
 
-  console.log('⏰ Scheduling hourly crawler (0 * * * *)...');
-  scheduledTask = cron.schedule('0 * * * *', async () => {
-    console.log('⏰ Running scheduled hourly crawler...');
+  console.log('⏰ Scheduling crawler every 10 minutes (*/10 * * * *)...');
+  scheduledTask = cron.schedule('*/10 * * * *', async () => {
+    console.log('⏰ Running scheduled crawler...');
     try {
       const result = await scrapeArxiv(false);
       console.log('✅ Scheduled crawler finished:', result);

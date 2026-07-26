@@ -39,7 +39,7 @@ function parseDate(dateText) {
 
 export async function scrapeArxiv(fullBackfill = false) {
     const result = { found: 0, added: 0, errors: 0 };
-    const MAX_RESULTS = fullBackfill ? 5000 : 200; // Scrape deeper if backfilling
+    const MAX_RESULTS = fullBackfill ? 5000 : 500;
     const BATCH_SIZE = 50; // Match arXiv default page size to avoid overlap
     const CUTOFF_DATE = new Date('2025-01-01');
 
