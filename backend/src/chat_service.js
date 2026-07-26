@@ -213,6 +213,15 @@ function findPaperByTitle(allPapers, searchTerm) {
   return null;
 }
 
+function summarizePaper(p) {
+  return {
+    title: p.title,
+    authors: (p.authors || []).slice(0, 3).join(', '),
+    year: new Date(p.publication_date).getFullYear(),
+    tags: (p.tags || []).slice(0, 5),
+  };
+}
+
 async function executeTool(call, favorites, context) {
   const { tool, args } = call;
 
@@ -234,13 +243,7 @@ async function executeTool(call, favorites, context) {
 
       return {
         count: result.items.length,
-        papers: result.items.map(p => ({
-          id: p.id,
-          title: p.title,
-          authors: (p.authors || []).slice(0, 3).join(', '),
-          year: new Date(p.publication_date).getFullYear(),
-          tags: (p.tags || []).slice(0, 5),
-        }))
+        papers: result.items.map(summarizePaper)
       };
     }
 
@@ -257,13 +260,7 @@ async function executeTool(call, favorites, context) {
 
       return {
         count: result.items.length,
-        papers: result.items.map(p => ({
-          id: p.id,
-          title: p.title,
-          authors: (p.authors || []).slice(0, 3).join(', '),
-          year: new Date(p.publication_date).getFullYear(),
-          tags: (p.tags || []).slice(0, 5),
-        }))
+        papers: result.items.map(summarizePaper)
       };
     }
 
@@ -323,13 +320,7 @@ async function executeTool(call, favorites, context) {
       return {
         count: result.items.length,
         sourcePaper: paperTitle,
-        papers: result.items.map(p => ({
-          id: p.id,
-          title: p.title,
-          authors: (p.authors || []).slice(0, 3).join(', '),
-          year: new Date(p.publication_date).getFullYear(),
-          tags: (p.tags || []).slice(0, 5),
-        }))
+        papers: result.items.map(summarizePaper)
       };
     }
 
