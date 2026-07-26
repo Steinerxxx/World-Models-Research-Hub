@@ -21,6 +21,7 @@ export default function Recommendations() {
 
   const triggerContextSearch = () => {
     setSubmittedContext(context.trim());
+    setContext('');
   };
 
   useEffect(() => {
@@ -65,11 +66,9 @@ export default function Recommendations() {
 
   if (initialLoading) {
     return (
-      <div className="container mx-auto px-4 py-12 max-w-7xl">
-        <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
-          <p className="text-lg text-muted-foreground">Generating recommendations...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)]">
+        <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
+        <p className="text-lg text-muted-foreground">Generating recommendations...</p>
       </div>
     );
   }
@@ -143,15 +142,13 @@ export default function Recommendations() {
                 <div key={`rec-${paper.id}`}>
                   <PaperCard
                     paper={paper}
-                    allHighlights={paper.match_reasons || []}
+                    allHighlights={[]}
                     selectedTags={selectedTags}
                     toggleTag={(tag) => { toggleTag(tag); navigate('/'); }}
                     setSearchTerm={() => { navigate('/'); }}
                     copyBibTeX={copyBibTeX}
                     onPaperUpdate={handlePaperUpdate}
                     onRecommendSimilar={handleRecommendSimilar}
-                    matchReasons={paper.match_reasons}
-                    reasonLabel="Why recommended"
                   />
                 </div>
               ))}
