@@ -1,0 +1,297 @@
+import OpenAI from 'openai';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config();
+dotenv.config({ path: path.join(__dirname, '../.env') });
+
+const apiKey = process.env.AI_API_KEY;
+const baseURL = process.env.AI_BASE_URL || 'https://api.deepseek.com';
+const modelName = process.env.AI_MODEL_NAME || 'deepseek-chat';
+
+const openai = apiKey ? new OpenAI({ apiKey, baseURL }) : null;
+
+const SYSTEM_PROMPT = `You are a research assistant for a World Models & Model-Based RL paper hub. You have access to these tools:
+
+TOOLS:
+- SEARCH(query, mode, tag?, author?, year?) — Search papers. mode: "semantic", "hybrid", or "keyword".
+- RECOMMEND(query?, limit?) — Get personalized recommendations based on user's favorites and research context.
+- ANALYZE(paper_title) — Get AI-generated summary, contribution, and limitations for a specific paper. Only use when user asks about a specific paper by name.
+- SIMILAR(paper_title) — Find papers similar to a given paper. Only use when user asks for similar papers.
+
+RULES:
+1. If the user asks to search/find papers → use SEARCH
+2. If the user asks for recommendations → use RECOMMEND
+3. If the user asks about a specific paper's details → use ANALYZE
+4. If the user asks "what's similar to X" → use SIMILAR
+5. You may use multiple tools in sequence if needed
+6. Keep your thinking concise
+
+RESPOND IN THIS EXACT FORMAT:
+
+If you need to use tools, start with:
+---TOOLS
+SEARCH("query", "mode", "tag?", "author?", "year?")
+RECOMMEND("query?", limit?)
+ANALYZE("paper_title")
+SIMILAR("paper_title")
+---END
+
+Then wait for results. After receiving results, provide your final answer in natural language.
+
+If no tools are needed, just answer directly.`;
+
+function parseToolCalls(text) {
+  const match = text.match(/---TOOLS\n([\s\S]*?)\n---END/);
+  if (!match) return null;
+
+  const calls = [];
+  const lines = match[1].trim().split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    const toolMatch = trimmed.match(/^(SEARCH|RECOMMEND|ANALYZE|SIMILAR)\((.*)\)$/s);
+    if (!toolMatch) continue;
+
+    const [, tool, argsStr] = toolMatch;
+    const args = [];
+    let current = '';
+    let inQuote = false;
+
+    for (let i = 0; i < argsStr.length; i++) {
+      const ch = argsStr[i];
+      if (ch === '"') {
+        inQuote = !inQuote;
+      } else if (ch === ',' && !inQuote) {
+        args.push(current.trim());
+        current = '';
+      } else {
+        current += ch;
+      }
+    }
+    if (current.trim()) args.push(current.trim());
+
+    calls.push({ tool, args: args.map(a => a.replace(/^"|"$/g, '')) });
+  }
+
+  return calls.length > 0 ? calls : null;
+}
+
+export async function chatWithAgent(userMessage, favorites, context) {
+  if (!openai) {
+    return { answer: 'AI agent is currently unavailable. Please configure AI_API_KEY.' };
+  }
+
+  const messages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'user', content: `User's favorites (paper IDs): [${favorites.join(', ')}]\nUser's research context: ${context || 'none'}\n\nUser message: ${userMessage}` }
+  ];
+
+  // Step 1: AI decides what tools to call
+  let response;
+  try {
+    response = await openai.chat.completions.create({
+      model: modelName,
+      messages,
+      temperature: 0.3,
+      max_tokens: 800,
+    });
+  } catch (err) {
+    console.error('Agent API error:', err.message);
+    return { answer: 'Sorry, the AI service is temporarily unavailable. Please try again later.' };
+  }
+
+  let content = response.choices[0]?.message?.content?.trim() || '';
+  if (!content && response.choices[0]?.message?.reasoning_content) {
+    content = response.choices[0].message.reasoning_content.trim();
+  }
+  if (!content) {
+    return { answer: 'I was unable to process your request. Please try rephrasing.' };
+  }
+
+  const toolCalls = parseToolCalls(content);
+
+  if (!toolCalls) {
+    // No tools needed — direct answer
+    const answer = content.replace(/---TOOLS[\s\S]*?---END/g, '').trim();
+    return { answer: answer || content };
+  }
+
+  // Step 2: Execute tools
+  const toolResults = [];
+  for (const call of toolCalls) {
+    try {
+      const result = await executeTool(call, favorites, context);
+      toolResults.push({ tool: call.tool, args: call.args, result });
+    } catch (err) {
+      toolResults.push({ tool: call.tool, args: call.args, error: err.message });
+    }
+  }
+
+  // Step 3: Feed results back to AI for final answer
+  messages.push({ role: 'assistant', content });
+  messages.push({
+    role: 'user',
+    content: `Tool execution results:\n${JSON.stringify(toolResults, null, 2)}\n\nPlease provide your final answer to the user based on these results. Be concise and informative.`
+  });
+
+  try {
+    response = await openai.chat.completions.create({
+      model: modelName,
+      messages,
+      temperature: 0.5,
+      max_tokens: 1200,
+    });
+  } catch (err) {
+    console.error('Agent final response error:', err.message);
+    return { answer: formatToolResultsFallback(toolResults) };
+  }
+
+  let finalContent = response.choices[0]?.message?.content?.trim() || '';
+  if (!finalContent && response.choices[0]?.message?.reasoning_content) {
+    finalContent = response.choices[0].message.reasoning_content.trim();
+  }
+
+  return {
+    answer: finalContent || formatToolResultsFallback(toolResults),
+    toolsUsed: toolCalls.map(c => c.tool)
+  };
+}
+
+function formatToolResultsFallback(results) {
+  return results.map(r => {
+    if (r.error) return `[${r.tool}] Error: ${r.error}`;
+    if (typeof r.result === 'string') return r.result;
+    return `[${r.tool}] Found ${r.result?.count || 0} results.`;
+  }).join('\n\n');
+}
+
+async function executeTool(call, favorites, context) {
+  const { tool, args } = call;
+
+  switch (tool) {
+    case 'SEARCH': {
+      const [query, mode = 'hybrid', tag, author, year] = args;
+      const filters = {};
+      if (tag) filters.tag = tag;
+      if (author) filters.author = author;
+      if (year) filters.year = year;
+
+      const { hybridSearchPapers, semanticSearchPapers } = await import('./vector_service.js');
+      const searchFn = mode === 'semantic' ? semanticSearchPapers : hybridSearchPapers;
+      const result = await searchFn({ query, filters, limit: 5 });
+
+      if (!result.items?.length) return `No papers found for "${query}".`;
+
+      return {
+        count: result.items.length,
+        papers: result.items.map(p => ({
+          id: p.id,
+          title: p.title,
+          authors: (p.authors || []).slice(0, 3).join(', '),
+          year: new Date(p.publication_date).getFullYear(),
+          tags: (p.tags || []).slice(0, 5),
+        }))
+      };
+    }
+
+    case 'RECOMMEND': {
+      const [query = '', limit = 5] = args;
+      const { recommendPapersFromFavorites } = await import('./vector_service.js');
+      const result = await recommendPapersFromFavorites({
+        favoriteIds: favorites,
+        contextQuery: query || context || undefined,
+        limit: parseInt(limit) || 5,
+      });
+
+      if (!result.items?.length) return 'No recommendations available. Try adding some papers to your favorites first.';
+
+      return {
+        count: result.items.length,
+        papers: result.items.map(p => ({
+          id: p.id,
+          title: p.title,
+          authors: (p.authors || []).slice(0, 3).join(', '),
+          year: new Date(p.publication_date).getFullYear(),
+          tags: (p.tags || []).slice(0, 5),
+        }))
+      };
+    }
+
+    case 'ANALYZE': {
+      const [paperTitle] = args;
+      if (!paperTitle) return 'Please specify a paper title to analyze.';
+
+      const { getAllPapers } = await import('./database.js');
+      const { generatePaperAnalysis } = await import('./ai_service.js');
+
+      const allPapers = await getAllPapers();
+      const paper = allPapers.find(p =>
+        p.title.toLowerCase().includes(paperTitle.toLowerCase())
+      );
+
+      if (!paper) return `Could not find a paper matching "${paperTitle}".`;
+
+      if (paper.summary) {
+        return {
+          title: paper.title,
+          summary: paper.summary,
+          contribution: paper.contribution,
+          limitations: paper.limitations
+        };
+      }
+
+      try {
+        const analysis = await generatePaperAnalysis(paper.title, paper.abstract);
+        return {
+          title: paper.title,
+          ...analysis
+        };
+      } catch {
+        return `Analysis for "${paper.title}" is not available yet.`;
+      }
+    }
+
+    case 'SIMILAR': {
+      const [paperTitle] = args;
+      if (!paperTitle) return 'Please specify a paper title.';
+
+      const { getAllPapers } = await import('./database.js');
+      const { recommendPapersFromFavorites } = await import('./vector_service.js');
+
+      const allPapers = await getAllPapers();
+      const paper = allPapers.find(p =>
+        p.title.toLowerCase().includes(paperTitle.toLowerCase())
+      );
+
+      if (!paper) return `Could not find a paper matching "${paperTitle}".`;
+
+      const result = await recommendPapersFromFavorites({
+        favoriteIds: [paper.id],
+        limit: 5,
+      });
+
+      if (!result.items?.length) return `No similar papers found for "${paperTitle}".`;
+
+      return {
+        count: result.items.length,
+        sourcePaper: paperTitle,
+        papers: result.items.map(p => ({
+          id: p.id,
+          title: p.title,
+          authors: (p.authors || []).slice(0, 3).join(', '),
+          year: new Date(p.publication_date).getFullYear(),
+          tags: (p.tags || []).slice(0, 5),
+        }))
+      };
+    }
+
+    default:
+      return `Unknown tool: ${tool}`;
+  }
+}
