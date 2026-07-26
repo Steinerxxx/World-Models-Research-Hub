@@ -367,12 +367,18 @@ export default function Home() {
     const state = location.state as { similarPaper?: Paper } | null;
     if (state?.similarPaper && !similarPaperTriggered.current) {
       similarPaperTriggered.current = true;
-      window.scrollTo({ top: 0, behavior: 'instant' });
       handleRecommendSimilar(state.similarPaper);
-      // Clear the state so it doesn't re-trigger on refresh
       window.history.replaceState({}, '');
     }
   }, [location.state]);
+
+  // Scroll to top after similar papers finish loading from navigation
+  useEffect(() => {
+    if (similarPaperTriggered.current && !isLoadingSimilarPapers && similarPaperResult) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      similarPaperTriggered.current = false;
+    }
+  }, [isLoadingSimilarPapers, similarPaperResult]);
 
   const {
     allHighlights,
