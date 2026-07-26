@@ -55,6 +55,7 @@ function parseToolCalls(text) {
     return null;
   }
 
+  const calls = [];
   const body = match[1].trim();
   // Split into lines if multi-line, otherwise treat entire body as one line
   const lines = body.includes('\n') ? body.split(/\r?\n/) : [body];
