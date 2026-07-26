@@ -187,11 +187,16 @@ Return ONLY a JSON object:
         { role: 'user', content: prompt }
       ],
       temperature: 0.1,
-      max_tokens: 150,
+      max_tokens: 200,
     });
 
-    const content = response.choices[0].message.content?.trim();
-    if (!content) return { isRelevant: false, tags: [] };
+    const choice = response.choices[0];
+    let content = choice.message.content?.trim();
+    // Fallback: DeepSeek sometimes returns reasoning_content only with empty content
+    if (!content && choice.message.reasoning_content) {
+      content = choice.message.reasoning_content.trim();
+    }
+    if (!content) return { isRelevant: true, tags: [] };
 
     const jsonStr = content.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
     const result = JSON.parse(jsonStr);
