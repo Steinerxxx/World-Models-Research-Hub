@@ -369,11 +369,11 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
                                   : 'text-muted-foreground/70 hover:bg-muted hover:text-foreground'
                               }`}
                             >
-                              <div className="flex items-center gap-2">
-                                <Tag className={`h-3 w-3 ${selectedTags.includes(tag) ? 'text-orange-500' : 'text-muted-foreground/40'}`} />
-                                <span>{tag}</span>
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Tag className={`h-3 w-3 flex-shrink-0 ${selectedTags.includes(tag) ? 'text-orange-500' : 'text-muted-foreground/40'}`} />
+                                <span className="truncate">{tag}</span>
                               </div>
-                              <span className="text-[10px] opacity-50">{count}</span>
+                              <span className="text-[10px] opacity-50 flex-shrink-0 ml-1">{count}</span>
                             </button>
                           ))}
                         </div>
