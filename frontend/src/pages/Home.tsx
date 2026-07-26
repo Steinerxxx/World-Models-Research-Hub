@@ -56,6 +56,18 @@ function sanitizeFilters(filters?: SearchFilters): SearchFilters {
   };
 }
 
+function buildFilterQuery(filters: SearchFilters): string {
+  const parts: string[] = [];
+  if (filters.tag) parts.push(filters.tag);
+  if (filters.author) parts.push(`by ${filters.author}`);
+  if (filters.year) parts.push(filters.year);
+  return parts.join(' ');
+}
+
+function hasFilters(filters: SearchFilters): boolean {
+  return !!(filters.tag || filters.author || filters.year);
+}
+
 function filtersEqual(left: SearchFilters, right: SearchFilters) {
   return (left.tag || '') === (right.tag || '')
     && (left.author || '') === (right.author || '')
@@ -206,8 +218,8 @@ export default function Home() {
         return;
       }
 
-      const trimmed = submittedSearchTerm;
-      if (!trimmed) {
+      const query = submittedSearchTerm || buildFilterQuery(appliedFilters);
+      if (!query) {
         setPapers(allPapersRef.current);
         setSemanticResult(null);
         setParsedIntent(null);
@@ -217,7 +229,7 @@ export default function Home() {
 
       setIsSemanticSearching(true);
       try {
-        const result = await semanticSearchPapers(trimmed, appliedFilters);
+        const result = await semanticSearchPapers(query, appliedFilters);
         setSemanticResult(result);
         setPapers(result.items);
         setUsingMockData(false);
@@ -249,8 +261,9 @@ export default function Home() {
         return;
       }
 
-      const trimmed = submittedSearchTerm;
-      if (!trimmed) {
+      const query = submittedSearchTerm || buildFilterQuery(appliedFilters);
+
+      if (!query) {
         setPapers(allPapersRef.current);
         setSemanticResult(null);
         setParsedIntent(null);
@@ -260,7 +273,7 @@ export default function Home() {
 
       setIsSemanticSearching(true);
       try {
-        const result = await hybridSearchPapers(trimmed, appliedFilters, appliedHybridWeights);
+        const result = await hybridSearchPapers(query, appliedFilters, appliedHybridWeights);
         const parsed = result.ai ? { raw: result.parsed, ai: result.ai } : null;
         setParsedIntent(parsed);
         if (parsed?.ai?.filters) {
