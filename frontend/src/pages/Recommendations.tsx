@@ -31,8 +31,8 @@ export default function Recommendations() {
     if (allPapers.length === 0) return;
     
     const query = context.trim() || 'Recommend useful world model papers';
-    setIsLoadingRecommendations(true);
     void (async () => {
+      setIsLoadingRecommendations(true);
       try {
         const result = await fetchAiRecommendations(query, favorites, 12);
         setRecommendations(result);

@@ -197,7 +197,7 @@ export default function Home() {
         return;
       }
 
-      const trimmed = searchTerm.trim();
+      const trimmed = submittedSearchTerm;
       if (!trimmed) {
         setPapers(allPapers);
         setSemanticResult(null);
@@ -240,7 +240,7 @@ export default function Home() {
         return;
       }
 
-      const trimmed = searchTerm.trim();
+      const trimmed = submittedSearchTerm;
       if (!trimmed) {
         setPapers(allPapers);
         setSemanticResult(null);
