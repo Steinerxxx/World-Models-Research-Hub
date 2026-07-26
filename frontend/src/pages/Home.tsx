@@ -64,10 +64,6 @@ function buildFilterQuery(filters: SearchFilters): string {
   return parts.join(' ');
 }
 
-function hasFilters(filters: SearchFilters): boolean {
-  return !!(filters.tag || filters.author || filters.year);
-}
-
 function filtersEqual(left: SearchFilters, right: SearchFilters) {
   return (left.tag || '') === (right.tag || '')
     && (left.author || '') === (right.author || '')
