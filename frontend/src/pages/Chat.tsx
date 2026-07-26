@@ -105,37 +105,32 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] max-w-3xl mx-auto">
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-5 border-b border-border/40 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10">
-            <Sparkles className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold tracking-tight">
-              Research Assistant
-            </h1>
-            <p className="text-xs text-muted-foreground">
+      <div className="container mx-auto px-4 pt-8 pb-6 max-w-3xl shrink-0">
+        <div className="flex items-start justify-between">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-bold tracking-tight">Research Assistant</h1>
+            <p className="text-muted-foreground">
               AI-powered paper search, analysis & recommendations
             </p>
           </div>
+          {messages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-destructive mt-1"
+              onClick={clearChat}
+              title="Clear chat"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
-        {messages.length > 0 && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-            onClick={clearChat}
-            title="Clear chat"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        )}
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5">
+      <div className="flex-1 overflow-y-auto container mx-auto px-4 max-w-3xl py-4 space-y-5">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center gap-8">
             <div className="flex flex-col items-center gap-4">
@@ -241,7 +236,7 @@ export default function Chat() {
       </div>
 
       {/* Input */}
-      <div className="px-4 pb-6 pt-3 shrink-0">
+      <div className="container mx-auto px-4 pb-6 pt-3 max-w-3xl shrink-0">
         <div className="relative">
           <Input
             value={input}
