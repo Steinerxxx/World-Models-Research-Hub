@@ -873,15 +873,13 @@ export default function Home() {
                       <div key={`similar-${paper.id}`}>
                       <PaperCard
                         paper={paper}
-                        allHighlights={paper.match_reasons || []}
+                        allHighlights={[]}
                         selectedTags={selectedTags}
                         toggleTag={toggleTag}
                         setSearchTerm={updateSearchTerm}
                         copyBibTeX={copyBibTeX}
                         onPaperUpdate={handlePaperUpdate}
                         onRecommendSimilar={handleRecommendSimilar}
-                        matchReasons={paper.match_reasons}
-                        reasonLabel="Why similar"
                       />
                       </div>
                     ))}
