@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, Send, Bot, User, Search, WandSparkles, GitBranch, Telescope } from 'lucide-react';
+import { Loader2, Send, User, Search, WandSparkles, GitBranch, Telescope, Sparkles, Trash2 } from 'lucide-react';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { API_BASE_URL } from '@/config';
 
@@ -19,19 +20,59 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   SIMILAR: <GitBranch className="h-3 w-3" />,
 };
 
+const TOOL_LABELS: Record<string, string> = {
+  SEARCH: 'Searching papers',
+  RECOMMEND: 'Generating recommendations',
+  ANALYZE: 'Analyzing paper',
+  SIMILAR: 'Finding similar papers',
+};
+
+const SUGGESTIONS = [
+  { icon: <Search className="h-3.5 w-3.5" />, text: 'Find papers about world models for robotics' },
+  { icon: <WandSparkles className="h-3.5 w-3.5" />, text: 'Recommend papers based on my favorites' },
+  { icon: <Telescope className="h-3.5 w-3.5" />, text: 'Analyze the paper Dream to Control' },
+  { icon: <GitBranch className="h-3.5 w-3.5" />, text: "What's similar to DayDreamer?" },
+];
+
+const STORAGE_KEY = 'research-chat-messages';
+
+function loadMessages(): Message[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveMessages(msgs: Message[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
+  } catch { /* quota exceeded, ignore */ }
+}
+
 export default function Chat() {
   const { favorites } = useFavorites();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(loadMessages);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
+
+  useEffect(() => {
+    saveMessages(messages);
   }, [messages]);
 
-  const handleSend = async () => {
-    const trimmed = input.trim();
+  const clearChat = useCallback(() => {
+    setMessages([]);
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
+
+  const handleSend = async (text?: string) => {
+    const trimmed = (text ?? input).trim();
     if (!trimmed || loading) return;
 
     const userMessage: Message = { role: 'user', content: trimmed };
@@ -43,10 +84,7 @@ export default function Chat() {
       const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: trimmed,
-          favorites,
-        }),
+        body: JSON.stringify({ message: trimmed, favorites }),
       });
 
       const data = await response.json();
@@ -56,11 +94,10 @@ export default function Chat() {
         toolsUsed: data.toolsUsed,
       };
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (err) {
-      console.error('Chat error:', err);
+    } catch {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Sorry, the AI service is currently unavailable. Please try again later.'
+        content: 'Sorry, the AI service is currently unavailable. Please try again later.',
       }]);
     } finally {
       setLoading(false);
@@ -70,110 +107,163 @@ export default function Chat() {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] max-w-3xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col gap-1 px-4 pt-6 pb-4 border-b border-border/60">
-        <h1 className="text-2xl font-bold tracking-tight">Research Assistant</h1>
-        <p className="text-sm text-muted-foreground">
-          Ask me to search papers, analyze research, or find recommendations.
-          {favorites.length > 0 && ` (${favorites.length} favorites loaded)`}
-        </p>
+      <div className="flex items-center justify-between px-4 py-5 border-b border-border/40 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+              Research Assistant
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              AI-powered paper search, analysis & recommendations
+            </p>
+          </div>
+        </div>
+        {messages.length > 0 && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+            onClick={clearChat}
+            title="Clear chat"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5">
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground gap-3">
-            <Bot className="h-10 w-10 opacity-30" />
-            <div>
-              <p className="text-sm font-medium">Try asking:</p>
-              <ul className="mt-2 text-xs space-y-1 opacity-70">
-                <li>"Find papers about world models for robotics"</li>
-                <li>"Recommend papers based on my favorites"</li>
-                <li>"Analyze the paper Dream to Control"</li>
-                <li>"What's similar to DayDreamer?"</li>
-              </ul>
+          <div className="flex flex-col items-center justify-center h-full text-center gap-8">
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+                <Sparkles className="h-8 w-8 text-primary" />
+              </div>
+              <div className="space-y-1.5">
+                <h2 className="text-xl font-semibold text-foreground">Ask me anything</h2>
+                <p className="text-sm text-muted-foreground max-w-sm">
+                  I can search papers, analyze research, find similar works, and give personalized recommendations.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-lg">
+              {SUGGESTIONS.map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSend(s.text)}
+                  className="group flex items-center gap-2.5 px-4 py-3 rounded-xl border border-border/60 bg-background/50 text-left text-sm text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
+                >
+                  <span className="flex-shrink-0 text-primary/50 group-hover:text-primary transition-colors">
+                    {s.icon}
+                  </span>
+                  <span className="line-clamp-2 leading-snug">{s.text}</span>
+                </button>
+              ))}
             </div>
           </div>
         )}
 
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            {msg.role === 'assistant' && (
-              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center mt-1">
-                <Bot className="h-4 w-4 text-primary" />
-              </div>
-            )}
-            <div className={`max-w-[85%] space-y-1.5`}>
-              {msg.toolsUsed && msg.toolsUsed.length > 0 && (
-                <div className="flex items-center gap-2">
-                  {msg.toolsUsed.map(tool => (
-                    <span
-                      key={tool}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary"
-                    >
-                      {TOOL_ICONS[tool]}
-                      {tool}
-                    </span>
-                  ))}
+        <AnimatePresence>
+          {messages.map((msg, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+              className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              {msg.role === 'assistant' && (
+                <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center mt-0.5">
+                  <Sparkles className="h-4 w-4 text-primary" />
                 </div>
               )}
-              <div
-                className={`rounded-xl px-4 py-3 text-sm leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted/60 text-foreground prose prose-sm dark:prose-invert max-w-none'
-                }`}
-              >
-                {msg.role === 'assistant' ? (
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
-                ) : (
-                  msg.content
+
+              <div className={`max-w-[82%] space-y-2`}>
+                {msg.toolsUsed && msg.toolsUsed.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {msg.toolsUsed.map(tool => (
+                      <span
+                        key={tool}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-primary/10 text-primary ring-1 ring-primary/20"
+                      >
+                        {TOOL_ICONS[tool]}
+                        {TOOL_LABELS[tool] || tool}
+                      </span>
+                    ))}
+                  </div>
                 )}
+
+                <div
+                  className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-primary text-primary-foreground rounded-br-md'
+                      : 'bg-muted/60 text-foreground rounded-bl-md prose prose-sm dark:prose-invert max-w-none'
+                  }`}
+                >
+                  {msg.role === 'assistant' ? (
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  ) : (
+                    msg.content
+                  )}
+                </div>
               </div>
-            </div>
-            {msg.role === 'user' && (
-              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary flex items-center justify-center mt-1">
-                <User className="h-4 w-4 text-primary-foreground" />
-              </div>
-            )}
-          </div>
-        ))}
+
+              {msg.role === 'user' && (
+                <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-primary flex items-center justify-center mt-0.5">
+                  <User className="h-4 w-4 text-primary-foreground" />
+                </div>
+              )}
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
         {loading && (
-          <div className="flex gap-3 justify-start">
-            <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center mt-1">
-              <Bot className="h-4 w-4 text-primary" />
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex gap-3 justify-start"
+          >
+            <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
+              <Sparkles className="h-4 w-4 text-primary" />
             </div>
-            <div className="max-w-[80%] rounded-xl px-4 py-3 bg-muted/60">
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            <div className="max-w-[80%] rounded-2xl rounded-bl-md px-4 py-3 bg-muted/60 flex items-center gap-2.5">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <span className="text-xs text-muted-foreground">Thinking...</span>
             </div>
-          </div>
+          </motion.div>
         )}
 
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="px-4 pb-6 pt-2 border-t border-border/60">
-        <div className="flex gap-2">
+      <div className="px-4 pb-6 pt-3 shrink-0">
+        <div className="relative">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
             placeholder="Ask me anything about the papers..."
-            className="flex-1 h-11 bg-background/50"
+            className="w-full h-12 pl-5 pr-12 rounded-2xl bg-background/60 border-border/60 focus-visible:ring-1 focus-visible:ring-primary/30 text-sm"
             disabled={loading}
           />
           <Button
-            onClick={handleSend}
+            onClick={() => handleSend()}
             disabled={loading || !input.trim()}
-            className="h-11 px-4"
+            size="icon"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl"
           >
             <Send className="h-4 w-4" />
           </Button>
         </div>
+        <p className="text-[10px] text-muted-foreground/50 text-center mt-2.5">
+          Research Assistant uses AI to search and analyze papers from the hub.
+          {favorites.length > 0 && ` · ${favorites.length} favorites`}
+        </p>
       </div>
     </div>
   );
