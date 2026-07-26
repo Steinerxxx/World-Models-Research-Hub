@@ -368,7 +368,11 @@ Rules:
       });
 
       const choice = response.choices?.[0];
-      const content = choice?.message?.content?.trim();
+      let content = choice?.message?.content?.trim();
+      // Fallback: DeepSeek sometimes returns reasoning_content only with empty content
+      if (!content && choice?.message?.reasoning_content) {
+        content = choice.message.reasoning_content.trim();
+      }
 
       if (!content) {
         const finishReason = choice?.finish_reason || 'unknown';
