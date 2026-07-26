@@ -186,6 +186,32 @@ function formatToolResultsFallback(results) {
   }).join('\n\n');
 }
 
+function findPaperByTitle(allPapers, searchTerm) {
+  const lower = searchTerm.toLowerCase();
+  // 1. Exact substring match
+  let paper = allPapers.find(p => p.title.toLowerCase().includes(lower));
+  if (paper) return paper;
+  // 2. All words must appear in title (AND match)
+  const words = lower.split(/\s+/).filter(w => w.length > 1);
+  if (words.length > 0) {
+    paper = allPapers.find(p => {
+      const t = p.title.toLowerCase();
+      return words.every(w => t.includes(w));
+    });
+    if (paper) return paper;
+    // 3. Best partial match: most words matched
+    let best = null;
+    let bestScore = 0;
+    for (const p of allPapers) {
+      const t = p.title.toLowerCase();
+      const score = words.filter(w => t.includes(w)).length;
+      if (score > bestScore) { best = p; bestScore = score; }
+    }
+    if (best && bestScore >= Math.ceil(words.length / 2)) return best;
+  }
+  return null;
+}
+
 async function executeTool(call, favorites, context) {
   const { tool, args } = call;
 
@@ -249,11 +275,9 @@ async function executeTool(call, favorites, context) {
       const { generatePaperAnalysis } = await import('./ai_service.js');
 
       const allPapers = await getAllPapers();
-      const paper = allPapers.find(p =>
-        p.title.toLowerCase().includes(paperTitle.toLowerCase())
-      );
+      const paper = findPaperByTitle(allPapers, paperTitle);
 
-      if (!paper) return `Could not find a paper matching "${paperTitle}".`;
+      if (!paper) return `Could not find a paper matching "${paperTitle}". Try using a more specific title.`;
 
       if (paper.summary) {
         return {
@@ -284,11 +308,9 @@ async function executeTool(call, favorites, context) {
       const { recommendPapersFromFavorites } = await import('./vector_service.js');
 
       const allPapers = await getAllPapers();
-      const paper = allPapers.find(p =>
-        p.title.toLowerCase().includes(paperTitle.toLowerCase())
-      );
+      const paper = findPaperByTitle(allPapers, paperTitle);
 
-      if (!paper) return `Could not find a paper matching "${paperTitle}".`;
+      if (!paper) return `Could not find a paper matching "${paperTitle}". Try using a more specific title.`;
 
       const result = await recommendPapersFromFavorites({
         sourcePaperIds: [paper.id],
