@@ -36,6 +36,7 @@ export function PaperCard({
   const [hasHiddenAbstractHighlight, setHasHiddenAbstractHighlight] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
   const authorsRef = useRef<HTMLDivElement>(null);
   const abstractRef = useRef<HTMLParagraphElement>(null);
   
@@ -153,7 +154,7 @@ export function PaperCard({
   };
 
   return (
-    <Card className="group relative hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full hover:z-20">
+    <Card className="group relative hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full">
       {/* Favorite Button */}
       <button
         onClick={toggleFavorite}
@@ -299,16 +300,23 @@ export function PaperCard({
 
         {/* AI Analysis Section */}
         {paper.summary ? (
-          <div className="mt-4 p-4 bg-muted/50 rounded-lg space-y-3 border border-border/50 text-sm">
-            <div className="flex items-center gap-2 text-primary font-semibold">
-              <Sparkles className="h-4 w-4" />
-              AI Analysis
-            </div>
-            <div className="space-y-2">
-              <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Core Idea:</span> {paper.summary}</p>
-              <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Innovation:</span> {paper.contribution}</p>
-              <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Limitations:</span> {paper.limitations}</p>
-            </div>
+          <div className="mt-3 flex justify-end relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSummary(!showSummary)}
+              className="text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 h-8 px-3"
+            >
+              <Sparkles className="h-3 w-3 mr-1.5" />
+              {showSummary ? 'Hide AI Summary' : 'View AI Summary'}
+            </Button>
+            {showSummary && (
+              <div className="absolute bottom-full right-0 mb-2 w-80 p-4 bg-popover text-popover-foreground rounded-lg shadow-xl border border-border z-50 space-y-2 text-sm">
+                <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Core Idea:</span> {paper.summary}</p>
+                <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Innovation:</span> {paper.contribution}</p>
+                <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Limitations:</span> {paper.limitations}</p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="mt-3 flex justify-end">

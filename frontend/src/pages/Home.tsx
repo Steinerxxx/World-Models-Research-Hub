@@ -115,29 +115,25 @@ export default function Home() {
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const [similarPaperResult, setSimilarPaperResult] = useState<SimilarPaperRecommendationResponse | null>(null);
   const [isLoadingSimilarPapers, setIsLoadingSimilarPapers] = useState(false);
+  const [showRecommendations, setShowRecommendations] = useState(true);
+  const [submittedSearchTerm, setSubmittedSearchTerm] = useState('');
 
   // Use context for filters
   const { searchTerm, setSearchTerm, searchMode, setSearchMode, selectedTags, setSelectedTags, toggleTag, itemsPerPage, sortBy } = useFilter();
   const { favorites, showFavoritesOnly, setShowFavoritesOnly } = useFavorites();
-  
-  // Local state for debounced search to prevent lag
-  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
 
   const updateSearchTerm = (value: string) => {
-    setLocalSearchTerm(value);
     setSearchTerm(value);
   };
 
-  // Debounce search updates
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if (localSearchTerm !== searchTerm) {
-        setSearchTerm(localSearchTerm);
-      }
-    }, 500);
-
-    return () => clearTimeout(handler);
-  }, [localSearchTerm, setSearchTerm, searchTerm]);
+  const triggerSearch = () => {
+    const trimmed = searchTerm.trim();
+    setSubmittedSearchTerm(trimmed);
+    if (!trimmed) {
+      setSemanticResult(null);
+      setParsedIntent(null);
+    }
+  };
   
   const [isLogoZoomed, setIsLogoZoomed] = useState(false);
 
@@ -233,7 +229,7 @@ export default function Home() {
     };
 
     runSemanticSearch();
-  }, [allPapers, appliedFilters, searchMode, searchTerm]);
+  }, [allPapers, appliedFilters, searchMode, submittedSearchTerm]);
 
   useEffect(() => {
     const runHybridSearch = async () => {
@@ -280,7 +276,7 @@ export default function Home() {
     };
 
     runHybridSearch();
-  }, [allPapers, appliedFilters, appliedHybridWeights, searchMode, searchTerm]);
+  }, [allPapers, appliedFilters, appliedHybridWeights, searchMode, submittedSearchTerm]);
 
   useEffect(() => {
     const runRecommendations = async () => {
@@ -469,19 +465,29 @@ export default function Home() {
           <Input
             type="text"
             placeholder={searchMode === 'keyword' ? 'Search by title, authors, or abstract...' : 'Describe what kind of papers you want...'}
-            className="w-full pl-10 pr-10 py-6 text-lg bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/50 rounded-xl shadow-lg backdrop-blur-sm transition-all duration-300"
-            value={localSearchTerm}
-            onChange={(e) => setLocalSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-24 py-6 text-lg bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/50 rounded-xl shadow-lg backdrop-blur-sm transition-all duration-300"
+            value={searchTerm}
+            onChange={(e) => updateSearchTerm(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') triggerSearch(); }}
           />
-          {searchTerm && (
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
             <button
-              onClick={() => updateSearchTerm('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition-colors"
-              aria-label="Clear search"
+              onClick={triggerSearch}
+              className="text-muted-foreground hover:text-primary p-2 rounded-full hover:bg-primary/10 transition-colors"
+              aria-label="Search"
             >
-              <X className="h-4 w-4" />
+              <Search className="h-5 w-5" />
             </button>
-          )}
+            {searchTerm && (
+              <button
+                onClick={() => { updateSearchTerm(''); setSubmittedSearchTerm(''); }}
+                className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
         <div className="flex flex-wrap justify-center gap-2">
           <Button
@@ -802,6 +808,14 @@ export default function Home() {
                     <div className="flex items-center gap-2 text-primary font-semibold">
                       <WandSparkles className="h-4 w-4" />
                       AI Recommendations
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowRecommendations(!showRecommendations)}
+                        className="ml-2 h-7 px-2 text-xs text-muted-foreground"
+                      >
+                        {showRecommendations ? 'Hide' : 'Show'}
+                      </Button>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {recommendationResult.usedVectorRecommendations
@@ -822,6 +836,7 @@ export default function Home() {
                   )}
                 </div>
 
+                {showRecommendations && (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {recommendationResult.items.map((paper) => (
                     <div key={`recommendation-${paper.id}`} className="space-y-2">
@@ -842,6 +857,7 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
+                )}
               </section>
             )}
 
