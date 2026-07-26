@@ -558,7 +558,7 @@ export default function Home() {
                         onFocus={() => setTagDropdownOpen(true)}
                         onBlur={() => setTimeout(() => setTagDropdownOpen(false), 150)}
                         placeholder="click or type..."
-                        className="h-9"
+                        className="h-9 text-foreground"
                         autoComplete="off"
                       />
                       {tagDropdownOpen && ALL_TAGS.filter(t => 
@@ -595,7 +595,7 @@ export default function Home() {
                       value={draftFilters.author || ''}
                       onChange={(e) => updateDraftFilter('author', e.target.value)}
                       placeholder="Hafner"
-                      className="h-9"
+                      className="h-9 text-foreground"
                     />
                   </label>
                   <label className="grid gap-1 text-xs">
@@ -607,7 +607,7 @@ export default function Home() {
                       value={draftFilters.year || ''}
                       onChange={(e) => updateDraftFilter('year', e.target.value.replace(/[^\d]/g, '').slice(0, 4))}
                       placeholder="2025"
-                      className="h-9"
+                      className="h-9 text-foreground"
                     />
                   </label>
                   <div className="flex items-center justify-between">
