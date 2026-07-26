@@ -113,7 +113,7 @@ export default function Chat() {
             <Sparkles className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            <h1 className="text-lg font-bold tracking-tight">
               Research Assistant
             </h1>
             <p className="text-xs text-muted-foreground">
