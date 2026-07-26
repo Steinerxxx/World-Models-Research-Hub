@@ -400,7 +400,8 @@ export default function Home() {
     sortBy,
     favorites,
     showFavoritesOnly,
-    disableTextSearch: searchMode !== 'keyword'
+    disableTextSearch: searchMode !== 'keyword',
+    preserveOrder: searchMode !== 'keyword'
   });
 
   return (

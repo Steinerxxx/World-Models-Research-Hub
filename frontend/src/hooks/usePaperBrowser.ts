@@ -12,6 +12,7 @@ interface UsePaperBrowserOptions {
   favorites: number[];
   showFavoritesOnly: boolean;
   disableTextSearch?: boolean;
+  preserveOrder?: boolean;
 }
 
 export function usePaperBrowser({
@@ -23,7 +24,8 @@ export function usePaperBrowser({
   sortBy,
   favorites,
   showFavoritesOnly,
-  disableTextSearch = false
+  disableTextSearch = false,
+  preserveOrder = false
 }: UsePaperBrowserOptions) {
   const pageScope = useMemo(() => JSON.stringify({
     searchTerm,
@@ -113,12 +115,13 @@ export function usePaperBrowser({
         return matchesPhrase && tagMatch;
       })
       .sort((a, b) => {
+        if (preserveOrder) return 0;
         if (sortBy === 'oldest') {
           return new Date(a.publication_date).getTime() - new Date(b.publication_date).getTime();
         }
         return new Date(b.publication_date).getTime() - new Date(a.publication_date).getTime();
       });
-  }, [disableTextSearch, favorites, papers, searchFilters.author, searchFilters.tag, searchFilters.year, searchGeneral, selectedTags, showFavoritesOnly, sortBy]);
+  }, [disableTextSearch, favorites, papers, preserveOrder, searchFilters.author, searchFilters.tag, searchFilters.year, searchGeneral, selectedTags, showFavoritesOnly, sortBy]);
 
   const totalPages = Math.ceil(filteredPapers.length / itemsPerPage);
   const safeCurrentPage = useMemo(() => {
