@@ -330,9 +330,13 @@ export default function Home() {
     setAllPapers(prevPapers =>
       prevPapers.map(p => p.id === updatedPaper.id ? updatedPaper : p)
     );
-    setPapers(prevPapers => 
+    setPapers(prevPapers =>
       prevPapers.map(p => p.id === updatedPaper.id ? updatedPaper : p)
     );
+    setSimilarPaperResult(prev => prev ? {
+      ...prev,
+      items: prev.items.map(p => p.id === updatedPaper.id ? updatedPaper : p)
+    } : prev);
   };
 
   const handleRecommendSimilar = async (paper: Paper) => {

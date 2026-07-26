@@ -60,6 +60,14 @@ export default function Recommendations() {
 
   const handlePaperUpdate = (updatedPaper: Paper) => {
     setAllPapers(prev => prev.map(p => p.id === updatedPaper.id ? updatedPaper : p));
+    setRecommendations(prev => prev ? {
+      ...prev,
+      items: prev.items.map(p => p.id === updatedPaper.id ? updatedPaper : p)
+    } : prev);
+    setSimilarPaperResult(prev => prev ? {
+      ...prev,
+      items: prev.items.map(p => p.id === updatedPaper.id ? updatedPaper : p)
+    } : prev);
   };
 
   const copyBibTeX = async (paper: Paper): Promise<boolean> => {
@@ -87,24 +95,24 @@ export default function Recommendations() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <header className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <WandSparkles className="h-7 w-7 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">AI Recommendations</h1>
-        </div>
-        <p className="text-muted-foreground">
+      <header className="mb-8 ml-2">
+        <h1 className="text-3xl font-bold text-foreground">AI Recommendations</h1>
+        <p className="mt-2 text-muted-foreground">
           {favorites.length > 0
             ? '基于你的收藏论文，为你推荐语义上最相近的研究'
             : '收藏一些论文后，AI 将基于你的兴趣做个性化推荐'}
         </p>
       </header>
 
-      <div className="mb-8 max-w-xl">
+      <div className="mb-8 max-w-xl ml-2">
+        <p className="mb-2 text-sm text-muted-foreground">
+          输入你当前的研究方向，AI 会据此调整推荐结果的侧重
+        </p>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
           <Input
             type="text"
-            placeholder="Describe your research interest for better context..."
+            placeholder="e.g. robot manipulation, video diffusion, RL planning..."
             className="w-full pl-10 pr-4 py-6 text-lg bg-background/50 rounded-xl"
             value={context}
             onChange={(e) => setContext(e.target.value)}
