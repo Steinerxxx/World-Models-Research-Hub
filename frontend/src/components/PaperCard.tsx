@@ -18,6 +18,8 @@ interface PaperCardProps {
   copyBibTeX: (paper: Paper) => Promise<boolean>;
   onPaperUpdate?: (updatedPaper: Paper) => void;
   onRecommendSimilar?: (paper: Paper) => void;
+  matchReasons?: string[];
+  reasonLabel?: string;
 }
 
 export function PaperCard({ 
@@ -28,7 +30,9 @@ export function PaperCard({
   setSearchTerm, 
   copyBibTeX,
   onPaperUpdate,
-  onRecommendSimilar
+  onRecommendSimilar,
+  matchReasons,
+  reasonLabel
 }: PaperCardProps) {
   const [isAuthorsTruncated, setIsAuthorsTruncated] = useState(false);
   const [isAbstractTruncated, setIsAbstractTruncated] = useState(false);
@@ -154,7 +158,16 @@ export function PaperCard({
   };
 
   return (
-    <Card className="group relative hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full">
+    <Card className="group relative hover:shadow-lg hover:relative hover:z-10 transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full">
+      {/* Match reason banner */}
+      {matchReasons && matchReasons.length > 0 && (
+        <div className="px-6 pt-4 pb-0">
+          <div className="rounded-lg border border-primary/15 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">{reasonLabel || 'Why'}:</span> {matchReasons.join(' · ')}
+          </div>
+        </div>
+      )}
+
       {/* Favorite Button */}
       <button
         onClick={toggleFavorite}

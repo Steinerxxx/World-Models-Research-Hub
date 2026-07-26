@@ -252,10 +252,15 @@ export default function Home() {
       setIsSemanticSearching(true);
       try {
         const result = await hybridSearchPapers(trimmed, appliedFilters, appliedHybridWeights);
-        setParsedIntent(result.ai ? {
-          raw: result.parsed,
-          ai: result.ai
-        } : null);
+        const parsed = result.ai ? { raw: result.parsed, ai: result.ai } : null;
+        setParsedIntent(parsed);
+        if (parsed?.ai?.filters) {
+          const suggested = sanitizeFilters(parsed.ai.filters);
+          if (suggested.tag || suggested.author || suggested.year) {
+            setDraftFilters(suggested);
+            setAppliedFilters(suggested);
+          }
+        }
         setSemanticResult(result);
         setPapers(result.items);
         setUsingMockData(false);
@@ -810,22 +815,19 @@ export default function Home() {
                 {similarPaperResult && similarPaperResult.items.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {similarPaperResult.items.map((paper) => (
-                      <div key={`similar-${paper.id}`} className="space-y-2">
-                        {paper.match_reasons && paper.match_reasons.length > 0 && (
-                          <div className="rounded-lg border border-primary/15 bg-background/70 px-3 py-2 text-xs text-left text-muted-foreground">
-                            <span className="font-medium text-foreground">Why similar:</span> {paper.match_reasons.join(' · ')}
-                          </div>
-                        )}
-                        <PaperCard
-                          paper={paper}
-                          allHighlights={paper.match_reasons || []}
-                          selectedTags={selectedTags}
-                          toggleTag={toggleTag}
-                          setSearchTerm={updateSearchTerm}
-                          copyBibTeX={copyBibTeX}
-                          onPaperUpdate={handlePaperUpdate}
-                          onRecommendSimilar={handleRecommendSimilar}
-                        />
+                      <div key={`similar-${paper.id}`}>
+                      <PaperCard
+                        paper={paper}
+                        allHighlights={paper.match_reasons || []}
+                        selectedTags={selectedTags}
+                        toggleTag={toggleTag}
+                        setSearchTerm={updateSearchTerm}
+                        copyBibTeX={copyBibTeX}
+                        onPaperUpdate={handlePaperUpdate}
+                        onRecommendSimilar={handleRecommendSimilar}
+                        matchReasons={paper.match_reasons}
+                        reasonLabel="Why similar"
+                      />
                       </div>
                     ))}
                   </div>
@@ -839,14 +841,9 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {currentPapers.map(paper => (
-                <div key={paper.id} className="space-y-2">
-                  {(searchMode === 'semantic' || searchMode === 'hybrid') && paper.match_reasons && paper.match_reasons.length > 0 && (
-                    <div className="rounded-lg border border-primary/15 bg-primary/5 px-3 py-2 text-xs text-left text-muted-foreground">
-                      <span className="font-medium text-foreground">Why it matched:</span> {paper.match_reasons.join(' · ')}
-                    </div>
-                  )}
-                  <PaperCard 
-                    paper={paper} 
+                <div key={paper.id}>
+                  <PaperCard
+                    paper={paper}
                     allHighlights={allHighlights}
                     selectedTags={selectedTags}
                     toggleTag={toggleTag}
@@ -854,6 +851,8 @@ export default function Home() {
                     copyBibTeX={copyBibTeX}
                     onPaperUpdate={handlePaperUpdate}
                     onRecommendSimilar={handleRecommendSimilar}
+                    matchReasons={(searchMode === 'semantic' || searchMode === 'hybrid') ? paper.match_reasons : undefined}
+                    reasonLabel="Why it matched"
                   />
                 </div>
               ))}

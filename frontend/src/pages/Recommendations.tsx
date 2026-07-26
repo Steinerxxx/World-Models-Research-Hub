@@ -142,12 +142,7 @@ export default function Recommendations() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {recommendations.items.map((paper) => (
-                <div key={`rec-${paper.id}`} className="space-y-2">
-                  {paper.match_reasons && paper.match_reasons.length > 0 && (
-                    <div className="rounded-lg border border-primary/15 bg-background/70 px-3 py-2 text-xs text-left text-muted-foreground">
-                      <span className="font-medium text-foreground">Why recommended:</span> {paper.match_reasons.join(' · ')}
-                    </div>
-                  )}
+                <div key={`rec-${paper.id}`}>
                   <PaperCard
                     paper={paper}
                     allHighlights={paper.match_reasons || []}
@@ -157,6 +152,8 @@ export default function Recommendations() {
                     copyBibTeX={copyBibTeX}
                     onPaperUpdate={handlePaperUpdate}
                     onRecommendSimilar={handleRecommendSimilar}
+                    matchReasons={paper.match_reasons}
+                    reasonLabel="Why recommended"
                   />
                 </div>
               ))}
@@ -199,12 +196,7 @@ export default function Recommendations() {
             {similarPaperResult && similarPaperResult.items.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {similarPaperResult.items.map((paper) => (
-                  <div key={`sim-${paper.id}`} className="space-y-2">
-                    {paper.match_reasons && paper.match_reasons.length > 0 && (
-                      <div className="rounded-lg border border-primary/15 bg-background/70 px-3 py-2 text-xs text-left text-muted-foreground">
-                        <span className="font-medium text-foreground">Why similar:</span> {paper.match_reasons.join(' · ')}
-                      </div>
-                    )}
+                  <div key={`sim-${paper.id}`}>
                     <PaperCard
                       paper={paper}
                       allHighlights={paper.match_reasons || []}
@@ -214,6 +206,8 @@ export default function Recommendations() {
                       copyBibTeX={copyBibTeX}
                       onPaperUpdate={handlePaperUpdate}
                       onRecommendSimilar={handleRecommendSimilar}
+                      matchReasons={paper.match_reasons}
+                      reasonLabel="Why similar"
                     />
                   </div>
                 ))}
