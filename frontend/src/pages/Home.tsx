@@ -117,6 +117,10 @@ export default function Home() {
   const [isLoadingSimilarPapers, setIsLoadingSimilarPapers] = useState(false);
   const [submittedSearchTerm, setSubmittedSearchTerm] = useState('');
 
+  const ALL_TAGS = [...SUBJECT_TAGS, ...ARCHITECTURE_TAGS];
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
+  const tagInputRef = useRef<HTMLInputElement>(null);
+
   // Use context for filters
   const { searchTerm, setSearchTerm, searchMode, setSearchMode, selectedTags, setSelectedTags, toggleTag, itemsPerPage, sortBy } = useFilter();
   const { favorites, showFavoritesOnly, setShowFavoritesOnly } = useFavorites();
@@ -539,12 +543,41 @@ export default function Home() {
                       <Tag className="h-3.5 w-3.5" />
                       Tag
                     </span>
-                    <Input
-                      value={draftFilters.tag || ''}
-                      onChange={(e) => updateDraftFilter('tag', e.target.value)}
-                      placeholder="robotics"
-                      className="h-9"
-                    />
+                    <div className="relative">
+                      <Input
+                        ref={tagInputRef}
+                        value={draftFilters.tag || ''}
+                        onChange={(e) => updateDraftFilter('tag', e.target.value)}
+                        onFocus={() => setTagDropdownOpen(true)}
+                        onBlur={() => setTimeout(() => setTagDropdownOpen(false), 150)}
+                        placeholder="click or type..."
+                        className="h-9"
+                        autoComplete="off"
+                      />
+                      {tagDropdownOpen && ALL_TAGS.filter(t => 
+                        !draftFilters.tag || t.toLowerCase().includes((draftFilters.tag || '').toLowerCase())
+                      ).length > 0 && (
+                        <div className="absolute top-full left-0 right-0 z-50 mt-1 rounded-md border border-border bg-popover shadow-lg max-h-40 overflow-y-auto">
+                          {ALL_TAGS.filter(t =>
+                            !draftFilters.tag || t.toLowerCase().includes((draftFilters.tag || '').toLowerCase())
+                          ).map(tag => (
+                            <button
+                              key={tag}
+                              type="button"
+                              className="w-full px-3 py-1.5 text-left text-xs hover:bg-primary/10 transition-colors"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                updateDraftFilter('tag', tag);
+                                setTagDropdownOpen(false);
+                                tagInputRef.current?.blur();
+                              }}
+                            >
+                              {tag}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </label>
                   <label className="grid gap-1 text-xs">
                     <span className="flex items-center gap-1.5 text-muted-foreground">

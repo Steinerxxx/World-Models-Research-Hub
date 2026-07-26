@@ -146,7 +146,7 @@ export default function Recommendations() {
                     allHighlights={paper.match_reasons || []}
                     selectedTags={selectedTags}
                     toggleTag={(tag) => { toggleTag(tag); navigate('/'); }}
-                    setSearchTerm={(term) => { navigate('/'); }}
+                    setSearchTerm={() => { navigate('/'); }}
                     copyBibTeX={copyBibTeX}
                     onPaperUpdate={handlePaperUpdate}
                     onRecommendSimilar={handleRecommendSimilar}
