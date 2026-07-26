@@ -67,18 +67,8 @@ export default function Recommendations() {
     return (
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="flex flex-col items-center justify-center py-20">
-          <div className="relative">
-            <Loader2 className="h-12 w-12 text-primary animate-spin" />
-            <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-primary/20 animate-ping" />
-          </div>
-          <p className="mt-6 text-lg text-muted-foreground animate-pulse">
-            正在生成个性化推荐...
-          </p>
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 w-full max-w-5xl">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-64 rounded-xl bg-muted/30 animate-pulse" />
-            ))}
-          </div>
+          <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
+          <p className="text-lg text-muted-foreground">Generating recommendations...</p>
         </div>
       </div>
     );
@@ -155,8 +145,8 @@ export default function Recommendations() {
                     paper={paper}
                     allHighlights={paper.match_reasons || []}
                     selectedTags={selectedTags}
-                    toggleTag={toggleTag}
-                    setSearchTerm={() => {}}
+                    toggleTag={(tag) => { toggleTag(tag); navigate('/'); }}
+                    setSearchTerm={(term) => { navigate('/'); }}
                     copyBibTeX={copyBibTeX}
                     onPaperUpdate={handlePaperUpdate}
                     onRecommendSimilar={handleRecommendSimilar}
