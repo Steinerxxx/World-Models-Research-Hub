@@ -46,8 +46,8 @@ Then wait for results. After receiving results, provide your final answer in nat
 If no tools are needed, just answer directly.`;
 
 function parseToolCalls(text) {
-  // Match ---TOOLS block flexibly (handle \r\n, extra spaces, etc.)
-  const match = text.match(/---TOOLS\s*\n([\s\S]*?)\n\s*---END/);
+  // Match ---TOOLS block flexibly — handles single-line, multi-line, \r\n, extra spaces
+  const match = text.match(/---TOOLS\s*[\r\n]*([\s\S]*?)[\r\n]*\s*---END/i);
   if (!match) {
     if (text.includes('---TOOLS')) {
       console.error('[parseToolCalls] Found ---TOOLS but regex failed. Raw text:', JSON.stringify(text.slice(0, 500)));
@@ -55,8 +55,9 @@ function parseToolCalls(text) {
     return null;
   }
 
-  const calls = [];
-  const lines = match[1].trim().split(/\r?\n/);
+  const body = match[1].trim();
+  // Split into lines if multi-line, otherwise treat entire body as one line
+  const lines = body.includes('\n') ? body.split(/\r?\n/) : [body];
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
@@ -130,7 +131,7 @@ export async function chatWithAgent(userMessage, favorites, context) {
 
   if (!toolCalls) {
     // No tools needed — direct answer (strip any ---TOOLS block just in case)
-    const answer = content.replace(/---TOOLS[\s\S]*?---END/g, '').trim();
+    const answer = content.replace(/---TOOLS[\s\S]*?---END/gi, '').trim();
     if (answer) return { answer };
     // If the entire response was a TOOLS block we couldn't parse, apologise
     return { answer: 'I encountered an issue processing your request. Please try again or rephrase your question.' };
