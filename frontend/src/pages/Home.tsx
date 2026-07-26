@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X, Star, AlertTriangle, Brain, Bot, Sparkles, SlidersHorizontal, Calendar, Users, Tag, WandSparkles } from "lucide-react";
+import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X, Star, AlertTriangle, Brain, Bot, Sparkles, SlidersHorizontal, Calendar, Users, Tag } from "lucide-react";
 import { useFilter } from '@/contexts/FilterContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { PaperCard } from '@/components/PaperCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL, FRONTEND_VERSION } from '@/config';
-import { fetchAiRecommendations, fetchPapersWithFallback, fetchSimilarPaperRecommendations, hybridSearchPapers, semanticSearchPapers, triggerScrape } from '@/lib/api';
+import { fetchPapersWithFallback, fetchSimilarPaperRecommendations, hybridSearchPapers, semanticSearchPapers, triggerScrape } from '@/lib/api';
 import { getPaginationPages } from '@/lib/papers';
 import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
 import { usePaperBrowser } from '@/hooks/usePaperBrowser';
-import type { Paper, ParseSearchQueryResponse, RecommendationResponse, SearchFilters, SearchWeights, SemanticSearchResponse, SimilarPaperRecommendationResponse } from '@/types/paper';
+import type { Paper, ParseSearchQueryResponse, SearchFilters, SearchWeights, SemanticSearchResponse, SimilarPaperRecommendationResponse } from '@/types/paper';
 
 const DEFAULT_HYBRID_WEIGHTS: SearchWeights = {
   semantic: 0.55,
@@ -111,11 +111,8 @@ export default function Home() {
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialSettings.filters);
   const [draftHybridWeights, setDraftHybridWeights] = useState<SearchWeights>(initialSettings.weights);
   const [appliedHybridWeights, setAppliedHybridWeights] = useState<SearchWeights>(initialSettings.weights);
-  const [recommendationResult, setRecommendationResult] = useState<RecommendationResponse | null>(null);
-  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const [similarPaperResult, setSimilarPaperResult] = useState<SimilarPaperRecommendationResponse | null>(null);
   const [isLoadingSimilarPapers, setIsLoadingSimilarPapers] = useState(false);
-  const [showRecommendations, setShowRecommendations] = useState(true);
   const [submittedSearchTerm, setSubmittedSearchTerm] = useState('');
 
   // Use context for filters
@@ -277,29 +274,6 @@ export default function Home() {
 
     runHybridSearch();
   }, [allPapers, appliedFilters, appliedHybridWeights, searchMode, submittedSearchTerm]);
-
-  useEffect(() => {
-    const runRecommendations = async () => {
-      if (allPapers.length === 0) {
-        setRecommendationResult(null);
-        return;
-      }
-
-      const normalizedQuery = searchTerm.trim() || 'Recommend useful world model papers for my current research direction';
-      setIsLoadingRecommendations(true);
-      try {
-        const result = await fetchAiRecommendations(normalizedQuery, favorites, 6);
-        setRecommendationResult(result);
-      } catch (err) {
-        console.error('AI recommendations failed:', err);
-        setRecommendationResult(null);
-      } finally {
-        setIsLoadingRecommendations(false);
-      }
-    };
-
-    void runRecommendations();
-  }, [allPapers.length, favorites, searchTerm]);
 
   const updateDraftFilter = (key: keyof SearchFilters, value: string) => {
     setDraftFilters(prev => ({
@@ -801,66 +775,6 @@ export default function Home() {
         
         {!loading && !error && (
           <>
-            {recommendationResult && recommendationResult.items.length > 0 && (
-              <section className="mb-10 rounded-2xl border border-primary/15 bg-primary/5 p-5">
-                <div className="mb-4 flex items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2 text-primary font-semibold">
-                      <WandSparkles className="h-4 w-4" />
-                      AI Recommendations
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowRecommendations(!showRecommendations)}
-                        className="ml-2 h-7 px-2 text-xs text-muted-foreground"
-                      >
-                        {showRecommendations ? 'Hide' : 'Show'}
-                      </Button>
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {recommendationResult.usedVectorRecommendations
-                        ? '基于你的收藏 embedding 做个性化向量推荐'
-                        : recommendationResult.basedOnFavorites
-                          ? '基于你的收藏偏好和当前搜索意图推荐'
-                          : '基于你当前搜索意图推荐'}
-                    </p>
-                    <p className="mt-2 text-xs text-foreground/80">
-                      {recommendationResult.ai.explanation}
-                    </p>
-                  </div>
-                  {isLoadingRecommendations && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Refreshing
-                    </div>
-                  )}
-                </div>
-
-                {showRecommendations && (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {recommendationResult.items.map((paper) => (
-                    <div key={`recommendation-${paper.id}`} className="space-y-2">
-                      {paper.match_reasons && paper.match_reasons.length > 0 && (
-                        <div className="rounded-lg border border-primary/15 bg-background/70 px-3 py-2 text-xs text-left text-muted-foreground">
-                          <span className="font-medium text-foreground">Why recommended:</span> {paper.match_reasons.join(' · ')}
-                        </div>
-                      )}
-                      <PaperCard
-                        paper={paper}
-                        allHighlights={paper.match_reasons || []}
-                        selectedTags={selectedTags}
-                        toggleTag={toggleTag}
-                        setSearchTerm={updateSearchTerm}
-                        copyBibTeX={copyBibTeX}
-                        onPaperUpdate={handlePaperUpdate}
-                      />
-                    </div>
-                  ))}
-                </div>
-                )}
-              </section>
-            )}
-
             {(similarPaperResult || isLoadingSimilarPapers) && (
               <section className="mb-10 rounded-2xl border border-border/60 bg-card/60 p-5">
                 <div className="mb-4 flex items-start justify-between gap-4">
@@ -880,6 +794,16 @@ export default function Home() {
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Loading
                     </div>
+                  )}
+                  {similarPaperResult && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSimilarPaperResult(null)}
+                      className="h-7 px-2 text-xs text-muted-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   )}
                 </div>
 

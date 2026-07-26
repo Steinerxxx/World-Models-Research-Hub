@@ -10,6 +10,7 @@ import { Layout } from '@/components/Layout';
 const Home = lazy(() => import('@/pages/Home'));
 const Introduction = lazy(() => import('@/pages/Introduction'));
 const Trends = lazy(() => import('@/pages/Trends'));
+const Recommendations = lazy(() => import('@/pages/Recommendations'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
 const Profile = lazy(() => import('@/pages/Profile'));
@@ -36,6 +37,7 @@ function App() {
                       <Route index element={<Home />} />
                       <Route path="introduction" element={<Introduction />} />
                       <Route path="trends" element={<Trends />} />
+                      <Route path="recommendations" element={<Recommendations />} />
                       <Route path="login" element={<LoginPage />} />
                       <Route path="register" element={<RegisterPage />} />
                       <Route path="profile" element={<Profile />} />

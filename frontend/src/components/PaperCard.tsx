@@ -252,7 +252,7 @@ export function PaperCard({
             </div>
 
             {/* Full author list (visible on hover) */}
-            <div className="hidden group-hover/authors:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-50 max-h-[400px] overflow-y-auto">
+            <div className="hidden group-hover/authors:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-30 max-h-[400px] overflow-y-auto">
               {paper.authors.map((author, i) => (
                 <span key={i}>
                   <button
@@ -293,7 +293,7 @@ export function PaperCard({
           )}
 
           {/* Full version (visible on hover) */}
-          <div className="hidden group-hover/abstract:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-50 max-h-[400px] overflow-y-auto">
+          <div className="hidden group-hover/abstract:block absolute top-0 left-0 w-full bg-popover text-popover-foreground text-sm leading-relaxed p-4 rounded-md shadow-xl border border-border z-30 max-h-[400px] overflow-y-auto">
             <HighlightText text={cleanedAbstract} highlights={allHighlights} />
           </div>
         </div>
@@ -311,7 +311,7 @@ export function PaperCard({
               {showSummary ? 'Hide AI Summary' : 'View AI Summary'}
             </Button>
             {showSummary && (
-              <div className="absolute bottom-full right-0 mb-2 w-80 p-4 bg-popover text-popover-foreground rounded-lg shadow-xl border border-border z-50 space-y-2 text-sm">
+              <div className="absolute top-full left-0 mt-2 w-full p-4 bg-popover text-popover-foreground rounded-lg shadow-xl border border-border z-40 space-y-2 text-sm max-h-64 overflow-y-auto">
                 <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Core Idea:</span> {paper.summary}</p>
                 <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Innovation:</span> {paper.contribution}</p>
                 <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Limitations:</span> {paper.limitations}</p>

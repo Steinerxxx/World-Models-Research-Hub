@@ -17,7 +17,8 @@ import {
   TrendingUp,
   Star,
   LogIn,
-  User
+  User,
+  WandSparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -151,6 +152,20 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
               <Home className="h-4 w-4" />
               Home
             </NavLink>
+            <NavLink
+              to="/recommendations"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                  isActive 
+                    ? "bg-primary/10 text-primary font-medium" 
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                }`
+              }
+            >
+              <WandSparkles className="h-4 w-4" />
+              <span className="font-medium">AI Recommendations</span>
+            </NavLink>
+
             <NavLink
               to="/trends"
               className={({ isActive }) =>
