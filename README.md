@@ -1,277 +1,265 @@
+<div align="center">
+
+<img src="https://img.shields.io/badge/version-4.0.0-blue?style=flat-square" alt="Version">
+<img src="https://img.shields.io/badge/license-ISC-green?style=flat-square" alt="License">
+<img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&style=flat-square" alt="React">
+<img src="https://img.shields.io/badge/Node-24-339933?logo=node.js&style=flat-square" alt="Node">
+<img src="https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?logo=postgresql&style=flat-square" alt="PostgreSQL">
+
+</div>
+
 # World Models Research Hub
 
-## 📋 项目概述
-
-World Models Research Hub 是一个功能强大的学术论文管理系统，专为研究人员和学者设计，提供从 arXiv 自动抓取、智能分析到个性化管理的全流程解决方案。
-
-- **AI 增强分析**：利用 DeepSeek V3 API 对论文进行深度分析，自动生成摘要和贡献点
-- **智能标签系统**：自动为论文分类标签，支持标签恢复和规范化
-- **多数据库支持**：同时支持 PostgreSQL 和本地 JSON 文件存储
-- **实时监控**：系统健康检查和任务状态监控
-- **响应式设计**：适配不同设备屏幕尺寸的现代化界面
-
-## ✨ 核心功能
-
-### 📚 论文管理系统
-- **自动抓取**：从 arXiv 定时抓取最新论文，支持全量回填和增量更新
-- **论文浏览**：完整的论文列表，包含标题、摘要、URL 等详细信息
-- **论文搜索**：基于标题、摘要和标签的智能搜索
-- **AI 分析**：自动生成论文摘要、贡献点和局限性分析
-
-### 🏷️ 标签系统
-- **智能分类**：基于 AI 和规则的双重标签分类
-- **标签管理**：自动规范化和清理标签
-- **标签恢复**：从备份数据恢复高质量标签
-- **标签统计**：提供标签使用频率和趋势分析
-
-### 👤 用户系统
-- **用户认证**：安全的注册和登录功能
-- **收藏管理**：个性化收藏和管理感兴趣的论文
-- **个人资料**：用户信息管理和偏好设置
-
-### 📊 数据分析
-- **趋势分析**：论文发表趋势和主题热点分析
-- **数据可视化**：通过图表直观展示分析结果
-- **统计报告**：系统运行状态和抓取任务统计
-
-### ⚙️ 后台管理
-- **手动抓取**：支持按需触发论文抓取任务
-- **重新分类**：对现有论文进行批量重新分类
-- **数据库管理**：支持数据库初始化和清理
-- **系统监控**：健康检查和详细日志记录
-
-## 🛠️ 技术架构
-
-### 前端技术栈
-- **框架**：React 19 + TypeScript
-- **路由**：React Router DOM 7
-- **样式**：Tailwind CSS
-- **图表**：Recharts
-- **动画**：Framer Motion
-- **构建**：Vite
-
-### 后端技术栈
-- **运行时**：Node.js + Express
-- **数据库**：PostgreSQL (可选) / 本地 JSON
-- **网络**：Axios + Cheerio
-- **AI**：DeepSeek V3 API
-- **任务调度**：Node-cron
-- **认证**：JWT
-
-### 架构设计
-- **模块化设计**：功能分离的独立模块
-- **RESTful API**：标准化的接口设计
-- **多数据库支持**：自动切换数据库模式
-- **实时监控**：系统健康检查和状态监控
-- **缓存机制**：提高分析和查询性能
-
-## 🚀 快速开始
-
-### 环境要求
-- Node.js >= 18.0.0
-- npm >= 9.0.0
-- PostgreSQL (可选，用于生产环境)
-- DeepSeek API Key (用于 AI 分析功能)
-
-### 安装步骤
-
-1. **克隆仓库**
-   ```bash
-   git clone https://github.com/Steinerxxx/World-Models-Research-Hub.git
-   cd World-Models-Research-Hub
-   ```
-
-2. **安装依赖**
-   ```bash
-   npm install
-   cd frontend
-   npm install
-   cd ..
-   ```
-
-3. **配置环境变量**
-   - 复制 `.env.example` 文件为 `.env`
-   - 填写必要的环境变量
-   ```env
-   # 数据库配置 (可选)
-   DATABASE_URL="postgresql://username:password@localhost:5432/database"
-   
-   # DeepSeek API 配置
-   AI_API_KEY="your-deepseek-api-key"
-   AI_BASE_URL="https://api.deepseek.com"  # 默认值
-   AI_MODEL_NAME="deepseek-chat"          # 默认值
-   
-   # 认证配置
-   JWT_SECRET="your-secret-key"
-   
-   # 管理密钥
-   ADMIN_KEY="your-admin-key"
-   ```
-
-4. **启动开发服务器**
-   ```bash
-   # 启动后端服务
-   npm run dev
-   
-   # 启动前端服务 (新终端)
-   cd frontend
-   npm run dev
-   ```
-
-5. **构建生产版本**
-   ```bash
-   # 构建前端
-   cd frontend
-   npm run build
-   cd ..
-   
-   # 启动生产服务
-   npm start
-   ```
-
-## 📖 使用指南
-
-### 浏览和搜索论文
-1. **首页**：展示最新抓取的论文列表
-2. **搜索框**：输入关键词搜索论文
-3. **标签过滤**：点击标签筛选相关论文
-4. **排序选项**：按发布日期、相关性等排序
-
-### 分析论文
-1. **论文详情**：点击论文标题查看详细信息
-2. **分析按钮**：点击「分析」按钮生成 AI 分析
-3. **分析结果**：查看生成的摘要、贡献点和局限性
-4. **标签管理**：查看和管理论文标签
-
-### 管理收藏
-1. **登录系统**：注册并登录用户账号
-2. **收藏论文**：点击论文卡片上的星形图标
-3. **收藏列表**：在个人资料页面查看收藏的论文
-4. **取消收藏**：在收藏列表中移除论文
-
-### 查看趋势
-1. **趋势页面**：点击导航栏的「趋势」选项
-2. **时间范围**：选择不同的时间范围查看趋势
-3. **图表交互**：悬停在图表上查看详细数据
-4. **导出选项**：导出趋势数据为 CSV 格式
-
-## 📊 系统工作流程
-
-### 论文抓取流程
-1. **触发**：定时任务（每小时）或手动触发
-2. **抓取**：从 arXiv 抓取最新论文
-3. **解析**：提取标题、摘要、URL 等信息
-4. **分类**：自动为论文添加标签
-5. **存储**：将论文保存到数据库
-6. **反馈**：返回抓取结果和统计信息
-
-### 论文分析流程
-1. **请求**：用户点击分析按钮
-2. **检查**：验证缓存中是否已有分析结果
-3. **分析**：调用 DeepSeek V3 API 生成分析
-4. **存储**：将分析结果保存到数据库
-5. **展示**：返回并显示分析结果给用户
-
-### 用户认证流程
-1. **注册**：提交注册信息，密码加密存储
-2. **登录**：验证凭据，生成 JWT token
-3. **授权**：API 请求时验证 token 有效性
-4. **操作**：执行授权后的操作（如收藏管理）
-5. **登出**：清除 token，结束会话
-
-## 📦 部署方式
-
-### 本地开发
-```bash
-# 启动开发服务器
-npm run dev
-
-# 前端开发服务器
-cd frontend && npm run dev
-```
-
-### Docker 部署
-```bash
-# 构建镜像
-docker build -t world-models-hub .
-
-# 运行容器
-docker run -p 3001:3001 --env-file .env world-models-hub
-```
-
-### 云平台部署
-- **Sealos**：参考 `LAF_DEPLOYMENT.md` 文档
-- **Hugging Face Spaces**：参考 `HUGGINGFACE_DEPLOY.md` 文档
-
-## 🔧 维护管理
-
-### 系统监控
-- **健康检查**：访问 `/health` 端点查看系统状态
-- **日志查看**：检查服务器日志了解系统运行情况
-- **任务状态**：监控抓取和分析任务的执行状态
-
-### 数据管理
-- **手动抓取**：访问 `/api/scrape` 触发抓取任务
-- **重新分类**：访问 `/api/reclassify` 批量重新分类
-- **标签规范化**：运行 `normalize_tags.js` 清理和标准化标签
-- **标签恢复**：运行 `restore_tags.js` 从备份恢复标签
-
-### 安全管理
-- **环境变量**：敏感信息通过环境变量配置
-- **密码加密**：用户密码使用 bcrypt 加密存储
-- **API 权限**：管理接口需要 admin key 授权
-- **CORS 配置**：合理配置跨域资源共享
-
-## 🤝 贡献指南
-
-### 代码规范
-- **前端**：遵循 ESLint 和 Prettier 规范
-- **后端**：使用标准 JavaScript 风格
-- **提交信息**：清晰描述变更内容和原因
-
-### 开发流程
-1. **Fork 仓库**：创建个人分支
-2. **创建功能分支**：从 main 分支创建新分支
-3. **开发功能**：实现新功能或修复 bug
-4. **测试**：确保代码通过测试
-5. **提交 PR**：提交拉取请求，描述变更内容
-
-### 分支管理
-- **main**：稳定版本分支
-- **dev**：开发分支
-- **feature/**：功能开发分支
-- **fix/**：bug 修复分支
-
-## 📄 许可证
-
-本项目采用 ISC 许可证。详见 `LICENSE` 文件。
-
-## 📞 联系方式
-
-- **GitHub**：[Steinerxxx/World-Models-Research-Hub](https://github.com/Steinerxxx/World-Models-Research-Hub)
-- **Issues**：通过 GitHub Issues 提交问题和建议
-- **Pull Requests**：欢迎提交代码贡献
-
-## 📝 更新日志
-
-### v3.5.2 (2026-02-12)
-- ✅ 修复 AI 分析缓存机制
-- ✅ 优化标签恢复功能
-- ✅ 改进系统健康检查
-- ✅ 增强错误处理机制
-
-### v3.5.1 (2026-02-10)
-- ✅ 添加前端响应式设计
-- ✅ 集成数据可视化图表
-- ✅ 优化数据库查询性能
-- ✅ 改进用户认证流程
-
-### v3.5.0 (2026-02-08)
-- ✅ 支持 PostgreSQL 数据库
-- ✅ 集成 DeepSeek V3 API 分析
-- ✅ 实现标签智能分类
-- ✅ 支持定时抓取任务
+> **AI 驱动的学术论文发现平台** — 从 arXiv 自动抓取、向量语义搜索、AI 深度分析到个性化推荐，一站式追踪前沿研究。
 
 ---
 
-*项目正在积极开发中，欢迎贡献和反馈！* 🚀
+## 亮点速览
+
+| 功能 | 说明 |
+|------|------|
+| **向量语义搜索** | 基于 `text-embedding-v4` 的 1536 维向量，按语义相关性而非关键词匹配搜索 |
+| **混合搜索模式** | Semantic / Hybrid / Keyword 三种模式自由切换，自由调节权重 |
+| **AI 研究助手** | 对话式 Agent，支持工具调用——搜索论文、分析论文、推荐相似论文 |
+| **个性化推荐** | 基于收藏列表的向量推荐，越收藏越精准 |
+| **自动抓取 & 打标** | 每 10 分钟从 arXiv 抓取最新论文，AI + 规则自动分类打标签 |
+| **Structured Filters** | Tag / Author / Year 精确筛选，Tag 输入支持自动补全 |
+| **趋势分析** | 论文发表趋势和主题热点可视化（Recharts） |
+| **深色模式** | 全站支持 Light / Dark 主题切换 |
+| **Sealos 一键部署** | Docker 镜像 + GitHub Actions CI/CD，推送即上线 |
+
+---
+
+## 搜索模式对比
+
+```
+Keyword:  "attention mechanism"          → 标题/摘要包含这些词的论文
+Semantic: "spatial-temporal reasoning"   → 语义相近的论文（即使词不完全一样）
+Hybrid:   "world models for robotics"    → 语义 + 关键词 + 时效性 三重加权
+```
+
+Structured Filters（Tag / Author / Year）可在**所有模式**下叠加使用，空搜索词只填 Filter 也能触发搜索。
+
+---
+
+## 使用指南
+
+### 首页 — 搜索与发现
+
+进入首页即显示全部论文，按日期倒序排列。顶部搜索栏支持三种模式切换：
+
+- **Keyword**（蓝色）— 传统关键词匹配，最快
+- **Semantic**（紫色）— 向量语义搜索，按含义匹配
+- **Hybrid**（青色）— 上面两者 + 时效性三重加权，最全面
+
+搜索框下方是 **Structured Filters**：
+
+| 筛选项 | 说明 |
+|--------|------|
+| Tag | 输入时自动补全下拉现有标签，支持点击选择 |
+| Author | 按作者姓名筛选 |
+| Year | 按发表年份筛选 |
+
+点击 Apply 生效。Filter 可以**独立使用**（不填搜索词也能搜），也可以与搜索词叠加。点击 ✕ 清空所有筛选条件。
+
+每篇论文卡片右下角有 **收藏星标** ⭐ 和 **相似论文** 🔀 按钮。
+
+### 侧边栏 — 导航与快捷筛选
+
+左侧边栏提供：
+
+- **Menu** — Home / AI Recommendations / Research Assistant / Trends / My Favorites / Introduction
+- **Research Topics** — 固定主题标签，点击即跳转首页并筛选对应标签
+- **Emerging Research** — 数据库自动发现的新兴高频主题，分为热门标签和折叠的"Discover More Topics"长尾标签
+
+右上角太阳/月亮图标切换 **深色/浅色模式**。
+
+### AI Recommendations — 个性化推荐
+
+基于你的收藏列表，AI 自动分析兴趣偏好，找出与你收藏语义相近的论文。操作方式：
+
+1. 先在首页收藏若干感兴趣的论文（点 ⭐）
+2. 进入 AI Recommendations 页面
+3. 可在输入框中补充当前研究主题（可选）
+4. 点击 **Generate Recommendations** 获取推荐
+
+每篇推荐论文会展示匹配理由，例如 "embedding similarity to your favorites"、"aligned with tags from your favorites" 等。点击论文标题直接跳转原文链接。
+
+### Research Assistant — AI 对话助手
+
+基于 tool-calling 架构的 AI Agent，支持以下能力：
+
+| 能力 | 示例 |
+|------|------|
+| 搜索论文 | "Find papers about world models for robotics" |
+| 分析论文 | "Analyze the paper DreamerV3" |
+| 找相似论文 | "What papers are similar to DreamerV3?" |
+| 个性化推荐 | "Recommend papers based on my favorites" |
+
+AI 会自动判断意图并调用相应工具，回复中使用 Markdown 格式渲染（列表、粗体、链接等）。对话记录会保存到浏览器本地，切换页面不会丢失。
+
+### 论文分析 — AI Deep Analysis
+
+在首页点击任意论文进入详情页（或搜索结果中点击标题），可以查看：
+
+- 论文摘要 (Abstract)
+- AI 生成的论文总结 (Summary)
+- AI 识别的核心贡献 (Contribution)
+- AI 分析的局限性 (Limitations)
+
+首次打开时会触发 AI 实时分析，之后使用缓存直接返回。
+
+### 相似论文发现
+
+在论文卡片上点击 🔀 按钮，系统会自动找出语义向量最接近的相关论文，返回首页并展示结果。这个功能适用于"读完这篇还想看更多"的场景。
+
+---
+
+## 技术栈
+
+| 层 | 技术 |
+|----|------|
+| 前端 | React 19 · TypeScript · Vite · Tailwind CSS · Framer Motion · Recharts · react-markdown |
+| 后端 | Node.js · Express · PostgreSQL + pgvector · node-cron |
+| AI | DeepSeek V3（分析/对话）· DashScope `text-embedding-v4`（1536 维向量） |
+| 认证 | JWT + bcrypt |
+| 部署 | Docker · Sealos · GitHub Actions CI/CD · GitHub Container Registry |
+
+---
+
+## 快速开始
+
+### 环境要求
+
+- Node.js ≥ 18
+- PostgreSQL（需启用 pgvector 扩展）
+- DeepSeek API Key
+- DashScope API Key（向量嵌入）
+
+### 1. 克隆 & 安装
+
+```bash
+git clone https://github.com/Steinerxxx/World-Models-Research-Hub.git
+cd World-Models-Research-Hub
+
+# 后端
+cd backend && npm install
+
+# 前端
+cd ../frontend && npm install
+```
+
+### 2. 配置环境变量
+
+在 `backend/` 下创建 `.env`：
+
+```env
+# PostgreSQL（必须，pgvector 扩展需预先启用）
+DATABASE_URL="postgresql://user:pass@host:5432/dbname"
+
+# AI — 分析与对话
+AI_API_KEY="sk-xxx"
+AI_BASE_URL="https://api.deepseek.com"
+AI_MODEL_NAME="deepseek-chat"
+
+# AI — 向量嵌入
+EMBEDDING_API_KEY="sk-xxx"
+EMBEDDING_BASE_URL="https://dashscope.aliyuncs.com/compatible-mode/v1"
+EMBEDDING_MODEL="text-embedding-v4"
+
+# 认证
+JWT_SECRET="your-jwt-secret"
+ADMIN_KEY="your-admin-key"
+```
+
+### 3. 启动
+
+```bash
+# 后端 (port 3001)
+cd backend && npm run dev
+
+# 前端 (port 5173)
+cd frontend && npm run dev
+```
+
+访问 `http://localhost:5173`。
+
+---
+
+## Docker / Sealos 部署
+
+```bash
+# 构建镜像
+docker build -t ghcr.io/your-username/world-models-hub:latest .
+
+# 推送
+docker push ghcr.io/your-username/world-models-hub:latest
+```
+
+推送后 GitHub Actions 自动触发 Sealos Webhook 部署。也可以直接上 [Sealos](https://sealos.run) 导入 Docker 镜像一键部署。
+
+---
+
+## 项目结构
+
+```
+├── frontend/                  # React + Vite + TypeScript
+│   ├── src/
+│   │   ├── components/        # UI 组件 (Layout, Sidebar, PaperCard...)
+│   │   ├── contexts/          # React Context (Theme, Auth, Favorites, Filter)
+│   │   ├── hooks/             # 自定义 Hooks (usePaperBrowser...)
+│   │   ├── lib/               # API 客户端 + 工具函数
+│   │   ├── pages/             # Home, Chat, Recommendations, Trends, Profile...
+│   │   └── types/             # TypeScript 类型定义
+│   └── ...
+├── backend/                   # Node.js + Express
+│   ├── src/
+│   │   ├── app.js             # Express 应用入口
+│   │   ├── ai_service.js      # AI 分析 / 搜索意图解析
+│   │   ├── chat_service.js    # Agent 工具调用核心
+│   │   ├── classifier.js      # 规则论文分类器
+│   │   ├── database.js        # PostgreSQL + pgvector 数据层
+│   │   ├── retag.js           # 批量重新打标签工具
+│   │   ├── scraper.js         # arXiv 抓取管道
+│   │   ├── search_parser.js   # 结构化查询解析
+│   │   ├── stopwords.js        # 停用词 + 查询预处理
+│   │   ├── vector_config.js   # 向量嵌入配置
+│   │   ├── vector_service.js  # 语义 / 混合搜索 + 推荐引擎
+│   │   ├── routes/            # API 路由
+│   │   │   ├── admin.js       # 管理接口 (x-admin-key)
+│   │   │   ├── chat.js        # Agent 对话接口
+│   │   │   ├── health.js      # 健康检查
+│   │   │   └── papers.js      # 论文搜索 / 分析 / 推荐
+│   │   └── jobs/              # 定时任务
+│   │       └── scrapeScheduler.js  # 每 10 分钟 arXiv 抓取
+│   └── ...
+├── Dockerfile
+├── .github/workflows/deploy.yml   # CI/CD 自动化部署
+└── README.md
+```
+
+---
+
+## API 端点摘要
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/health` | 系统健康检查，含版本号和 Embedding 状态 |
+| GET | `/api/papers` | 获取全部论文 |
+| GET | `/api/tags` | 获取全部标签及计数 |
+| POST | `/api/search/semantic` | 纯语义向量搜索 |
+| POST | `/api/search/hybrid` | 语义 + 关键词 + 时效混合搜索 |
+| POST | `/api/recommendations` | AI 个性化推荐 |
+| POST | `/api/recommendations/similar-paper` | 查找相似论文 |
+| POST | `/api/papers/:id/analyze` | AI 深度分析单篇论文 |
+| POST | `/api/chat` | AI 研究助手对话 (Agent) |
+| POST | `/api/auth/register` | 用户注册 |
+| POST | `/api/auth/login` | 用户登录 |
+| POST | `/api/scrape` | 手动触发 arXiv 抓取 |
+| `*`  | `/api/admin/*` | 管理接口（需 `x-admin-key` Header） |
+
+---
+
+## 许可证
+
+ISC License · [GitHub](https://github.com/Steinerxxx/World-Models-Research-Hub)
