@@ -92,6 +92,8 @@ export default function Home() {
   const [similarPaperResult, setSimilarPaperResult] = useState<SimilarPaperRecommendationResponse | null>(null);
   const [isLoadingSimilarPapers, setIsLoadingSimilarPapers] = useState(false);
   const [submittedSearchTerm, setSubmittedSearchTerm] = useState('');
+  const [enableFilters, setEnableFilters] = useState(true);
+  const [enableWeights, setEnableWeights] = useState(true);
 
   const ALL_TAGS = [...SUBJECT_TAGS, ...ARCHITECTURE_TAGS];
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
@@ -180,7 +182,9 @@ export default function Home() {
 
       setIsSearching(true);
       try {
-        const result = await hybridSearchPapers(query, appliedFilters, appliedHybridWeights);
+        const effectiveFilters = enableFilters ? appliedFilters : {};
+        const effectiveWeights = enableWeights ? appliedHybridWeights : DEFAULT_HYBRID_WEIGHTS;
+        const result = await hybridSearchPapers(query, effectiveFilters, effectiveWeights);
         const parsed = result.ai ? { raw: result.parsed, ai: result.ai } : null;
         setParsedIntent(parsed);
         if (parsed?.ai?.filters) {
@@ -205,7 +209,7 @@ export default function Home() {
     };
 
     runSearch();
-  }, [appliedFilters, appliedHybridWeights, searchMode, submittedSearchTerm]);
+  }, [appliedFilters, appliedHybridWeights, searchMode, submittedSearchTerm, enableFilters, enableWeights]);
 
   const updateDraftFilter = (key: keyof SearchFilters, value: string) => {
     setDraftFilters(prev => ({
@@ -444,11 +448,22 @@ export default function Home() {
             <p>Use natural language to describe the papers you want. Example: recent robot world model papers focused on planning.</p>
             <div className="mx-auto grid max-w-3xl gap-4 text-left md:grid-cols-2">
               <div className="rounded-xl border border-border/60 bg-card/60 p-4">
-                <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  Structured Filters
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-medium text-foreground">
+                    <SlidersHorizontal className="h-4 w-4" />
+                    Structured Filters
+                  </div>
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={enableFilters}
+                      onChange={(e) => setEnableFilters(e.target.checked)}
+                      className="h-3.5 w-3.5 rounded border-border accent-primary"
+                    />
+                    <span className="text-xs text-muted-foreground">Enable</span>
+                  </label>
                 </div>
-                <div className="grid gap-3">
+                <div className={enableFilters ? '' : 'opacity-40 pointer-events-none'}>
                   <label className="grid gap-1 text-xs">
                     <span className="flex items-center gap-1.5 text-muted-foreground">
                       <Tag className="h-3.5 w-3.5" />
@@ -542,11 +557,22 @@ export default function Home() {
                 </div>
               </div>
               <div className="rounded-xl border border-border/60 bg-card/60 p-4">
-                <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
-                  <Sparkles className="h-4 w-4" />
-                  Hybrid Weights
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-medium text-foreground">
+                    <Sparkles className="h-4 w-4" />
+                    Hybrid Weights
+                  </div>
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={enableWeights}
+                      onChange={(e) => setEnableWeights(e.target.checked)}
+                      className="h-3.5 w-3.5 rounded border-border accent-primary"
+                    />
+                    <span className="text-xs text-muted-foreground">Enable</span>
+                  </label>
                 </div>
-                <div className="mb-3 flex flex-wrap gap-2">
+                <div className={enableWeights ? '' : 'opacity-40 pointer-events-none'}>
                   {HYBRID_PRESETS.map((preset) => (
                     <Button
                       key={preset.key}
@@ -558,7 +584,6 @@ export default function Home() {
                       {preset.label}
                     </Button>
                   ))}
-                </div>
                 <div className="space-y-3">
                   <label className="grid gap-1 text-xs">
                     <span className="flex items-center justify-between text-muted-foreground">
@@ -620,6 +645,7 @@ export default function Home() {
                   {hasPendingWeightChanges && (
                     <p className="text-xs text-amber-600">You have unapplied weight changes.</p>
                   )}
+                </div>
                 </div>
               </div>
             </div>
