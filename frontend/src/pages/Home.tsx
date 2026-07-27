@@ -649,6 +649,19 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            {isSearching && searchMode === 'hybrid' && (
+              <div className="mx-auto max-w-3xl rounded-xl border border-primary/20 bg-primary/5 p-4 text-left">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  <div>
+                    <p className="text-sm font-medium text-primary">Hybrid Searching</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Combining semantic, keyword and recency signals...
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             {parsedIntent?.ai && (
               <div className="mx-auto max-w-3xl rounded-xl border border-primary/20 bg-primary/5 p-4 text-left">
                 <div className="flex items-center gap-2 text-primary font-medium mb-2">
