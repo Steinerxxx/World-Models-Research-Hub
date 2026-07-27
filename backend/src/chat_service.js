@@ -48,6 +48,12 @@ SEARCH("query", "mode")
 Use ONLY quoted positional arguments. NEVER use tag="value" syntax.
 After receiving results, respond in natural language. NEVER repeat the ---TOOLS block.
 
+=== IMPORTANT RULES ===
+- NEVER mention internal database IDs in your responses.
+- When referring to a paper, always use its title, not an ID number.
+- For ANALYZE, use the exact paper title from results. The tool will confirm which paper was matched.
+- If the user says "the last one", "the first one", or similar ordinal references, look at the most recent results for context.
+
 If no tools needed, answer directly. Keep responses concise.`;
 
 function parseToolCalls(text) {
@@ -105,14 +111,14 @@ export async function chatWithAgent(userMessage, favorites, context, history = [
   }
 
   // Look up favorite paper titles so AI understands user's references
-  let favoriteInfo = `User's favorites (paper IDs): [${favorites.join(', ')}]`;
+  let favoriteInfo = favorites.length > 0 ? `User has ${favorites.length} favorite papers.` : 'User has no favorites yet.';
   if (favorites.length > 0) {
     try {
       const { getAllPapers } = await import('./database.js');
       const allPapers = await getAllPapers();
       const favPapers = allPapers.filter(p => favorites.includes(p.id));
       if (favPapers.length > 0) {
-        favoriteInfo = `User's favorites:\n${favPapers.map(p => `- ID ${p.id}: "${p.title}" (${new Date(p.publication_date).getFullYear()})`).join('\n')}`;
+        favoriteInfo = `User's favorites:\n${favPapers.map(p => `- "${p.title}" (${new Date(p.publication_date).getFullYear()})`).join('\n')}`;
       }
     } catch { /* non-critical, keep IDs-only fallback */ }
   }
@@ -221,6 +227,14 @@ function summarizeToolResults(results) {
       if (res.contribution) lines.push(`  Contribution: ${res.contribution}`);
       if (res.limitations) lines.push(`  Limitations: ${res.limitations}`);
       return lines.join('\n');
+    }
+    if (res.summary || res.contribution || res.limitations) {
+      return [
+        `[${r.tool}] Matched paper: "${res.title}"`,
+        res.summary ? `  Summary: ${res.summary}` : '',
+        res.contribution ? `  Contribution: ${res.contribution}` : '',
+        res.limitations ? `  Limitations: ${res.limitations}` : ''
+      ].filter(Boolean).join('\n');
     }
     return `[${r.tool}] ${JSON.stringify(res).slice(0, 500)}`;
   }).join('\n\n');
