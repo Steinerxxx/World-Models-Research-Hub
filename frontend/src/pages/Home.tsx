@@ -852,7 +852,7 @@ export default function Home() {
         {!loading && !error && (
           <>
             {(similarPaperResult || isLoadingSimilarPapers) && (
-              <section className="mb-10 rounded-2xl border border-border/60 bg-card/60 p-5">
+              <section className="mb-10 rounded-2xl border-2 border-primary/20 bg-primary/5 dark:bg-primary/10 p-5">
                 <div className="mb-4 flex items-start justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2 text-primary font-semibold">
