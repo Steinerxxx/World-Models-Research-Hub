@@ -36,30 +36,45 @@ function filtersEqual(left: SearchFilters, right: SearchFilters) {
     && (left.year || '') === (right.year || '');
 }
 
-const SEARCH_SETTINGS_KEY = 'ai-search-settings-v5';
+const DEFAULT_HYBRID_WEIGHTS: SearchWeights = {
+  semantic: 0.55,
+  keyword: 0.3,
+  recency: 0.15
+};
 
-function computeHybridWeights(useSemantic: boolean, useKeyword: boolean): SearchWeights {
-  if (useSemantic && useKeyword) return { semantic: 0.55, keyword: 0.3, recency: 0.15 };
-  if (useSemantic) return { semantic: 0.85, keyword: 0, recency: 0.15 };
-  if (useKeyword) return { semantic: 0, keyword: 0.85, recency: 0.15 };
-  return { semantic: 0, keyword: 0, recency: 1.0 };
+const SEARCH_SETTINGS_KEY = 'ai-search-settings-v5';
+const HYBRID_PRESETS: Array<{ key: string; label: string; weights: SearchWeights }> = [
+  { key: 'balanced', label: 'Balanced', weights: DEFAULT_HYBRID_WEIGHTS },
+  { key: 'semantic', label: 'Semantic First', weights: { semantic: 0.75, keyword: 0.15, recency: 0.1 } },
+  { key: 'keyword', label: 'Keyword First', weights: { semantic: 0.35, keyword: 0.5, recency: 0.15 } },
+  { key: 'recent', label: 'Recent First', weights: { semantic: 0.35, keyword: 0.2, recency: 0.45 } }
+];
+
+function formatWeight(value: number) {
+  return `${Math.round(value * 100)}%`;
 }
 
-function loadSearchToggles() {
+function weightsEqual(left: SearchWeights, right: SearchWeights) {
+  return left.semantic === right.semantic
+    && left.keyword === right.keyword
+    && left.recency === right.recency;
+}
+
+function loadSearchSettings() {
   try {
     const saved = localStorage.getItem(SEARCH_SETTINGS_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (typeof parsed.useSemantic === 'boolean' && typeof parsed.useKeyword === 'boolean') {
-        return { useSemantic: parsed.useSemantic, useKeyword: parsed.useKeyword };
-      }
+      return {
+        weights: (parsed.weights && typeof parsed.weights.semantic === 'number') ? parsed.weights : DEFAULT_HYBRID_WEIGHTS,
+      };
     }
   } catch { /* ignore */ }
-  return { useSemantic: true, useKeyword: true };
+  return { weights: DEFAULT_HYBRID_WEIGHTS };
 }
 
 export default function Home() {
-  const initialToggles = loadSearchToggles();
+  const initialSettings = loadSearchSettings();
   const [allPapers, setAllPapers] = useState<Paper[]>([]);
   const allPapersRef = useRef<Paper[]>([]);
   const [papers, setPapers] = useState<Paper[]>([]);
@@ -72,8 +87,8 @@ export default function Home() {
   const [parsedIntent, setParsedIntent] = useState<ParseSearchQueryResponse | null>(null);
   const [draftFilters, setDraftFilters] = useState<SearchFilters>({});
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>({});
-  const [useSemantic, setUseSemantic] = useState(initialToggles.useSemantic);
-  const [useKeyword, setUseKeyword] = useState(initialToggles.useKeyword);
+  const [draftHybridWeights, setDraftHybridWeights] = useState<SearchWeights>(initialSettings.weights);
+  const [appliedHybridWeights, setAppliedHybridWeights] = useState<SearchWeights>(initialSettings.weights);
   const [similarPaperResult, setSimilarPaperResult] = useState<SimilarPaperRecommendationResponse | null>(null);
   const [isLoadingSimilarPapers, setIsLoadingSimilarPapers] = useState(false);
   const [submittedSearchTerm, setSubmittedSearchTerm] = useState('');
@@ -98,8 +113,8 @@ export default function Home() {
   const [isLogoZoomed, setIsLogoZoomed] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(SEARCH_SETTINGS_KEY, JSON.stringify({ useSemantic, useKeyword }));
-  }, [useSemantic, useKeyword]);
+    localStorage.setItem(SEARCH_SETTINGS_KEY, JSON.stringify({ weights: appliedHybridWeights }));
+  }, [appliedHybridWeights]);
 
   const fetchPapers = async () => {
     setLoading(true);
@@ -158,8 +173,7 @@ export default function Home() {
 
       setIsSearching(true);
       try {
-        const weights = computeHybridWeights(useSemantic, useKeyword);
-        const result = await hybridSearchPapers(query, appliedFilters, weights);
+        const result = await hybridSearchPapers(query, appliedFilters, appliedHybridWeights);
         const parsed = result.ai ? { raw: result.parsed, ai: result.ai } : null;
         setParsedIntent(parsed);
         if (parsed?.ai?.filters) {
@@ -184,7 +198,7 @@ export default function Home() {
     };
 
     runSearch();
-  }, [appliedFilters, useSemantic, useKeyword, submittedSearchTerm]);
+  }, [appliedFilters, appliedHybridWeights, submittedSearchTerm]);
 
   const updateDraftFilter = (key: keyof SearchFilters, value: string) => {
     setDraftFilters(prev => ({
@@ -208,7 +222,29 @@ export default function Home() {
     setAppliedFilters(nextFilters);
   };
 
+  const updateDraftHybridWeight = (key: keyof SearchWeights, value: number) => {
+    setDraftHybridWeights(prev => ({
+      ...prev,
+      [key]: value / 100
+    }));
+  };
+
+  const applyDraftHybridWeights = () => {
+    setAppliedHybridWeights(draftHybridWeights);
+  };
+
+  const applyHybridPreset = (weights: SearchWeights) => {
+    setDraftHybridWeights(weights);
+    setAppliedHybridWeights(weights);
+  };
+
+  const resetHybridWeights = () => {
+    setDraftHybridWeights(DEFAULT_HYBRID_WEIGHTS);
+    setAppliedHybridWeights(DEFAULT_HYBRID_WEIGHTS);
+  };
+
   const hasPendingFilterChanges = !filtersEqual(draftFilters, appliedFilters);
+  const hasPendingWeightChanges = !weightsEqual(draftHybridWeights, appliedHybridWeights);
 
   const handlePaperUpdate = (updatedPaper: Paper) => {
     setAllPapers(prevPapers =>
@@ -480,33 +516,82 @@ export default function Home() {
               <div className="rounded-xl border border-border/60 bg-card/60 p-4">
                 <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
                   <Sparkles className="h-4 w-4" />
-                  Search Dimensions
+                  Hybrid Weights
+                </div>
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {HYBRID_PRESETS.map((preset) => (
+                    <Button
+                      key={preset.key}
+                      variant={weightsEqual(appliedHybridWeights, preset.weights) ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => applyHybridPreset(preset.weights)}
+                      className="h-8 rounded-full px-3 text-xs"
+                    >
+                      {preset.label}
+                    </Button>
+                  ))}
                 </div>
                 <div className="space-y-3">
-                  <label className="flex items-center gap-2.5 cursor-pointer">
+                  <label className="grid gap-1 text-xs">
+                    <span className="flex items-center justify-between text-muted-foreground">
+                      <span>Semantic</span>
+                      <span>{formatWeight(draftHybridWeights.semantic)}</span>
+                    </span>
                     <input
-                      type="checkbox"
-                      checked={useSemantic}
-                      onChange={(e) => setUseSemantic(e.target.checked)}
-                      className="h-4 w-4 rounded border-border accent-primary"
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={Math.round(draftHybridWeights.semantic * 100)}
+                      onChange={(e) => updateDraftHybridWeight('semantic', Number(e.target.value))}
                     />
-                    <div>
-                      <span className="text-sm font-medium text-foreground">Semantic Search</span>
-                      <p className="text-xs text-muted-foreground">Match papers by meaning, even if terms differ</p>
-                    </div>
                   </label>
-                  <label className="flex items-center gap-2.5 cursor-pointer">
+                  <label className="grid gap-1 text-xs">
+                    <span className="flex items-center justify-between text-muted-foreground">
+                      <span>Keyword</span>
+                      <span>{formatWeight(draftHybridWeights.keyword)}</span>
+                    </span>
                     <input
-                      type="checkbox"
-                      checked={useKeyword}
-                      onChange={(e) => setUseKeyword(e.target.checked)}
-                      className="h-4 w-4 rounded border-border accent-primary"
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={Math.round(draftHybridWeights.keyword * 100)}
+                      onChange={(e) => updateDraftHybridWeight('keyword', Number(e.target.value))}
                     />
-                    <div>
-                      <span className="text-sm font-medium text-foreground">Keyword Matching</span>
-                      <p className="text-xs text-muted-foreground">Match papers by exact terms in title, tags, and abstract</p>
-                    </div>
                   </label>
+                  <label className="grid gap-1 text-xs">
+                    <span className="flex items-center justify-between text-muted-foreground">
+                      <span>Recency</span>
+                      <span>{formatWeight(draftHybridWeights.recency)}</span>
+                    </span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={Math.round(draftHybridWeights.recency * 100)}
+                      onChange={(e) => updateDraftHybridWeight('recency', Number(e.target.value))}
+                    />
+                  </label>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-xs text-muted-foreground">
+                      Applied: {formatWeight(appliedHybridWeights.semantic)} / {formatWeight(appliedHybridWeights.keyword)} / {formatWeight(appliedHybridWeights.recency)}
+                    </span>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={resetHybridWeights} className="h-8 px-2 text-xs">
+                        Reset
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={applyDraftHybridWeights}
+                        disabled={!hasPendingWeightChanges}
+                        className="h-8 px-3 text-xs"
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                  </div>
+                  {hasPendingWeightChanges && (
+                    <p className="text-xs text-amber-600">You have unapplied weight changes.</p>
+                  )}
                 </div>
               </div>
             </div>
