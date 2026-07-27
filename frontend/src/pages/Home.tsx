@@ -98,7 +98,7 @@ export default function Home() {
   const tagInputRef = useRef<HTMLInputElement>(null);
 
   // Use context for filters
-  const { searchTerm, setSearchTerm, selectedTags, setSelectedTags, toggleTag, itemsPerPage, sortBy } = useFilter();
+  const { searchTerm, setSearchTerm, searchMode, setSearchMode, selectedTags, setSelectedTags, toggleTag, itemsPerPage, sortBy } = useFilter();
   const { favorites, showFavoritesOnly, setShowFavoritesOnly } = useFavorites();
   const location = useLocation();
 
@@ -162,6 +162,13 @@ export default function Home() {
 
   useEffect(() => {
     const runSearch = async () => {
+      if (searchMode === 'keyword') {
+        setPapers(allPapersRef.current);
+        setParsedIntent(null);
+        setError(null);
+        return;
+      }
+
       const query = submittedSearchTerm || buildFilterQuery(appliedFilters);
 
       if (!query) {
@@ -198,7 +205,7 @@ export default function Home() {
     };
 
     runSearch();
-  }, [appliedFilters, appliedHybridWeights, submittedSearchTerm]);
+  }, [appliedFilters, appliedHybridWeights, searchMode, submittedSearchTerm]);
 
   const updateDraftFilter = (key: keyof SearchFilters, value: string) => {
     setDraftFilters(prev => ({
@@ -305,14 +312,14 @@ export default function Home() {
   } = usePaperBrowser({
     papers,
     searchTerm,
-    highlightTerm: parsedIntent?.ai?.rewrittenQuery || parsedIntent?.raw.general || searchTerm,
+    highlightTerm: searchMode === 'keyword' ? undefined : (parsedIntent?.ai?.rewrittenQuery || parsedIntent?.raw.general || searchTerm),
     selectedTags,
     itemsPerPage,
     sortBy,
     favorites,
     showFavoritesOnly,
-    disableTextSearch: true,
-    preserveOrder: true
+    disableTextSearch: searchMode !== 'keyword',
+    preserveOrder: searchMode !== 'keyword'
   });
 
   return (
@@ -387,7 +394,7 @@ export default function Home() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
           <Input
             type="text"
-            placeholder="Describe what kind of papers you want..."
+            placeholder={searchMode === 'keyword' ? 'Search by title, authors, or abstract...' : 'Describe what kind of papers you want...'}
             className="w-full pl-10 pr-24 py-6 text-lg bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/50 rounded-xl shadow-lg backdrop-blur-sm transition-all duration-300"
             value={searchTerm}
             onChange={(e) => updateSearchTerm(e.target.value)}
@@ -412,6 +419,27 @@ export default function Home() {
             )}
           </div>
         </div>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button
+            variant={searchMode === 'keyword' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSearchMode('keyword')}
+            className="rounded-full"
+          >
+            <Search className="h-4 w-4 mr-1.5" />
+            Keyword Search
+          </Button>
+          <Button
+            variant={searchMode === 'hybrid' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSearchMode('hybrid')}
+            className="rounded-full"
+          >
+            <Sparkles className="h-4 w-4 mr-1.5" />
+            Hybrid Search
+          </Button>
+        </div>
+        {searchMode === 'hybrid' && (
         <div className="space-y-4 text-center text-sm text-muted-foreground">
             <p>Use natural language to describe the papers you want. Example: recent robot world model papers focused on planning.</p>
             <div className="mx-auto grid max-w-3xl gap-4 text-left md:grid-cols-2">
@@ -632,6 +660,7 @@ export default function Home() {
               </div>
             )}
           </div>
+        )}
         
         {/* Active Filter Indicator */}
         <div className="flex flex-col items-center gap-2">
@@ -783,7 +812,7 @@ export default function Home() {
                     copyBibTeX={copyBibTeX}
                     onPaperUpdate={handlePaperUpdate}
                     onRecommendSimilar={handleRecommendSimilar}
-                    matchReasons={paper.match_reasons}
+                    matchReasons={searchMode === 'hybrid' ? paper.match_reasons : undefined}
                     reasonLabel="Why it matched"
                   />
                 </div>
