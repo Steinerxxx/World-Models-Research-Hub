@@ -12,6 +12,7 @@ import {
   VECTOR_SEARCH_TOP_K,
   getEmbeddingConfigSummary
 } from './vector_config.js';
+import { STOP_WORDS, stripQueryWrappers } from './stopwords.js';
 import {
   findSimilarPapers,
   getAllPapers,
@@ -59,20 +60,8 @@ function normalizeHybridWeights(weights = {}) {
   };
 }
 
-const STOP_WORDS = new Set([
-  'a', 'an', 'the', 'of', 'in', 'on', 'at', 'to', 'for', 'with', 'by', 'from',
-  'and', 'or', 'not', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
-  'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'can', 'could',
-  'may', 'might', 'must', 'shall', 'should', 'it', 'its', 'this', 'that',
-  'these', 'those', 'about', 'into', 'over', 'such', 'only', 'than', 'then',
-  'also', 'very', 'just', 'but', 'if', 'so', 'no', 'as', 'up', 'out', 'all',
-  'papers', 'paper', 'research', 'study', 'find', 'approach', 'method',
-  'based', 'using', 'new', 'via', 'use', 'novel', 'towards', 'learning',
-  'search', 'looking', 'please', 'show', 'tell', 'give', 'want', 'need',
-]);
-
 function buildKeywordSet(query, keywords = []) {
-  const merged = [query, ...keywords]
+  const merged = [stripQueryWrappers(query), ...keywords]
     .join(' ')
     .toLowerCase()
     .split(/\s+/)

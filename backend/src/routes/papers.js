@@ -11,6 +11,7 @@ import { scrapeArxiv } from '../scraper.js';
 import { generatePaperAnalysis, parseSearchIntentWithAI } from '../ai_service.js';
 import { hybridSearchPapers, recommendPapersFromFavorites, semanticSearchPapers } from '../vector_service.js';
 import { parseSearchQuery } from '../search_parser.js';
+import { extractKeywords, stripQueryWrappers } from '../stopwords.js';
 
 export function createPapersRouter(deps = {}) {
   const router = express.Router();
@@ -285,7 +286,14 @@ export function createPapersRouter(deps = {}) {
       }
 
       const parsed = services.parseSearchQuery(query);
+      const cleanQuery = stripQueryWrappers(parsed.general);
+      const ruleKeywords = extractKeywords(cleanQuery);
       const aiParsed = await services.parseSearchIntentWithAI(query);
+      // Merge: rule-extracted keywords are always included; AI keywords supplement
+      const keywords = [...new Set([...ruleKeywords, ...(aiParsed.keywords || [])])];
+      const focusAreas = (aiParsed.focusAreas || []).filter(
+        a => a.length > 2
+      );
       const mergedFilters = {
         ...parsed.filters,
         ...aiParsed.filters,
@@ -295,8 +303,8 @@ export function createPapersRouter(deps = {}) {
       const result = await services.hybridSearchPapers({
         query: aiParsed.rewrittenQuery || parsed.general || query,
         filters: mergedFilters,
-        keywords: aiParsed.keywords || [],
-        focusAreas: aiParsed.focusAreas || [],
+        keywords,
+        focusAreas,
         excludeTerms: aiParsed.excludeTerms || [],
         timePreference: aiParsed.timePreference || 'balanced',
         weights,
