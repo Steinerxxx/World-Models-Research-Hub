@@ -186,29 +186,54 @@ function computeRecencyScore(publicationDate) {
   return 0.15;
 }
 
-function buildMatchReasons(paper, terms, filters) {
+function buildMatchReasons(paper, {
+  terms = [],
+  filters = {},
+  semanticScore = 0,
+  keywordScore = 0,
+  recencyScore = 0,
+  focusAreas = [],
+  focusAreaScore = 0,
+  timePreference = 'balanced'
+} = {}) {
   const reasons = [];
 
-  for (const term of terms.slice(0, 4)) {
-    const lower = term.toLowerCase();
-    if ((paper.title || '').toLowerCase().includes(lower)) {
-      reasons.push(`title matches "${term}"`);
-    } else if ((paper.abstract || '').toLowerCase().includes(lower)) {
-      reasons.push(`abstract matches "${term}"`);
-    } else if ((paper.tags || []).some((tag) => tag.toLowerCase().includes(lower))) {
-      reasons.push(`tag matches "${term}"`);
+  // Semantic similarity — the primary ranking signal
+  if (semanticScore > 0.6) reasons.push(`strong semantic match (${Math.round(semanticScore * 100)}%)`);
+  else if (semanticScore > 0.3) reasons.push(`moderate semantic match (${Math.round(semanticScore * 100)}%)`);
+
+  // Focus area match
+  if (focusAreaScore > 0) {
+    const matched = focusAreas.filter(a => {
+      const text = [paper.title, paper.abstract, (paper.tags || []).join(' ')].join(' ').toLowerCase();
+      return text.includes(a.toLowerCase());
+    });
+    if (matched.length > 0) reasons.push(`topic: ${matched.slice(0, 2).join(', ')}`);
+    else reasons.push(`topic relevance (${Math.round(focusAreaScore * 100)}%)`);
+  }
+
+  // Recency
+  if (timePreference === 'recent' && recencyScore >= 0.8) reasons.push('recent publication');
+  else if (timePreference === 'classic' && recencyScore <= 0.35) reasons.push('foundational/classic work');
+  else if (recencyScore >= 0.9) reasons.push('recently published');
+
+  // Keyword match — only show if it's a distinguishing factor
+  if (keywordScore > 0.3 && semanticScore < 0.5) {
+    reasons.push(`keyword relevance (${Math.round(keywordScore * 100)}%)`);
+  } else if (keywordScore > 0.3) {
+    // Show the highest-scoring keyword hit in title
+    for (const term of terms.filter(t => t.length > 3).slice(0, 5)) {
+      if ((paper.title || '').toLowerCase().includes(term.toLowerCase())) {
+        reasons.push(`"${term}" in title`);
+        break;
+      }
     }
   }
 
-  if (filters.author) {
-    reasons.push(`author filter: ${filters.author}`);
-  }
-  if (filters.tag) {
-    reasons.push(`tag filter: ${filters.tag}`);
-  }
-  if (filters.year) {
-    reasons.push(`year filter: ${filters.year}`);
-  }
+  // Filters
+  if (filters.tag) reasons.push(`tag: ${filters.tag}`);
+  if (filters.author) reasons.push(`author: ${filters.author}`);
+  if (filters.year) reasons.push(`year: ${filters.year}`);
 
   return Array.from(new Set(reasons)).slice(0, 4);
 }
@@ -483,12 +508,10 @@ export async function hybridSearchPapers({
         keyword_score: Number(keywordScore.toFixed(4)),
         recency_score: Number(recencyScore.toFixed(4)),
         hybrid_score: Number(hybridScore.toFixed(4)),
-        match_reasons: Array.from(new Set([
-          ...buildMatchReasons(paper, terms, filters),
-          ...focusAreas.slice(0, 2).filter((area) => computeFocusAreaScore(paper, [area]) > 0).map((area) => `focus area: ${area}`),
-          ...(timePreference === 'recent' && recencyScore >= 0.8 ? ['recent work boost'] : []),
-          ...(timePreference === 'classic' && recencyScore <= 0.35 ? ['classic work boost'] : [])
-        ])).slice(0, 5)
+        match_reasons: buildMatchReasons(paper, {
+          terms, filters, semanticScore, keywordScore, recencyScore,
+          focusAreas, focusAreaScore, timePreference
+        })
       };
     })
     .sort((a, b) => b.hybrid_score - a.hybrid_score)
@@ -568,8 +591,10 @@ export async function recommendPapersFromFavorites({
         hybrid_score: Number(recommendationScore.toFixed(4)),
         match_reasons: Array.from(new Set([
           reasonLabel,
-          ...buildMatchReasons(paper, terms, filters),
-          ...focusAreas.slice(0, 2).filter((area) => computeFocusAreaScore(paper, [area]) > 0).map((area) => `focus area: ${area}`)
+          ...buildMatchReasons(paper, {
+            terms, filters, semanticScore, keywordScore, recencyScore,
+            focusAreas, focusAreaScore, timePreference
+          })
         ])).slice(0, 5)
       };
     })
