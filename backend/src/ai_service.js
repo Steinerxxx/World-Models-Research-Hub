@@ -38,12 +38,13 @@ function extractJsonObject(text) {
 }
 
 function buildFallbackSearchIntent(query, explanation) {
-  const keywords = extractKeywords(stripQueryWrappers(query));
+  const stripped = stripQueryWrappers(query);
+  const keywords = extractKeywords(stripped);
 
   return {
     query,
     intent: 'search',
-    rewrittenQuery: query,
+    rewrittenQuery: stripped || query,
     filters: {},
     keywords,
     focusAreas: keywords.slice(0, 4),

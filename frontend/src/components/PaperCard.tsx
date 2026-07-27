@@ -40,7 +40,7 @@ export function PaperCard({
   const [hasHiddenAbstractHighlight, setHasHiddenAbstractHighlight] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [showSummary, setShowSummary] = useState(false);
+  const [showSummary, setShowSummary] = useState(!!paper.summary);
   const authorsRef = useRef<HTMLDivElement>(null);
   const abstractRef = useRef<HTMLParagraphElement>(null);
   
@@ -73,6 +73,7 @@ export function PaperCard({
           ...analysis
         });
         showToast('AI analysis generated successfully!');
+        setShowSummary(true);
       }
     } catch (error) {
       console.error('Analysis error:', error);
