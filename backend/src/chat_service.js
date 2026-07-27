@@ -15,35 +15,40 @@ const modelName = process.env.AI_MODEL_NAME || 'deepseek-chat';
 
 const openai = apiKey ? new OpenAI({ apiKey, baseURL }) : null;
 
-const SYSTEM_PROMPT = `You are a research assistant for a World Models & Model-Based RL paper hub. You have access to these tools:
+const SYSTEM_PROMPT = `You are a research assistant for a World Models & Model-Based RL paper hub.
 
-TOOLS:
-- SEARCH(query, mode, tag?, author?, year?) — Search papers. mode: "semantic", "hybrid", or "keyword".
-- RECOMMEND(query?, limit?) — Get personalized recommendations based on user's favorites and research context.
-- ANALYZE(paper_title) — Get AI-generated summary, contribution, and limitations for a specific paper. Only use when user asks about a specific paper by name.
-- SIMILAR(paper_title) — Find papers similar to a given paper. Only use when user asks for similar papers.
+=== AVAILABLE TOOLS ===
 
-RULES:
-1. If the user asks to search/find papers → use SEARCH
-2. If the user asks for recommendations → use RECOMMEND
-3. If the user asks about a specific paper's details → use ANALYZE
-4. If the user asks "what's similar to X" → use SIMILAR
-5. You may use multiple tools in sequence if needed
-6. Keep your thinking concise
+SEARCH(query, mode)
+  - mode: "semantic" | "hybrid" | "keyword"
+  - To filter by tag/author/year, include them in the query string.
 
-RESPOND IN THIS EXACT FORMAT:
+RECOMMEND(query?, limit?)
+  - Recommend papers based on user's favorites and research context.
 
-If you need to use tools, start with:
+ANALYZE(paper_title)
+  - Get summary, contribution, and limitations for a specific paper.
+
+SIMILAR(paper_title)
+  - Find papers similar to a given paper.
+
+=== WHEN TO USE EACH TOOL ===
+- "find/search/discover papers about X" → SEARCH
+- "recommend/suggest papers" → RECOMMEND
+- "analyze/explain paper X", "what is X about" → ANALYZE
+- "similar to X", "papers like X" → SIMILAR
+
+=== RESPONSE FORMAT ===
+
+To use tools, output EXACTLY:
 ---TOOLS
-SEARCH("query", "mode", "tag?", "author?", "year?")
-RECOMMEND("query?", limit?)
-ANALYZE("paper_title")
-SIMILAR("paper_title")
+SEARCH("query", "mode")
 ---END
 
-Then wait for results. After receiving results, provide your final answer in natural language.
+Use ONLY quoted positional arguments. NEVER use tag="value" syntax.
+After receiving results, respond in natural language. NEVER repeat the ---TOOLS block.
 
-If no tools are needed, just answer directly.`;
+If no tools needed, answer directly. Keep responses concise.`;
 
 function parseToolCalls(text) {
   // Match ---TOOLS block flexibly — handles single-line, multi-line, \r\n, extra spaces
@@ -99,9 +104,22 @@ export async function chatWithAgent(userMessage, favorites, context) {
     return { answer: 'AI agent is currently unavailable. Please configure AI_API_KEY.' };
   }
 
+  // Look up favorite paper titles so AI understands user's references
+  let favoriteInfo = `User's favorites (paper IDs): [${favorites.join(', ')}]`;
+  if (favorites.length > 0) {
+    try {
+      const { getAllPapers } = await import('./database.js');
+      const allPapers = await getAllPapers();
+      const favPapers = allPapers.filter(p => favorites.includes(p.id));
+      if (favPapers.length > 0) {
+        favoriteInfo = `User's favorites:\n${favPapers.map(p => `- ID ${p.id}: "${p.title}" (${new Date(p.publication_date).getFullYear()})`).join('\n')}`;
+      }
+    } catch { /* non-critical, keep IDs-only fallback */ }
+  }
+
   const messages = [
     { role: 'system', content: SYSTEM_PROMPT },
-    { role: 'user', content: `User's favorites (paper IDs): [${favorites.join(', ')}]\nUser's research context: ${context || 'none'}\n\nUser message: ${userMessage}` }
+    { role: 'user', content: `${favoriteInfo}\nUser's research context: ${context || 'none'}\n\nUser message: ${userMessage}` }
   ];
 
   // Step 1: AI decides what tools to call
@@ -149,11 +167,11 @@ export async function chatWithAgent(userMessage, favorites, context) {
     }
   }
 
-  // Step 3: Feed results back to AI for final answer
-  messages.push({ role: 'assistant', content });
+  // Step 3: Feed concise results back to AI for final answer
+  messages.push({ role: 'assistant', content: `[System: tools executed: ${toolCalls.map(c => c.tool).join(', ')}]` });
   messages.push({
     role: 'user',
-    content: `Tool execution results:\n${JSON.stringify(toolResults, null, 2)}\n\nPlease provide your final answer to the user based on these results. Be concise and informative.`
+    content: `Tool results:\n${summarizeToolResults(toolResults)}\n\nProvide your final answer based on these results. Be concise. Do NOT output ---TOOLS or tool call format.`
   });
 
   try {
@@ -172,11 +190,33 @@ export async function chatWithAgent(userMessage, favorites, context) {
   if (!finalContent && response.choices[0]?.message?.reasoning_content) {
     finalContent = response.choices[0].message.reasoning_content.trim();
   }
+  // Safety: strip any stray ---TOOLS blocks from final response
+  finalContent = finalContent.replace(/---TOOLS[\s\S]*?---END/gi, '').trim();
 
   return {
     answer: finalContent || formatToolResultsFallback(toolResults),
     toolsUsed: toolCalls.map(c => c.tool)
   };
+}
+
+function summarizeToolResults(results) {
+  return results.map(r => {
+    if (r.error) return `[${r.tool}] Error: ${r.error}`;
+    if (typeof r.result === 'string') return `[${r.tool}] ${r.result}`;
+    const res = r.result;
+    if (res.papers) {
+      const maxPapers = res.papers.slice(0, 5);
+      const lines = [
+        `[${r.tool}] ${res.count || maxPapers.length} results${res.sourcePaper ? ` (similar to: "${res.sourcePaper}")` : ''}:`,
+        ...maxPapers.map(p => `  - "${p.title}" (${p.year}) - ${p.authors || ''} [${(p.tags || []).join(', ')}]`),
+      ];
+      if (res.summary) lines.push(`  Summary: ${res.summary}`);
+      if (res.contribution) lines.push(`  Contribution: ${res.contribution}`);
+      if (res.limitations) lines.push(`  Limitations: ${res.limitations}`);
+      return lines.join('\n');
+    }
+    return `[${r.tool}] ${JSON.stringify(res).slice(0, 500)}`;
+  }).join('\n\n');
 }
 
 function formatToolResultsFallback(results) {
