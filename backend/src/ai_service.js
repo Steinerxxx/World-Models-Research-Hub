@@ -366,26 +366,29 @@ Rules:
           { role: 'user', content: prompt }
         ],
         temperature: 0,
-        max_tokens: 250
+        max_tokens: 400
       });
 
       const choice = response.choices?.[0];
       let content = choice?.message?.content?.trim();
-      // Fallback: DeepSeek sometimes returns reasoning_content only with empty content
-      if (!content && choice?.message?.reasoning_content) {
-        content = choice.message.reasoning_content.trim();
-      }
+      const reasoningContent = choice?.message?.reasoning_content?.trim();
 
-      if (!content) {
+      if (!content && !reasoningContent) {
         const finishReason = choice?.finish_reason || 'unknown';
-        const hasReasoningOnly = Boolean(choice?.message?.reasoning_content?.trim());
         throw new Error(
-          `Empty AI search parsing response from ${modelName} (finish_reason=${finishReason}, reasoning_only=${hasReasoningOnly})`
+          `Empty AI search parsing response from ${modelName} (finish_reason=${finishReason})`
         );
       }
 
-      const result = JSON.parse(extractJsonObject(content));
-      return normalizeSearchIntent(query, result);
+      // For reasoning models, content may be empty but reasoning_content contains the answer
+      const rawContent = content || reasoningContent;
+      try {
+        const result = JSON.parse(extractJsonObject(rawContent));
+        return normalizeSearchIntent(query, result);
+      } catch (parseError) {
+        console.error(`[DEBUG] ${modelName} raw response (first 500 chars):`, rawContent.slice(0, 500));
+        throw parseError;
+      }
     } catch (error) {
       lastError = error;
       console.warn(`Search intent parsing failed with model ${modelName}:`, error.message);
