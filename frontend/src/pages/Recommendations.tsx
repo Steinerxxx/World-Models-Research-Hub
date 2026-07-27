@@ -80,15 +80,15 @@ export default function Recommendations() {
           <h1 className="text-3xl font-bold tracking-tight">AI Recommendations</h1>
           <p className="text-muted-foreground">
             {favorites.length > 0
-              ? '基于你的收藏论文，为你推荐语义上最相近的研究'
-              : '收藏一些论文后，AI 将基于你的兴趣做个性化推荐'}
+              ? 'Personalized recommendations based on your favorite papers'
+              : 'Add some papers to your favorites for AI-powered recommendations'}
           </p>
         </div>
       </header>
 
       <div className="mb-8 max-w-xl">
         <p className="mb-2 text-sm text-muted-foreground">
-          输入你当前的研究方向，AI 会据此调整推荐结果的侧重
+          Describe your research focus — the AI will tailor recommendations accordingly
         </p>
         <div className="flex gap-2">
           <Input
@@ -120,10 +120,10 @@ export default function Recommendations() {
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {recommendations.usedVectorRecommendations
-                    ? '基于你的收藏 embedding 做个性化向量推荐'
+                    ? 'Vector-based recommendations from your favorites'
                     : recommendations.basedOnFavorites
-                      ? '基于你的收藏偏好和当前意图推荐'
-                      : '基于你当前意图推荐'}
+                      ? 'Recommendations based on your favorites and current intent'
+                      : 'Recommendations based on your current intent'}
                 </p>
                 <p className="mt-2 text-xs text-foreground/80">
                   {recommendations.ai.explanation}
@@ -158,7 +158,7 @@ export default function Recommendations() {
 
         {!recommendations?.items.length && !isLoadingRecommendations && (
           <div className="text-center py-20 text-muted-foreground">
-            <p className="text-xl">收藏一些论文，AI 将为你生成个性化推荐</p>
+            <p className="text-xl">Add favorites to get AI-powered personalized recommendations</p>
           </div>
         )}
       </main>

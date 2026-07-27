@@ -8,45 +8,11 @@ import { useFavorites } from '@/contexts/FavoritesContext';
 import { PaperCard } from '@/components/PaperCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL, FRONTEND_VERSION } from '@/config';
-import { fetchPapersWithFallback, fetchSimilarPaperRecommendations, hybridSearchPapers, semanticSearchPapers, triggerScrape } from '@/lib/api';
+import { fetchPapersWithFallback, fetchSimilarPaperRecommendations, hybridSearchPapers, triggerScrape } from '@/lib/api';
 import { getPaginationPages } from '@/lib/papers';
 import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
 import { usePaperBrowser } from '@/hooks/usePaperBrowser';
-import type { Paper, ParseSearchQueryResponse, SearchFilters, SearchWeights, SemanticSearchResponse, SimilarPaperRecommendationResponse } from '@/types/paper';
-
-const DEFAULT_HYBRID_WEIGHTS: SearchWeights = {
-  semantic: 0.55,
-  keyword: 0.3,
-  recency: 0.15
-};
-
-const SEARCH_SETTINGS_KEY = 'ai-search-settings-v4';
-const HYBRID_PRESETS: Array<{ key: string; label: string; weights: SearchWeights }> = [
-  {
-    key: 'balanced',
-    label: 'Balanced',
-    weights: DEFAULT_HYBRID_WEIGHTS
-  },
-  {
-    key: 'semantic',
-    label: 'Semantic First',
-    weights: { semantic: 0.75, keyword: 0.15, recency: 0.1 }
-  },
-  {
-    key: 'keyword',
-    label: 'Keyword First',
-    weights: { semantic: 0.35, keyword: 0.5, recency: 0.15 }
-  },
-  {
-    key: 'recent',
-    label: 'Recent First',
-    weights: { semantic: 0.35, keyword: 0.2, recency: 0.45 }
-  }
-];
-
-function formatWeight(value: number) {
-  return `${Math.round(value * 100)}%`;
-}
+import type { Paper, ParseSearchQueryResponse, SearchFilters, SearchWeights, SimilarPaperRecommendationResponse } from '@/types/paper';
 
 function sanitizeFilters(filters?: SearchFilters): SearchFilters {
   return {
@@ -70,42 +36,30 @@ function filtersEqual(left: SearchFilters, right: SearchFilters) {
     && (left.year || '') === (right.year || '');
 }
 
-function weightsEqual(left: SearchWeights, right: SearchWeights) {
-  return left.semantic === right.semantic
-    && left.keyword === right.keyword
-    && left.recency === right.recency;
+const SEARCH_SETTINGS_KEY = 'ai-search-settings-v5';
+
+function computeHybridWeights(useSemantic: boolean, useKeyword: boolean): SearchWeights {
+  if (useSemantic && useKeyword) return { semantic: 0.55, keyword: 0.3, recency: 0.15 };
+  if (useSemantic) return { semantic: 0.85, keyword: 0, recency: 0.15 };
+  if (useKeyword) return { semantic: 0, keyword: 0.85, recency: 0.15 };
+  return { semantic: 0, keyword: 0, recency: 1.0 };
 }
 
-function loadInitialSearchSettings() {
+function loadSearchToggles() {
   try {
     const saved = localStorage.getItem(SEARCH_SETTINGS_KEY);
-    if (!saved) {
-      return {
-        filters: {} as SearchFilters,
-        weights: DEFAULT_HYBRID_WEIGHTS
-      };
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (typeof parsed.useSemantic === 'boolean' && typeof parsed.useKeyword === 'boolean') {
+        return { useSemantic: parsed.useSemantic, useKeyword: parsed.useKeyword };
+      }
     }
-
-    const parsed = JSON.parse(saved) as {
-      filters?: SearchFilters;
-      weights?: SearchWeights;
-    };
-
-    return {
-      filters: sanitizeFilters(parsed.filters),
-      weights: parsed.weights || DEFAULT_HYBRID_WEIGHTS
-    };
-  } catch (err) {
-    console.warn('Failed to restore AI search settings:', err);
-    return {
-      filters: {} as SearchFilters,
-      weights: DEFAULT_HYBRID_WEIGHTS
-    };
-  }
+  } catch { /* ignore */ }
+  return { useSemantic: true, useKeyword: true };
 }
 
 export default function Home() {
-  const initialSettings = loadInitialSearchSettings();
+  const initialToggles = loadSearchToggles();
   const [allPapers, setAllPapers] = useState<Paper[]>([]);
   const allPapersRef = useRef<Paper[]>([]);
   const [papers, setPapers] = useState<Paper[]>([]);
@@ -114,13 +68,12 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [usingMockData, setUsingMockData] = useState(false);
   const [fetchErrorDetail, setFetchErrorDetail] = useState<string>('');
-  const [semanticResult, setSemanticResult] = useState<SemanticSearchResponse | null>(null);
-  const [isSemanticSearching, setIsSemanticSearching] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [parsedIntent, setParsedIntent] = useState<ParseSearchQueryResponse | null>(null);
-  const [draftFilters, setDraftFilters] = useState<SearchFilters>(initialSettings.filters);
-  const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialSettings.filters);
-  const [draftHybridWeights, setDraftHybridWeights] = useState<SearchWeights>(initialSettings.weights);
-  const [appliedHybridWeights, setAppliedHybridWeights] = useState<SearchWeights>(initialSettings.weights);
+  const [draftFilters, setDraftFilters] = useState<SearchFilters>({});
+  const [appliedFilters, setAppliedFilters] = useState<SearchFilters>({});
+  const [useSemantic, setUseSemantic] = useState(initialToggles.useSemantic);
+  const [useKeyword, setUseKeyword] = useState(initialToggles.useKeyword);
   const [similarPaperResult, setSimilarPaperResult] = useState<SimilarPaperRecommendationResponse | null>(null);
   const [isLoadingSimilarPapers, setIsLoadingSimilarPapers] = useState(false);
   const [submittedSearchTerm, setSubmittedSearchTerm] = useState('');
@@ -130,7 +83,7 @@ export default function Home() {
   const tagInputRef = useRef<HTMLInputElement>(null);
 
   // Use context for filters
-  const { searchTerm, setSearchTerm, searchMode, setSearchMode, selectedTags, setSelectedTags, toggleTag, itemsPerPage, sortBy } = useFilter();
+  const { searchTerm, setSearchTerm, selectedTags, setSelectedTags, toggleTag, itemsPerPage, sortBy } = useFilter();
   const { favorites, showFavoritesOnly, setShowFavoritesOnly } = useFavorites();
   const location = useLocation();
 
@@ -139,22 +92,14 @@ export default function Home() {
   };
 
   const triggerSearch = () => {
-    const trimmed = searchTerm.trim();
-    setSubmittedSearchTerm(trimmed);
-    if (!trimmed) {
-      setSemanticResult(null);
-      setParsedIntent(null);
-    }
+    setSubmittedSearchTerm(searchTerm.trim());
   };
-  
+
   const [isLogoZoomed, setIsLogoZoomed] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(SEARCH_SETTINGS_KEY, JSON.stringify({
-      filters: appliedFilters,
-      weights: appliedHybridWeights
-    }));
-  }, [appliedFilters, appliedHybridWeights]);
+    localStorage.setItem(SEARCH_SETTINGS_KEY, JSON.stringify({ useSemantic, useKeyword }));
+  }, [useSemantic, useKeyword]);
 
   const fetchPapers = async () => {
     setLoading(true);
@@ -165,7 +110,6 @@ export default function Home() {
     setPapers(result.data);
     setUsingMockData(result.usingMockData);
     setFetchErrorDetail(result.errorDetail);
-    setSemanticResult(null);
     setError(null);
     setLoading(false);
   };
@@ -177,7 +121,6 @@ export default function Home() {
       setPapers(result.data);
       setUsingMockData(result.usingMockData);
       setFetchErrorDetail(result.errorDetail);
-      setSemanticResult(null);
       setError(null);
       setLoading(false);
     };
@@ -203,73 +146,20 @@ export default function Home() {
   useEffect(() => { allPapersRef.current = allPapers; }, [allPapers]);
 
   useEffect(() => {
-    const runSemanticSearch = async () => {
-      if (searchMode !== 'semantic') {
-        if (searchMode === 'keyword') {
-          setPapers(allPapersRef.current);
-          setSemanticResult(null);
-          setParsedIntent(null);
-          setError(null);
-        }
-        return;
-      }
-
-      const query = submittedSearchTerm || buildFilterQuery(appliedFilters);
-      if (!query) {
-        setPapers(allPapersRef.current);
-        setSemanticResult(null);
-        setParsedIntent(null);
-        setError(null);
-        return;
-      }
-
-      setIsSemanticSearching(true);
-      try {
-        const result = await semanticSearchPapers(query, appliedFilters);
-        setSemanticResult(result);
-        setPapers(result.items);
-        setUsingMockData(false);
-        setFetchErrorDetail('');
-        setError(null);
-      } catch (err) {
-        console.error('Semantic search failed:', err);
-        setPapers(allPapersRef.current);
-        setSemanticResult(null);
-        setParsedIntent(null);
-        setError('AI semantic search failed');
-      } finally {
-        setIsSemanticSearching(false);
-      }
-    };
-
-    runSemanticSearch();
-  }, [appliedFilters, searchMode, submittedSearchTerm]);
-
-  useEffect(() => {
-    const runHybridSearch = async () => {
-      if (searchMode !== 'hybrid') {
-        if (searchMode === 'keyword') {
-          setPapers(allPapersRef.current);
-          setSemanticResult(null);
-          setParsedIntent(null);
-          setError(null);
-        }
-        return;
-      }
-
+    const runSearch = async () => {
       const query = submittedSearchTerm || buildFilterQuery(appliedFilters);
 
       if (!query) {
         setPapers(allPapersRef.current);
-        setSemanticResult(null);
         setParsedIntent(null);
         setError(null);
         return;
       }
 
-      setIsSemanticSearching(true);
+      setIsSearching(true);
       try {
-        const result = await hybridSearchPapers(query, appliedFilters, appliedHybridWeights);
+        const weights = computeHybridWeights(useSemantic, useKeyword);
+        const result = await hybridSearchPapers(query, appliedFilters, weights);
         const parsed = result.ai ? { raw: result.parsed, ai: result.ai } : null;
         setParsedIntent(parsed);
         if (parsed?.ai?.filters) {
@@ -279,7 +169,6 @@ export default function Home() {
             setAppliedFilters(suggested);
           }
         }
-        setSemanticResult(result);
         setPapers(result.items);
         setUsingMockData(false);
         setFetchErrorDetail('');
@@ -288,15 +177,14 @@ export default function Home() {
         console.error('Hybrid search failed:', err);
         setPapers(allPapersRef.current);
         setParsedIntent(null);
-        setSemanticResult(null);
-        setError('AI hybrid search failed');
+        setError('Search failed');
       } finally {
-        setIsSemanticSearching(false);
+        setIsSearching(false);
       }
     };
 
-    runHybridSearch();
-  }, [appliedFilters, appliedHybridWeights, searchMode, submittedSearchTerm]);
+    runSearch();
+  }, [appliedFilters, useSemantic, useKeyword, submittedSearchTerm]);
 
   const updateDraftFilter = (key: keyof SearchFilters, value: string) => {
     setDraftFilters(prev => ({
@@ -320,29 +208,7 @@ export default function Home() {
     setAppliedFilters(nextFilters);
   };
 
-  const updateDraftHybridWeight = (key: keyof SearchWeights, value: number) => {
-    setDraftHybridWeights(prev => ({
-      ...prev,
-      [key]: value / 100
-    }));
-  };
-
-  const applyDraftHybridWeights = () => {
-    setAppliedHybridWeights(draftHybridWeights);
-  };
-
-  const applyHybridPreset = (weights: SearchWeights) => {
-    setDraftHybridWeights(weights);
-    setAppliedHybridWeights(weights);
-  };
-
-  const resetHybridWeights = () => {
-    setDraftHybridWeights(DEFAULT_HYBRID_WEIGHTS);
-    setAppliedHybridWeights(DEFAULT_HYBRID_WEIGHTS);
-  };
-
   const hasPendingFilterChanges = !filtersEqual(draftFilters, appliedFilters);
-  const hasPendingWeightChanges = !weightsEqual(draftHybridWeights, appliedHybridWeights);
 
   const handlePaperUpdate = (updatedPaper: Paper) => {
     setAllPapers(prevPapers =>
@@ -403,14 +269,14 @@ export default function Home() {
   } = usePaperBrowser({
     papers,
     searchTerm,
-    highlightTerm: searchMode === 'keyword' ? undefined : (semanticResult?.ai?.rewrittenQuery || semanticResult?.parsed.general || searchTerm),
+    highlightTerm: parsedIntent?.ai?.rewrittenQuery || parsedIntent?.raw.general || searchTerm,
     selectedTags,
     itemsPerPage,
     sortBy,
     favorites,
     showFavoritesOnly,
-    disableTextSearch: searchMode !== 'keyword',
-    preserveOrder: searchMode !== 'keyword'
+    disableTextSearch: true,
+    preserveOrder: true
   });
 
   return (
@@ -485,7 +351,7 @@ export default function Home() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
           <Input
             type="text"
-            placeholder={searchMode === 'keyword' ? 'Search by title, authors, or abstract...' : 'Describe what kind of papers you want...'}
+            placeholder="Describe what kind of papers you want..."
             className="w-full pl-10 pr-24 py-6 text-lg bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/50 rounded-xl shadow-lg backdrop-blur-sm transition-all duration-300"
             value={searchTerm}
             onChange={(e) => updateSearchTerm(e.target.value)}
@@ -510,44 +376,8 @@ export default function Home() {
             )}
           </div>
         </div>
-        <div className="flex flex-wrap justify-center gap-2">
-          <Button
-            variant={searchMode === 'keyword' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSearchMode('keyword')}
-            className="rounded-full"
-          >
-            <Search className="h-4 w-4 mr-1.5" />
-            Keyword Search
-          </Button>
-          <Button
-            variant={searchMode === 'semantic' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSearchMode('semantic')}
-            className="rounded-full"
-          >
-            <Brain className="h-4 w-4 mr-1.5" />
-            AI Semantic Search
-          </Button>
-          <Button
-            variant={searchMode === 'hybrid' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSearchMode('hybrid')}
-            className="rounded-full"
-          >
-            <Sparkles className="h-4 w-4 mr-1.5" />
-            Hybrid Search
-          </Button>
-        </div>
-        {(searchMode === 'semantic' || searchMode === 'hybrid') && (
-          <div className="space-y-4 text-center text-sm text-muted-foreground">
+        <div className="space-y-4 text-center text-sm text-muted-foreground">
             <p>Use natural language to describe the papers you want. Example: recent robot world model papers focused on planning.</p>
-            {semanticResult && (
-              <p>
-                Search source: {semanticResult.status.enabled ? 'pgvector semantic retrieval' : 'fallback semantic matching'}
-                {semanticResult.usedFallbackEmbedding ? ' (fallback mode)' : ''}
-              </p>
-            )}
             <div className="mx-auto grid max-w-3xl gap-4 text-left md:grid-cols-2">
               <div className="rounded-xl border border-border/60 bg-card/60 p-4">
                 <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
@@ -647,89 +477,38 @@ export default function Home() {
                   )}
                 </div>
               </div>
-              {searchMode === 'hybrid' && (
-                <div className="rounded-xl border border-border/60 bg-card/60 p-4">
-                  <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
-                    <Sparkles className="h-4 w-4" />
-                    Hybrid Weights
-                  </div>
-                  <div className="mb-3 flex flex-wrap gap-2">
-                    {HYBRID_PRESETS.map((preset) => (
-                      <Button
-                        key={preset.key}
-                        variant={weightsEqual(appliedHybridWeights, preset.weights) ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => applyHybridPreset(preset.weights)}
-                        className="h-8 rounded-full px-3 text-xs"
-                      >
-                        {preset.label}
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="space-y-3">
-                    <label className="grid gap-1 text-xs">
-                      <span className="flex items-center justify-between text-muted-foreground">
-                        <span>Semantic</span>
-                        <span>{formatWeight(draftHybridWeights.semantic)}</span>
-                      </span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={Math.round(draftHybridWeights.semantic * 100)}
-                        onChange={(e) => updateDraftHybridWeight('semantic', Number(e.target.value))}
-                      />
-                    </label>
-                    <label className="grid gap-1 text-xs">
-                      <span className="flex items-center justify-between text-muted-foreground">
-                        <span>Keyword</span>
-                        <span>{formatWeight(draftHybridWeights.keyword)}</span>
-                      </span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={Math.round(draftHybridWeights.keyword * 100)}
-                        onChange={(e) => updateDraftHybridWeight('keyword', Number(e.target.value))}
-                      />
-                    </label>
-                    <label className="grid gap-1 text-xs">
-                      <span className="flex items-center justify-between text-muted-foreground">
-                        <span>Recency</span>
-                        <span>{formatWeight(draftHybridWeights.recency)}</span>
-                      </span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={Math.round(draftHybridWeights.recency * 100)}
-                        onChange={(e) => updateDraftHybridWeight('recency', Number(e.target.value))}
-                      />
-                    </label>
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="text-xs text-muted-foreground">
-                        Applied: {semanticResult?.weights ? `${formatWeight(semanticResult.weights.semantic)} / ${formatWeight(semanticResult.weights.keyword)} / ${formatWeight(semanticResult.weights.recency)}` : `${formatWeight(appliedHybridWeights.semantic)} / ${formatWeight(appliedHybridWeights.keyword)} / ${formatWeight(appliedHybridWeights.recency)}`}
-                      </span>
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="sm" onClick={resetHybridWeights} className="h-8 px-2 text-xs">
-                          Reset
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={applyDraftHybridWeights}
-                          disabled={!hasPendingWeightChanges}
-                          className="h-8 px-3 text-xs"
-                        >
-                          Apply
-                        </Button>
-                      </div>
-                    </div>
-                    {hasPendingWeightChanges && (
-                      <p className="text-xs text-amber-600">You have unapplied weight changes.</p>
-                    )}
-                  </div>
+              <div className="rounded-xl border border-border/60 bg-card/60 p-4">
+                <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
+                  <Sparkles className="h-4 w-4" />
+                  Search Dimensions
                 </div>
-              )}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={useSemantic}
+                      onChange={(e) => setUseSemantic(e.target.checked)}
+                      className="h-4 w-4 rounded border-border accent-primary"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-foreground">Semantic Search</span>
+                      <p className="text-xs text-muted-foreground">Match papers by meaning, even if terms differ</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={useKeyword}
+                      onChange={(e) => setUseKeyword(e.target.checked)}
+                      className="h-4 w-4 rounded border-border accent-primary"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-foreground">Keyword Matching</span>
+                      <p className="text-xs text-muted-foreground">Match papers by exact terms in title, tags, and abstract</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
             </div>
             {parsedIntent?.ai && (
               <div className="mx-auto max-w-3xl rounded-xl border border-primary/20 bg-primary/5 p-4 text-left">
@@ -768,7 +547,6 @@ export default function Home() {
               </div>
             )}
           </div>
-        )}
         
         {/* Active Filter Indicator */}
         <div className="flex flex-col items-center gap-2">
@@ -827,7 +605,7 @@ export default function Home() {
           </div>
           {!loading && !error && (
             <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">
-              {isSemanticSearching ? 'Running semantic search...' : `Found ${filteredPapers.length} papers`}
+              {isSearching ? 'Searching...' : `Found ${filteredPapers.length} papers`}
             </p>
           )}
         </div>
@@ -861,8 +639,8 @@ export default function Home() {
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {similarPaperResult
-                        ? `基于论文《${similarPaperResult.paperTitle}》的相似论文推荐`
-                        : '正在生成相似论文推荐'}
+                        ? `Similar papers based on: ${similarPaperResult.paperTitle}`
+                        : 'Generating similar paper recommendations...'}
                     </p>
                   </div>
                   {isLoadingSimilarPapers && (
@@ -920,7 +698,7 @@ export default function Home() {
                     copyBibTeX={copyBibTeX}
                     onPaperUpdate={handlePaperUpdate}
                     onRecommendSimilar={handleRecommendSimilar}
-                    matchReasons={(searchMode === 'semantic' || searchMode === 'hybrid') ? paper.match_reasons : undefined}
+                    matchReasons={paper.match_reasons}
                     reasonLabel="Why it matched"
                   />
                 </div>
