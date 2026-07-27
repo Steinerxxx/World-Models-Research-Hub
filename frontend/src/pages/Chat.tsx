@@ -81,10 +81,13 @@ export default function Chat() {
     setLoading(true);
 
     try {
+      // Send recent chat history for multi-turn context
+      const history = messages.map(m => ({ role: m.role, content: m.content }));
+
       const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmed, favorites }),
+        body: JSON.stringify({ message: trimmed, favorites, history }),
       });
 
       const data = await response.json();

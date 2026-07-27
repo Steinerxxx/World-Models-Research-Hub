@@ -5,13 +5,13 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const { message, favorites = [], context = '' } = req.body;
+    const { message, favorites = [], context = '', history = [] } = req.body;
 
     if (!message || !message.trim()) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    const result = await chatWithAgent(message.trim(), favorites, context);
+    const result = await chatWithAgent(message.trim(), favorites, context, history);
     res.json(result);
   } catch (err) {
     console.error('Chat agent error:', err);

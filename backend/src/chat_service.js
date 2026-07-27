@@ -99,7 +99,7 @@ function parseToolCalls(text) {
   return calls.length > 0 ? calls : null;
 }
 
-export async function chatWithAgent(userMessage, favorites, context) {
+export async function chatWithAgent(userMessage, favorites, context, history = []) {
   if (!openai) {
     return { answer: 'AI agent is currently unavailable. Please configure AI_API_KEY.' };
   }
@@ -117,8 +117,15 @@ export async function chatWithAgent(userMessage, favorites, context) {
     } catch { /* non-critical, keep IDs-only fallback */ }
   }
 
+  // Build conversation with recent history (keep last 12 messages = 6 turns)
+  const recentHistory = history.slice(-12).map(m => ({
+    role: m.role === 'user' ? 'user' : 'assistant',
+    content: m.content
+  }));
+
   const messages = [
     { role: 'system', content: SYSTEM_PROMPT },
+    ...recentHistory,
     { role: 'user', content: `${favoriteInfo}\nUser's research context: ${context || 'none'}\n\nUser message: ${userMessage}` }
   ];
 
