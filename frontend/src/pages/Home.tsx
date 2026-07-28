@@ -763,7 +763,7 @@ export default function Home() {
           </div>
           {!loading && !error && (
             <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">
-              {isSearching ? 'Searching...' : `Found ${filteredPapers.length} papers`}
+              {isSearching ? '' : `Found ${filteredPapers.length} papers`}
             </p>
           )}
         </div>
