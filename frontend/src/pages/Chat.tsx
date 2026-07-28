@@ -57,6 +57,7 @@ export default function Chat() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -65,6 +66,13 @@ export default function Chat() {
   useEffect(() => {
     saveMessages(messages);
   }, [messages]);
+
+  // Cancel in-flight request on unmount
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const clearChat = useCallback(() => {
     setMessages([]);
@@ -76,9 +84,15 @@ export default function Chat() {
     if (!trimmed || loading) return;
 
     const userMessage: Message = { role: 'user', content: trimmed };
-    setMessages(prev => [...prev, userMessage]);
+    const next = [...messages, userMessage];
+    setMessages(next);
+    // Save immediately so the message persists even if user navigates away
+    saveMessages(next);
     setInput('');
     setLoading(true);
+
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
 
     try {
       // Send recent chat history for multi-turn context
@@ -88,6 +102,7 @@ export default function Chat() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: trimmed, favorites, history }),
+        signal: abortRef.current.signal,
       });
 
       const data = await response.json();
@@ -97,7 +112,8 @@ export default function Chat() {
         toolsUsed: data.toolsUsed,
       };
       setMessages(prev => [...prev, assistantMessage]);
-    } catch {
+    } catch (err: any) {
+      if (err?.name === 'AbortError') return;
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: 'Sorry, the AI service is currently unavailable. Please try again later.',
