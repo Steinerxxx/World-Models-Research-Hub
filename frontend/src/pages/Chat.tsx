@@ -110,7 +110,7 @@ export default function Chat() {
     const last = stored[stored.length - 1];
     if (last?.role !== 'user') return;
 
-    setLoading(true);
+    // loading already initialized to true from useState — just start polling
     const prevCount = stored.length;
     let elapsed = 0;
 
