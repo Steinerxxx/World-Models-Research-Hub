@@ -192,7 +192,7 @@ export async function chatWithAgent(userMessage, favorites, context, history = [
       model: modelName,
       messages,
       temperature: 0.5,
-      max_tokens: 1200,
+      max_tokens: 4096,
     });
   } catch (err) {
     console.error('Agent final response error:', err.message);
