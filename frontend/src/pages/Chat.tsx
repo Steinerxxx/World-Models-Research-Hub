@@ -69,22 +69,25 @@ async function sendToAgent(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message, favorites, history }),
     });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`Chat API returned ${res.status}: ${text.slice(0, 200)}`);
+    }
     const data = await res.json();
     const assistant: Message = {
       role: 'assistant',
       content: data.answer || 'Sorry, I could not process your request.',
       toolsUsed: data.toolsUsed,
     };
-    const final = [...withUser, assistant];
-    saveMessages(final);
+    saveMessages([...withUser, assistant]);
     return assistant;
-  } catch {
-    const err: Message = {
-      role: 'assistant',
-      content: 'Sorry, the AI service is currently unavailable.',
-    };
-    saveMessages([...withUser, err]);
-    return err;
+  } catch (err) {
+    const msg = err instanceof Error && err.message.startsWith('Chat API')
+      ? `Server error (${err.message.slice(10, 25)})... Please try again.`
+      : 'Sorry, the AI service is currently unavailable. Please try again later.';
+    const error: Message = { role: 'assistant', content: msg };
+    saveMessages([...withUser, error]);
+    return error;
   }
 }
 
@@ -113,11 +116,19 @@ export default function Chat() {
 
     setLoading(true);
     const prevCount = stored.length;
+    let elapsed = 0;
 
     const interval = setInterval(() => {
+      elapsed += 500;
       const latest = loadMessages();
       if (latest.length > prevCount) {
         setMessages(latest);
+        setLoading(false);
+        clearInterval(interval);
+      } else if (elapsed >= 60000) {
+        // Timeout: stop polling, show error
+        saveMessages([...latest, { role: 'assistant', content: 'Request timed out. Please try again.' }]);
+        setMessages(loadMessages());
         setLoading(false);
         clearInterval(interval);
       }
@@ -141,23 +152,17 @@ export default function Chat() {
       const trimmed = (text ?? input).trim();
       if (!trimmed || loading) return;
 
-      const withUser = [...messages, { role: 'user', content: trimmed }];
-      setMessages(withUser);
+      setMessages(prev => [...prev, { role: 'user' as const, content: trimmed }]);
       setInput('');
       setLoading(true);
 
-      const assistant = await sendToAgent(trimmed, favorites, messages);
-      // Component may have unmounted — re-read from localStorage to be safe
+      // sendToAgent persists to localStorage — read back on completion
+      await sendToAgent(trimmed, favorites, messages);
       setMessages(loadMessages());
       setLoading(false);
     },
     [input, loading, messages, favorites]
   );
-
-  // Sync localStorage on every message change (so the polling branch above works)
-  useEffect(() => {
-    if (messages.length > 0) saveMessages(messages);
-  }, [messages]);
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
