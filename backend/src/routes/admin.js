@@ -3,7 +3,8 @@ import { classifyPaper } from '../classifier.js';
 import {
   getAllPapers,
   seedMockData,
-  updatePaperTags
+  updatePaperTags,
+  getUserStats
 } from '../database.js';
 import { adminAuth } from '../middleware/adminAuth.js';
 import { getVectorSearchOverview, indexPaperEmbeddings } from '../vector_service.js';
@@ -56,6 +57,16 @@ router.post('/admin/reindex-embeddings', adminAuth, async (req, res) => {
       message: 'Embedding reindex failed',
       error: err.message
     });
+  }
+});
+
+router.get('/admin/users/stats', adminAuth, async (_req, res) => {
+  try {
+    const stats = await getUserStats();
+    res.json(stats);
+  } catch (err) {
+    console.error('User stats error:', err);
+    res.status(500).json({ message: 'Failed to get user stats' });
   }
 });
 

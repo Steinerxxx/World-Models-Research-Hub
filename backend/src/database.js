@@ -546,6 +546,20 @@ export async function getAllTags() {
   return result;
 }
 
+export async function getUserStats() {
+  if (!isDbConnected) {
+    return { total_users: 0, total_favorites: 0 };
+  }
+  try {
+    const usersResult = await pool.query('SELECT COUNT(*)::int AS total_users FROM users');
+    const totalUsers = usersResult.rows[0]?.total_users || 0;
+    return { total_users: totalUsers };
+  } catch (err) {
+    console.error('getUserStats error:', err.message);
+    return { total_users: 0 };
+  }
+}
+
 export async function seedMockData() {
   const MOCK_PAPERS = [
     {
