@@ -6,6 +6,7 @@ import { Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, X, Star, AlertTr
 import { useFilter } from '@/contexts/FilterContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { PaperCard } from '@/components/PaperCard';
+import { summaryState } from '@/lib/summaryState';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL, FRONTEND_VERSION } from '@/config';
 import { fetchPapersWithFallback, fetchSimilarPaperRecommendations, hybridSearchPapers, triggerScrape } from '@/lib/api';
@@ -161,6 +162,11 @@ export default function Home() {
   };
 
   useEffect(() => { allPapersRef.current = allPapers; }, [allPapers]);
+
+  // Collapse all AI summaries when leaving the page
+  useEffect(() => {
+    return () => { summaryState.collapsed = true; };
+  }, []);
 
   useEffect(() => {
     const runSearch = async () => {

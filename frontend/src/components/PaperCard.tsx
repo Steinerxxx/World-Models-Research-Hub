@@ -9,6 +9,8 @@ import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
 import { analyzePaper } from '@/lib/api';
 import type { Paper } from '@/types/paper';
 
+import { summaryState } from '@/lib/summaryState';
+
 interface PaperCardProps {
   paper: Paper;
   allHighlights: string[];
@@ -40,7 +42,7 @@ export function PaperCard({
   const [hasHiddenAbstractHighlight, setHasHiddenAbstractHighlight] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [showSummary, setShowSummary] = useState(!!paper.summary);
+  const [showSummary, setShowSummary] = useState(!summaryState.collapsed && !!paper.summary);
   const authorsRef = useRef<HTMLDivElement>(null);
   const abstractRef = useRef<HTMLParagraphElement>(null);
   

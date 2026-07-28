@@ -56,6 +56,12 @@ After receiving results, respond in natural language. NEVER repeat the ---TOOLS 
 
 If no tools needed, answer directly. Keep responses concise.`;
 
+function isContextLengthError(err) {
+  const msg = (err.message || '').toLowerCase();
+  return /context.?length|maximum.?context|token.?limit|reduce.?the.?length/i.test(msg)
+    || (err.status === 400 && /length/i.test(msg));
+}
+
 function parseToolCalls(text) {
   // Match ---TOOLS block flexibly — handles single-line, multi-line, \r\n, extra spaces
   const match = text.match(/---TOOLS\s*[\r\n]*([\s\S]*?)[\r\n]*\s*---END/i);
@@ -146,6 +152,9 @@ export async function chatWithAgent(userMessage, favorites, context, history = [
     });
   } catch (err) {
     console.error('Agent API error:', err.message);
+    if (isContextLengthError(err)) {
+      return { answer: 'The conversation is too long for the model to process. Please clear the chat and start a new conversation.' };
+    }
     return { answer: 'Sorry, the AI service is temporarily unavailable. Please try again later.' };
   }
 
@@ -196,7 +205,11 @@ export async function chatWithAgent(userMessage, favorites, context, history = [
     });
   } catch (err) {
     console.error('Agent final response error:', err.message);
-    return { answer: formatToolResultsFallback(toolResults) };
+    const fallback = formatToolResultsFallback(toolResults);
+    if (isContextLengthError(err)) {
+      return { answer: fallback + '\n\n_(Note: The conversation became too long to generate a polished response. Please clear the chat to continue.)_', toolsUsed: toolCalls.map(c => c.tool) };
+    }
+    return { answer: fallback };
   }
 
   let finalContent = response.choices[0]?.message?.content?.trim() || '';
