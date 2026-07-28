@@ -235,6 +235,11 @@ function buildMatchReasons(paper, {
   if (filters.author) reasons.push(`author: ${filters.author}`);
   if (filters.year) reasons.push(`year: ${filters.year}`);
 
+  // Fallback: always show at least the semantic score
+  if (reasons.length === 0) {
+    reasons.push(`semantic match (${Math.round(semanticScore * 100)}%)`);
+  }
+
   return Array.from(new Set(reasons)).slice(0, 4);
 }
 
