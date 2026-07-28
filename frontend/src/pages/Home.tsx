@@ -463,7 +463,7 @@ export default function Home() {
                     <span className="text-xs text-muted-foreground">Enable</span>
                   </label>
                 </div>
-                <div className={enableFilters ? '' : 'opacity-40 pointer-events-none'}>
+                <div className={enableFilters ? 'space-y-3' : 'opacity-40 pointer-events-none space-y-3'}>
                   <label className="grid gap-1 text-xs">
                     <span className="flex items-center gap-1.5 text-muted-foreground">
                       <Tag className="h-3.5 w-3.5" />
@@ -573,6 +573,7 @@ export default function Home() {
                   </label>
                 </div>
                 <div className={enableWeights ? '' : 'opacity-40 pointer-events-none'}>
+                  <div className="flex flex-wrap gap-2 mb-4">
                   {HYBRID_PRESETS.map((preset) => (
                     <Button
                       key={preset.key}
@@ -584,6 +585,7 @@ export default function Home() {
                       {preset.label}
                     </Button>
                   ))}
+                  </div>
                 <div className="space-y-3">
                   <label className="grid gap-1 text-xs">
                     <span className="flex items-center justify-between text-muted-foreground">
@@ -596,6 +598,7 @@ export default function Home() {
                       max="100"
                       value={Math.round(draftHybridWeights.semantic * 100)}
                       onChange={(e) => updateDraftHybridWeight('semantic', Number(e.target.value))}
+                      className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border accent-primary [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
                     />
                   </label>
                   <label className="grid gap-1 text-xs">
@@ -609,6 +612,7 @@ export default function Home() {
                       max="100"
                       value={Math.round(draftHybridWeights.keyword * 100)}
                       onChange={(e) => updateDraftHybridWeight('keyword', Number(e.target.value))}
+                      className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border accent-primary [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
                     />
                   </label>
                   <label className="grid gap-1 text-xs">
@@ -622,6 +626,7 @@ export default function Home() {
                       max="100"
                       value={Math.round(draftHybridWeights.recency * 100)}
                       onChange={(e) => updateDraftHybridWeight('recency', Number(e.target.value))}
+                      className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border accent-primary [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
                     />
                   </label>
                   <div className="flex items-center justify-between pt-1">
