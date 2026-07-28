@@ -548,15 +548,20 @@ export async function getAllTags() {
 
 export async function getUserStats() {
   if (!isDbConnected) {
-    return { total_users: 0, total_favorites: 0 };
+    return { total_users: 0, users: [] };
   }
   try {
-    const usersResult = await pool.query('SELECT COUNT(*)::int AS total_users FROM users');
-    const totalUsers = usersResult.rows[0]?.total_users || 0;
-    return { total_users: totalUsers };
+    const [countResult, usersResult] = await Promise.all([
+      pool.query('SELECT COUNT(*)::int AS total_users FROM users'),
+      pool.query('SELECT username, created_at FROM users ORDER BY created_at DESC')
+    ]);
+    return {
+      total_users: countResult.rows[0]?.total_users || 0,
+      users: usersResult.rows
+    };
   } catch (err) {
     console.error('getUserStats error:', err.message);
-    return { total_users: 0 };
+    return { total_users: 0, users: [] };
   }
 }
 
