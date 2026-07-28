@@ -101,47 +101,29 @@ export default function Chat() {
   const [loading, setLoading] = useState(initial[initial.length - 1]?.role === 'user');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // On mount: if the last message is from user (no response), re-send the request.
-  // This handles the case where the fetch was disconnected by navigation.
+  // On mount: if the last message is from user (no response yet), poll until 
+  // the original sendToAgent (still running in background) writes its result.
   useEffect(() => {
     const stored = loadMessages();
     if (stored.length > initial.length) {
-      // Response already arrived in localStorage while component was unmounted
       setMessages(stored);
-      setLoading(false);
       return;
     }
     const last = stored[stored.length - 1];
-    if (last?.role !== 'user') return; // No pending request
+    if (last?.role !== 'user') return;
 
     setLoading(true);
-    const pendingMsg = last.content;
-    const prevMessages = stored.slice(0, -1);
     const prevCount = stored.length;
-    let settled = false;
-
-    // Fire a re-send immediately — if the original fetch was lost, this ensures a response
-    sendToAgent(pendingMsg, favorites, prevMessages).then(() => {
-      if (settled) return;
-      settled = true;
-      setMessages(loadMessages());
-      setLoading(false);
-    });
-
-    // Also poll: if the ORIGINAL sendToAgent (before navigation) is still alive,
-    // its response may arrive in localStorage before the re-send completes.
     let elapsed = 0;
+
     const interval = setInterval(() => {
-      if (settled) { clearInterval(interval); return; }
       elapsed += 500;
       const latest = loadMessages();
       if (latest.length > prevCount) {
-        settled = true;
         setMessages(latest);
         setLoading(false);
         clearInterval(interval);
       } else if (elapsed >= 60000) {
-        settled = true;
         saveMessages([...latest, { role: 'assistant', content: 'Request timed out. Please try again.' }]);
         setMessages(loadMessages());
         setLoading(false);
@@ -149,10 +131,7 @@ export default function Chat() {
       }
     }, 500);
 
-    return () => {
-      settled = true;
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
