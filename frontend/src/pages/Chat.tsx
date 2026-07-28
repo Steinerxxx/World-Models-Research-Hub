@@ -70,7 +70,7 @@ async function sendToAgent(
       body: JSON.stringify({ message, favorites, history }),
     });
     if (!res.ok) {
-      const text = await res.text().catch(() => '');
+      await res.text().catch(() => {});
       const err: Message = { role: 'assistant', content: `Server error (${res.status}). Please try again.` };
       saveMessages([...withUser, err]);
       return err;
@@ -101,14 +101,12 @@ export default function Chat() {
   const [loading, setLoading] = useState(initial[initial.length - 1]?.role === 'user');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // On mount: if the last message is from user (no response yet), poll until 
+  // On mount: if the last message is from user (no response yet), poll until
   // the original sendToAgent (still running in background) writes its result.
   useEffect(() => {
     const stored = loadMessages();
-    if (stored.length > initial.length) {
-      setMessages(stored);
-      return;
-    }
+    // If response already in localStorage from the initial load, nothing to do
+    if (stored.length > initial.length) return;
     const last = stored[stored.length - 1];
     if (last?.role !== 'user') return;
 
