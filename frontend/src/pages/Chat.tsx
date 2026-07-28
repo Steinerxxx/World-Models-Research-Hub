@@ -51,36 +51,80 @@ function saveMessages(msgs: Message[]) {
   } catch { /* quota exceeded, ignore */ }
 }
 
+// ---- Module-level: runs independently of React lifecycle ----
+
+async function sendToAgent(
+  message: string,
+  favorites: number[],
+  prevMessages: Message[]
+): Promise<Message> {
+  const userMsg: Message = { role: 'user', content: message };
+  const withUser = [...prevMessages, userMsg];
+  saveMessages(withUser);
+
+  try {
+    const history = prevMessages.map(m => ({ role: m.role, content: m.content }));
+    const res = await fetch(`${API_BASE_URL}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, favorites, history }),
+    });
+    const data = await res.json();
+    const assistant: Message = {
+      role: 'assistant',
+      content: data.answer || 'Sorry, I could not process your request.',
+      toolsUsed: data.toolsUsed,
+    };
+    const final = [...withUser, assistant];
+    saveMessages(final);
+    return assistant;
+  } catch {
+    const err: Message = {
+      role: 'assistant',
+      content: 'Sorry, the AI service is currently unavailable.',
+    };
+    saveMessages([...withUser, err]);
+    return err;
+  }
+}
+
+// ---- Component ----
+
 export default function Chat() {
   const { favorites } = useFavorites();
-  const [messages, setMessages] = useState<Message[]>(() => {
-    const msgs = loadMessages();
-    return msgs;
-  });
+  const initial = loadMessages();
+  const [messages, setMessages] = useState<Message[]>(initial);
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(() => {
-    const msgs = loadMessages();
-    // If last message is from user, a response may still be in flight
-    const last = msgs[msgs.length - 1];
-    return last?.role === 'user';
-  });
+  const [loading, setLoading] = useState(initial[initial.length - 1]?.role === 'user');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesRef = useRef<Message[]>([]);
-  // Keep ref in sync so fetch callback can always access latest
-  messagesRef.current = messages;
 
-  // Poll localStorage periodically while loading (covers in-flight responses after page return)
+  // On mount: if a response was written to localStorage while we were away, pick it up.
+  // If the last message is still from the user, poll until a response appears.
   useEffect(() => {
-    if (!loading) return;
+    const stored = loadMessages();
+    if (stored.length > initial.length) {
+      // Response already arrived while component was unmounted
+      setMessages(stored);
+      setLoading(false);
+      return;
+    }
+    const last = stored[stored.length - 1];
+    if (last?.role !== 'user') return; // No pending response
+
+    setLoading(true);
+    const prevCount = stored.length;
+
     const interval = setInterval(() => {
-      const stored = loadMessages();
-      if (stored.length > messagesRef.current.length) {
-        setMessages(stored);
+      const latest = loadMessages();
+      if (latest.length > prevCount) {
+        setMessages(latest);
         setLoading(false);
+        clearInterval(interval);
       }
-    }, 1000);
+    }, 500);
+
     return () => clearInterval(interval);
-  }, [loading]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -92,48 +136,28 @@ export default function Chat() {
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
-  const handleSend = async (text?: string) => {
-    const trimmed = (text ?? input).trim();
-    if (!trimmed || loading) return;
+  const handleSend = useCallback(
+    async (text?: string) => {
+      const trimmed = (text ?? input).trim();
+      if (!trimmed || loading) return;
 
-    const userMessage: Message = { role: 'user', content: trimmed };
-    const withUser = [...messagesRef.current, userMessage];
-    setMessages(withUser);
-    saveMessages(withUser);
-    setInput('');
-    setLoading(true);
+      const withUser = [...messages, { role: 'user', content: trimmed }];
+      setMessages(withUser);
+      setInput('');
+      setLoading(true);
 
-    try {
-      const history = messagesRef.current.map(m => ({ role: m.role, content: m.content }));
-
-      const response = await fetch(`${API_BASE_URL}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmed, favorites, history }),
-      });
-
-      const data = await response.json();
-      const assistantMessage: Message = {
-        role: 'assistant',
-        content: data.answer || 'Sorry, I could not process your request.',
-        toolsUsed: data.toolsUsed,
-      };
-      const finalMessages = [...withUser, assistantMessage];
-      // Persist directly — handles both mounted and unmounted cases
-      saveMessages(finalMessages);
-      setMessages(finalMessages);
+      const assistant = await sendToAgent(trimmed, favorites, messages);
+      // Component may have unmounted — re-read from localStorage to be safe
+      setMessages(loadMessages());
       setLoading(false);
-    } catch {
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Sorry, the AI service is currently unavailable. Please try again later.',
-      };
-      const finalMessages = [...withUser, errorMessage];
-      saveMessages(finalMessages);
-      setMessages(finalMessages);
-      setLoading(false);
-    }
-  };
+    },
+    [input, loading, messages, favorites]
+  );
+
+  // Sync localStorage on every message change (so the polling branch above works)
+  useEffect(() => {
+    if (messages.length > 0) saveMessages(messages);
+  }, [messages]);
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
