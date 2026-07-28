@@ -53,29 +53,42 @@ function saveMessages(msgs: Message[]) {
 
 export default function Chat() {
   const { favorites } = useFavorites();
-  const [messages, setMessages] = useState<Message[]>(loadMessages);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const msgs = loadMessages();
+    return msgs;
+  });
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => {
+    const msgs = loadMessages();
+    // If last message is from user, a response may still be in flight
+    const last = msgs[msgs.length - 1];
+    return last?.role === 'user';
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  const messagesRef = useRef<Message[]>([]);
+  // Keep ref in sync so fetch callback can always access latest
+  messagesRef.current = messages;
+
+  // Poll localStorage periodically while loading (covers in-flight responses after page return)
+  useEffect(() => {
+    if (!loading) return;
+    const interval = setInterval(() => {
+      const stored = loadMessages();
+      if (stored.length > messagesRef.current.length) {
+        setMessages(stored);
+        setLoading(false);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [loading]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  useEffect(() => {
-    saveMessages(messages);
-  }, [messages]);
-
-  // Cancel in-flight request on unmount
-  useEffect(() => {
-    return () => {
-      abortRef.current?.abort();
-    };
-  }, []);
-
   const clearChat = useCallback(() => {
     setMessages([]);
+    setLoading(false);
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
@@ -84,25 +97,19 @@ export default function Chat() {
     if (!trimmed || loading) return;
 
     const userMessage: Message = { role: 'user', content: trimmed };
-    const next = [...messages, userMessage];
-    setMessages(next);
-    // Save immediately so the message persists even if user navigates away
-    saveMessages(next);
+    const withUser = [...messagesRef.current, userMessage];
+    setMessages(withUser);
+    saveMessages(withUser);
     setInput('');
     setLoading(true);
 
-    abortRef.current?.abort();
-    abortRef.current = new AbortController();
-
     try {
-      // Send recent chat history for multi-turn context
-      const history = messages.map(m => ({ role: m.role, content: m.content }));
+      const history = messagesRef.current.map(m => ({ role: m.role, content: m.content }));
 
       const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: trimmed, favorites, history }),
-        signal: abortRef.current.signal,
       });
 
       const data = await response.json();
@@ -111,14 +118,19 @@ export default function Chat() {
         content: data.answer || 'Sorry, I could not process your request.',
         toolsUsed: data.toolsUsed,
       };
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (err: any) {
-      if (err?.name === 'AbortError') return;
-      setMessages(prev => [...prev, {
+      const finalMessages = [...withUser, assistantMessage];
+      // Persist directly — handles both mounted and unmounted cases
+      saveMessages(finalMessages);
+      setMessages(finalMessages);
+      setLoading(false);
+    } catch {
+      const errorMessage: Message = {
         role: 'assistant',
         content: 'Sorry, the AI service is currently unavailable. Please try again later.',
-      }]);
-    } finally {
+      };
+      const finalMessages = [...withUser, errorMessage];
+      saveMessages(finalMessages);
+      setMessages(finalMessages);
       setLoading(false);
     }
   };
