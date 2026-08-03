@@ -18,6 +18,7 @@ import {
   Star,
   LogIn,
   User,
+  Users,
   WandSparkles,
   MessageSquare
 } from 'lucide-react';
@@ -179,6 +180,20 @@ const SidebarContent = ({ isMobile, onClose }: SidebarContentProps) => {
             >
               <MessageSquare className="h-4 w-4" />
               <span className="font-medium">Research Assistant</span>
+            </NavLink>
+
+            <NavLink
+              to="/community"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                  isActive 
+                    ? "bg-primary/10 text-primary font-medium" 
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                }`
+              }
+            >
+              <Users className="h-4 w-4" />
+              <span className="font-medium">Community</span>
             </NavLink>
 
             <NavLink

@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url';
 import adminRoutes from './routes/admin.js';
 import authRoutes from './auth.js';
 import chatRoutes from './routes/chat.js';
+import commentsRoutes from './routes/comments.js';
+import communityRoutes from './routes/community.js';
 import favoritesRoutes from './favorites.js';
 import healthRoutes from './routes/health.js';
 import paperRoutes from './routes/papers.js';
@@ -28,6 +30,8 @@ export function createApp() {
   app.use('/api/auth', authRoutes);
   app.use('/api/favorites', favoritesRoutes);
   app.use('/api', paperRoutes);
+  app.use('/api', commentsRoutes);
+  app.use('/api', communityRoutes);
   app.use('/api/chat', chatRoutes);
   app.use('/api', adminRoutes);
 

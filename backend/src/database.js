@@ -100,6 +100,9 @@ export async function initDatabase() {
     await createUsersTable();
     await createFavoritesTable();
     await createPaperEmbeddingsTable();
+    await createPaperCommentsTable();
+    await createCommunityPostsTable();
+    await createCommunityRepliesTable();
   } catch (err) {
     console.error('❌ Database connection FAILED.');
     console.error('---------------------------------------------------');
@@ -185,6 +188,66 @@ export async function createFavoritesTable() {
     console.log('"favorites" table created or updated.');
   } catch (err) {
     console.error('Error creating favorites table:', err);
+  }
+}
+
+export async function createPaperCommentsTable() {
+  if (!isDbConnected) return;
+  try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS paper_comments (
+        id SERIAL PRIMARY KEY,
+        paper_id INTEGER NOT NULL REFERENCES papers(id) ON DELETE CASCADE,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        content TEXT NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_paper_comments_paper ON paper_comments(paper_id, created_at);
+    `);
+    console.log('"paper_comments" table ready.');
+  } catch (err) {
+    console.error('Error creating paper_comments table:', err);
+  }
+}
+
+export async function createCommunityPostsTable() {
+  if (!isDbConnected) return;
+  try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS community_posts (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_community_posts_time ON community_posts(created_at DESC);
+    `);
+    console.log('"community_posts" table ready.');
+  } catch (err) {
+    console.error('Error creating community_posts table:', err);
+  }
+}
+
+export async function createCommunityRepliesTable() {
+  if (!isDbConnected) return;
+  try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS community_replies (
+        id SERIAL PRIMARY KEY,
+        post_id INTEGER NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        content TEXT NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_community_replies_post ON community_replies(post_id, created_at);
+    `);
+    console.log('"community_replies" table ready.');
+  } catch (err) {
+    console.error('Error creating community_replies table:', err);
   }
 }
 
@@ -544,6 +607,123 @@ export async function getAllTags() {
   tagsCache = result;
   lastTagsCacheUpdate = now;
   return result;
+}
+
+// ── Paper Comments CRUD ──────────────────────────────────────────────
+
+export async function getPaperComments(paperId) {
+  if (!isDbConnected) return [];
+  const result = await query(
+    `SELECT c.id, c.content, c.created_at, c.updated_at, u.username, c.user_id
+     FROM paper_comments c JOIN users u ON c.user_id = u.id
+     WHERE c.paper_id = $1 ORDER BY c.created_at ASC`, [paperId]
+  );
+  return result.rows;
+}
+
+export async function addPaperComment(paperId, userId, content) {
+  const result = await query(
+    `INSERT INTO paper_comments (paper_id, user_id, content) VALUES ($1, $2, $3)
+     RETURNING id, content, created_at`,
+    [paperId, userId, content]
+  );
+  return result.rows[0];
+}
+
+export async function deletePaperComment(commentId, userId) {
+  const result = await query(
+    'DELETE FROM paper_comments WHERE id = $1 AND user_id = $2 RETURNING id',
+    [commentId, userId]
+  );
+  return result.rowCount > 0;
+}
+
+export async function getCommentCounts(paperIds) {
+  if (!isDbConnected || !paperIds.length) return {};
+  const result = await query(
+    `SELECT paper_id, COUNT(*)::int AS count FROM paper_comments
+     WHERE paper_id = ANY($1) GROUP BY paper_id`,
+    [paperIds]
+  );
+  const map = {};
+  for (const row of result.rows) map[row.paper_id] = row.count;
+  return map;
+}
+
+// ── Community CRUD ───────────────────────────────────────────────────
+
+export async function getCommunityPosts(page = 1, limit = 20) {
+  if (!isDbConnected) return { posts: [], total: 0 };
+  const offset = (page - 1) * limit;
+  const [postsResult, countResult] = await Promise.all([
+    query(
+      `SELECT p.id, p.title, p.content, p.created_at, u.username,
+       (SELECT COUNT(*) FROM community_replies WHERE post_id = p.id)::int AS reply_count
+       FROM community_posts p JOIN users u ON p.user_id = u.id
+       ORDER BY p.created_at DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    ),
+    query('SELECT COUNT(*)::int FROM community_posts')
+  ]);
+  return {
+    posts: postsResult.rows,
+    total: countResult.rows[0].count,
+    page,
+    total_pages: Math.ceil(countResult.rows[0].count / limit)
+  };
+}
+
+export async function getCommunityPost(postId) {
+  if (!isDbConnected) return null;
+  const [postResult, repliesResult] = await Promise.all([
+    query(
+      `SELECT p.id, p.title, p.content, p.created_at, u.username, p.user_id
+       FROM community_posts p JOIN users u ON p.user_id = u.id WHERE p.id = $1`,
+      [postId]
+    ),
+    query(
+      `SELECT r.id, r.content, r.created_at, u.username, r.user_id
+       FROM community_replies r JOIN users u ON r.user_id = u.id
+       WHERE r.post_id = $1 ORDER BY r.created_at ASC`,
+      [postId]
+    )
+  ]);
+  if (!postResult.rows[0]) return null;
+  return { ...postResult.rows[0], replies: repliesResult.rows };
+}
+
+export async function addCommunityPost(userId, title, content) {
+  const result = await query(
+    `INSERT INTO community_posts (user_id, title, content) VALUES ($1, $2, $3)
+     RETURNING id, title, content, created_at`,
+    [userId, title, content]
+  );
+  return result.rows[0];
+}
+
+export async function deleteCommunityPost(postId, userId) {
+  const result = await query(
+    'DELETE FROM community_posts WHERE id = $1 AND user_id = $2 RETURNING id',
+    [postId, userId]
+  );
+  return result.rowCount > 0;
+}
+
+export async function addCommunityReply(postId, userId, content) {
+  const result = await query(
+    `INSERT INTO community_replies (post_id, user_id, content) VALUES ($1, $2, $3)
+     RETURNING id, content, created_at`,
+    [postId, userId, content]
+  );
+  return result.rows[0];
+}
+
+export async function deleteCommunityReply(replyId, userId) {
+  const result = await query(
+    'DELETE FROM community_replies WHERE id = $1 AND user_id = $2 RETURNING id',
+    [replyId, userId]
+  );
+  return result.rowCount > 0;
 }
 
 export async function getUserStats() {

@@ -8,6 +8,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { SUBJECT_TAGS, ARCHITECTURE_TAGS } from '@/constants/tags';
 import { analyzePaper } from '@/lib/api';
 import type { Paper } from '@/types/paper';
+import { CommentSection } from './CommentSection';
 
 import { summaryState } from '@/lib/summaryState';
 
@@ -358,6 +359,7 @@ export function PaperCard({
           </div>
         )}
       </CardContent>
+      <CommentSection paperId={paper.id} />
       <CardFooter className="pt-4 border-t border-border/50 flex gap-2">
         {onRecommendSimilar && (
           <Button

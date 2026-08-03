@@ -2,6 +2,7 @@ import { API_BASE_URL } from '@/config';
 import { MOCK_PAPERS } from '@/data/mockData';
 import { buildTagCounts, filterNoiseTags, normalizeTagCounts } from '@/lib/papers';
 import type { Paper, ParseSearchQueryResponse, RecommendationResponse, SearchFilters, SearchWeights, SemanticSearchResponse, SimilarPaperRecommendationResponse, TagCount } from '@/types/paper';
+import type { Comment, CommunityPost, CommunityPostDetail, CommunityReply, CommunityPostsResponse } from '@/types/comment';
 
 interface ApiResult<T> {
   data: T;
@@ -151,5 +152,69 @@ export async function fetchSimilarPaperRecommendations(
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ paperId, query, limit })
+  });
+}
+
+// ── Comments API ─────────────────────────────────────────────────────
+
+export async function fetchComments(paperId: number): Promise<{ comments: Comment[] }> {
+  return requestJson(`/api/papers/${paperId}/comments`, { credentials: 'include' });
+}
+
+export async function addComment(paperId: number, content: string): Promise<Comment> {
+  return requestJson(`/api/papers/${paperId}/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ content })
+  });
+}
+
+export async function deleteComment(commentId: number): Promise<void> {
+  return requestJson(`/api/papers/comments/${commentId}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+}
+
+// ── Community API ─────────────────────────────────────────────────────
+
+export async function fetchCommunityPosts(page = 1, limit = 20): Promise<CommunityPostsResponse> {
+  return requestJson(`/api/community/posts?page=${page}&limit=${limit}`);
+}
+
+export async function fetchCommunityPost(id: number): Promise<CommunityPostDetail> {
+  return requestJson(`/api/community/posts/${id}`);
+}
+
+export async function createCommunityPost(title: string, content: string): Promise<CommunityPost> {
+  return requestJson('/api/community/posts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ title, content })
+  });
+}
+
+export async function deleteCommunityPost(postId: number): Promise<void> {
+  return requestJson(`/api/community/posts/${postId}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+}
+
+export async function addCommunityReply(postId: number, content: string): Promise<CommunityReply> {
+  return requestJson(`/api/community/posts/${postId}/replies`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ content })
+  });
+}
+
+export async function deleteCommunityReply(replyId: number): Promise<void> {
+  return requestJson(`/api/community/replies/${replyId}`, {
+    method: 'DELETE',
+    credentials: 'include'
   });
 }

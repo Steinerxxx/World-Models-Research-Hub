@@ -35,7 +35,7 @@ function clearAuthCookie(res) {
   res.clearCookie(AUTH_COOKIE_NAME, getCookieOptions());
 }
 
-function readAuthToken(req) {
+export function readAuthToken(req) {
   const authorization = req.headers['authorization'];
   if (authorization?.startsWith('Bearer ')) {
     return authorization.split(' ')[1];
