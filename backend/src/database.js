@@ -638,18 +638,6 @@ export async function deletePaperComment(commentId, userId) {
   return result.rowCount > 0;
 }
 
-export async function getCommentCounts(paperIds) {
-  if (!isDbConnected || !paperIds.length) return {};
-  const result = await query(
-    `SELECT paper_id, COUNT(*)::int AS count FROM paper_comments
-     WHERE paper_id = ANY($1) GROUP BY paper_id`,
-    [paperIds]
-  );
-  const map = {};
-  for (const row of result.rows) map[row.paper_id] = row.count;
-  return map;
-}
-
 // ── Community CRUD ───────────────────────────────────────────────────
 
 export async function getCommunityPosts(page = 1, limit = 20) {

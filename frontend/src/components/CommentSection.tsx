@@ -68,7 +68,7 @@ export function CommentSection({ paperId }: Props) {
   };
 
   return (
-    <div className="mt-3">
+    <div>
       <Button
         variant="ghost"
         size="sm"
@@ -122,6 +122,7 @@ export function CommentSection({ paperId }: Props) {
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) handleSubmit(); }}
                 placeholder="Write a comment..."
+                maxLength={2000}
                 className="flex-1 bg-muted/40 rounded-full px-3.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary/30 placeholder:text-muted-foreground/50 transition-all duration-200"
                 disabled={submitting}
               />

@@ -315,51 +315,53 @@ export function PaperCard({
           </div>
         </div>
 
-        {/* AI Analysis Section */}
-        {paper.summary ? (
-          <div className="mt-3 flex justify-end relative">
+      </CardContent>
+
+      {/* Unified action bar */}
+      <div className="px-6 pb-3">
+        <div className="border-t border-border/50 pt-3 flex items-center justify-between gap-3">
+          <CommentSection paperId={paper.id} />
+          {paper.summary ? (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowSummary(!showSummary)}
-              className="text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 h-8 px-3"
+              className="text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 active:scale-95 transition-all duration-200 h-8 px-3 rounded-full flex-shrink-0"
             >
-              <Sparkles className="h-3 w-3 mr-1.5" />
+              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
               {showSummary ? 'Hide AI Summary' : 'View AI Summary'}
             </Button>
-            {showSummary && (
-              <div className="absolute top-full left-0 mt-2 w-full p-4 bg-popover text-popover-foreground rounded-lg shadow-xl border border-border z-40 space-y-2 text-sm max-h-64 overflow-y-auto">
-                <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Core Idea:</span> {paper.summary}</p>
-                <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Innovation:</span> {paper.contribution}</p>
-                <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Limitations:</span> {paper.limitations}</p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="mt-3 flex justify-end">
+          ) : (
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={handleAnalyze} 
               disabled={isAnalyzing}
-              className="text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 h-8 px-3"
+              className="text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 active:scale-95 transition-all duration-200 h-8 px-3 rounded-full flex-shrink-0"
             >
               {isAnalyzing ? (
                 <>
-                  <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
                   Analyzing...
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-3 w-3 mr-1.5" />
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                   Generate AI Summary
                 </>
               )}
             </Button>
+          )}
+        </div>
+        {showSummary && paper.summary && (
+          <div className="mt-2 p-4 bg-popover text-popover-foreground rounded-lg shadow-xl border border-border z-40 space-y-2 text-sm max-h-64 overflow-y-auto">
+            <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Core Idea:</span> {paper.summary}</p>
+            <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Innovation:</span> {paper.contribution}</p>
+            <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Limitations:</span> {paper.limitations}</p>
           </div>
         )}
-      </CardContent>
-      <CommentSection paperId={paper.id} />
+      </div>
+
       <CardFooter className="pt-4 border-t border-border/50 flex gap-2">
         {onRecommendSimilar && (
           <Button

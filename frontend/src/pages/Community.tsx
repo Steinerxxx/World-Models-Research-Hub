@@ -127,6 +127,7 @@ function PostDetail({ post, onBack, onDeleted }: {
             onChange={e => setReplyInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) handleReply(); }}
             placeholder="Write a reply..."
+            maxLength={2000}
             className="flex-1 bg-card/50 border border-border/60 rounded-lg px-3 py-2 text-sm outline-none focus:border-primary/30"
             disabled={replySubmitting}
           />
@@ -297,11 +298,11 @@ export default function Community() {
 
       {totalPages > 1 && (
         <div className="flex justify-center items-center gap-3 mt-8">
-          <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
+          <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading}>
             Prev
           </Button>
           <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
-          <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
+          <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages || loading}>
             Next
           </Button>
         </div>

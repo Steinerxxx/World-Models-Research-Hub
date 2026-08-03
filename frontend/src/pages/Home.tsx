@@ -163,8 +163,9 @@ export default function Home() {
 
   useEffect(() => { allPapersRef.current = allPapers; }, [allPapers]);
 
-  // Collapse all AI summaries when leaving the page
+  // Collapse all AI summaries when leaving, reset when entering
   useEffect(() => {
+    summaryState.collapsed = false;
     return () => { summaryState.collapsed = true; };
   }, []);
 
