@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { fetchComments, addComment, deleteComment } from '@/lib/api';
 import { relativeTime } from '@/lib/time';
+import { focusPanel, usePanelFocus } from '@/lib/panelFocus';
 import type { Comment } from '@/types/comment';
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 export function CommentSection({ paperId }: Props) {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const isFocused = usePanelFocus();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState('');
@@ -36,7 +38,7 @@ export function CommentSection({ paperId }: Props) {
   const handleToggle = () => {
     const next = !isOpen;
     setIsOpen(next);
-    if (next) loadComments();
+    if (next) { focusPanel('comments'); loadComments(); }
   };
 
   const handleSubmit = async () => {
@@ -80,7 +82,7 @@ export function CommentSection({ paperId }: Props) {
       </Button>
 
       {isOpen && (
-        <div className="absolute bottom-full left-0 mb-2 w-80 border border-border/60 rounded-lg bg-card shadow-xl p-3 space-y-3 max-h-72 overflow-y-auto z-30">
+        <div className={`absolute bottom-full left-0 mb-2 w-80 border border-border/60 rounded-lg bg-card shadow-xl p-3 space-y-3 max-h-72 overflow-y-auto ${isFocused('comments') ? 'z-40' : 'z-30'}`} onClick={() => focusPanel('comments')}>
           {loading ? (
             <div className="flex items-center justify-center py-4">
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />

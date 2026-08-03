@@ -11,6 +11,7 @@ import type { Paper } from '@/types/paper';
 import { CommentSection } from './CommentSection';
 
 import { summaryState } from '@/lib/summaryState';
+import { focusPanel, usePanelFocus } from '@/lib/panelFocus';
 
 interface PaperCardProps {
   paper: Paper;
@@ -49,6 +50,7 @@ export function PaperCard({
   
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
   const { showToast } = useToast();
+  const isAiFocused = usePanelFocus();
   const isStarred = isFavorite(paper.id);
 
   const toggleFavorite = (e: React.MouseEvent) => {
@@ -326,14 +328,14 @@ export function PaperCard({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowSummary(!showSummary)}
+                onClick={() => { focusPanel('summary'); setShowSummary(!showSummary); }}
                 className="text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 active:scale-95 transition-all duration-200 h-8 px-3 rounded-full"
               >
                 <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                 {showSummary ? 'Hide AI Summary' : 'View AI Summary'}
               </Button>
               {showSummary && (
-                <div className="absolute bottom-full right-0 mb-2 w-80 p-4 bg-popover text-popover-foreground rounded-lg shadow-xl border border-border z-40 space-y-2 text-sm max-h-72 overflow-y-auto">
+                <div className={`absolute bottom-full right-0 mb-2 w-80 p-4 bg-popover text-popover-foreground rounded-lg shadow-xl border border-border space-y-2 text-sm max-h-72 overflow-y-auto ${isAiFocused('summary') ? 'z-40' : 'z-30'}`} onClick={() => focusPanel('summary')}>
                   <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Core Idea:</span> {paper.summary}</p>
                   <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Innovation:</span> {paper.contribution}</p>
                   <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Limitations:</span> {paper.limitations}</p>
