@@ -45,6 +45,7 @@ export function PaperCard({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [showSummary, setShowSummary] = useState(!summaryState.collapsed && !!paper.summary);
+  const [commentOpen, setCommentOpen] = useState(false);
   const authorsRef = useRef<HTMLDivElement>(null);
   const abstractRef = useRef<HTMLParagraphElement>(null);
   
@@ -164,7 +165,7 @@ export function PaperCard({
   };
 
   return (
-    <Card className={`group relative hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full ${showSummary ? 'relative z-10' : 'hover:relative hover:z-10'}`}>
+    <Card className={`group relative hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full ${(showSummary || commentOpen) ? 'relative z-10' : 'hover:relative hover:z-10'}`}>
       {/* Match reason banner */}
       {matchReasons && matchReasons.length > 0 && (
         <div className="pl-6 pr-14 pt-4 pb-0">
@@ -322,7 +323,7 @@ export function PaperCard({
       {/* Unified action bar */}
       <div className="px-6 pb-3">
         <div className="border-t border-border/50 pt-3 flex items-center justify-between gap-3">
-          <CommentSection paperId={paper.id} />
+          <CommentSection paperId={paper.id} onOpenChange={setCommentOpen} />
           {paper.summary ? (
             <div className="relative flex-shrink-0">
               <Button

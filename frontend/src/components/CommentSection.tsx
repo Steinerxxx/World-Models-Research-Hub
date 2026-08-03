@@ -11,9 +11,10 @@ import type { Comment } from '@/types/comment';
 
 interface Props {
   paperId: number;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function CommentSection({ paperId }: Props) {
+export function CommentSection({ paperId, onOpenChange }: Props) {
   const { user } = useAuth();
   const { showToast } = useToast();
   const isFocused = usePanelFocus();
@@ -39,6 +40,7 @@ export function CommentSection({ paperId }: Props) {
     const next = !isOpen;
     setIsOpen(next);
     if (next) { focusPanel('comments'); loadComments(); }
+    onOpenChange?.(next);
   };
 
   const handleSubmit = async () => {
