@@ -68,7 +68,7 @@ export function CommentSection({ paperId }: Props) {
   };
 
   return (
-    <div>
+    <div className="relative">
       <Button
         variant="ghost"
         size="sm"
@@ -80,7 +80,7 @@ export function CommentSection({ paperId }: Props) {
       </Button>
 
       {isOpen && (
-        <div className="mt-2 border border-border/60 rounded-lg bg-card/50 p-3 space-y-3 max-h-72 overflow-y-auto">
+        <div className="absolute bottom-full left-0 mb-2 w-80 border border-border/60 rounded-lg bg-card shadow-xl p-3 space-y-3 max-h-72 overflow-y-auto z-30">
           {loading ? (
             <div className="flex items-center justify-center py-4">
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
