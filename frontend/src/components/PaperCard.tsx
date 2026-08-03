@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Calendar, Users, Copy, Tag, Sparkles, Loader2, Star, Check, Orbit } from "lucide-react";
@@ -46,6 +47,8 @@ export function PaperCard({
   const [isCopied, setIsCopied] = useState(false);
   const [showSummary, setShowSummary] = useState(!summaryState.collapsed && !!paper.summary);
   const [commentOpen, setCommentOpen] = useState(false);
+  const [summaryPos, setSummaryPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const aiBtnRef = useRef<HTMLDivElement>(null);
   const authorsRef = useRef<HTMLDivElement>(null);
   const abstractRef = useRef<HTMLParagraphElement>(null);
   
@@ -88,6 +91,27 @@ export function PaperCard({
       setIsAnalyzing(false);
     }
   };
+
+  const calcSummaryPos = useCallback(() => {
+    if (!aiBtnRef.current) return;
+    const rect = aiBtnRef.current.getBoundingClientRect();
+    setSummaryPos({
+      left: Math.max(8, rect.right - 320),
+      top: rect.bottom + 8
+    });
+  }, []);
+
+  useEffect(() => {
+    if (showSummary) {
+      calcSummaryPos();
+      window.addEventListener('scroll', calcSummaryPos, true);
+      window.addEventListener('resize', calcSummaryPos);
+      return () => {
+        window.removeEventListener('scroll', calcSummaryPos, true);
+        window.removeEventListener('resize', calcSummaryPos);
+      };
+    }
+  }, [showSummary, calcSummaryPos]);
 
   useEffect(() => {
     const checkTruncation = () => {
@@ -325,7 +349,7 @@ export function PaperCard({
         <div className="border-t border-border/50 pt-3 flex items-center justify-between gap-3">
           <CommentSection paperId={paper.id} onOpenChange={setCommentOpen} />
           {paper.summary ? (
-            <div className="relative flex-shrink-0">
+            <div ref={aiBtnRef} className="flex-shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
@@ -335,12 +359,13 @@ export function PaperCard({
                 <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                 {showSummary ? 'Hide AI Summary' : 'View AI Summary'}
               </Button>
-              {showSummary && (
-                <div className={`absolute top-full right-0 mt-2 w-80 p-4 bg-popover text-popover-foreground rounded-lg shadow-xl border border-border space-y-2 text-sm max-h-72 overflow-y-auto ${isAiFocused('summary') ? 'z-40' : 'z-30'}`} onClick={() => focusPanel('summary')}>
+              {showSummary && createPortal(
+                <div className={`fixed w-80 p-4 bg-popover text-popover-foreground rounded-lg shadow-xl border border-border space-y-2 text-sm max-h-72 overflow-y-auto ${isAiFocused('summary') ? 'z-[100]' : 'z-[99]'}`} style={{ top: summaryPos.top, left: summaryPos.left }} onClick={() => focusPanel('summary')}>
                   <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Core Idea:</span> {paper.summary}</p>
                   <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Innovation:</span> {paper.contribution}</p>
                   <p className="leading-relaxed"><span className="font-semibold text-foreground/80">Limitations:</span> {paper.limitations}</p>
-                </div>
+                </div>,
+                document.body
               )}
             </div>
           ) : (
