@@ -92,7 +92,7 @@ function PostDetail({ post, onBack, onDeleted }: {
 
       <div className="border-t border-border/60 pt-6 mb-6">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
-          <MessageSquare className="h-4 w-4" /> {replies.length} Replies
+          <MessageSquare className="h-4 w-4" /> {replies.length} {replies.length === 1 ? 'Reply' : 'Replies'}
         </h2>
 
         {replies.length === 0 ? (
@@ -287,7 +287,7 @@ export default function Community() {
                 {' · '}{relativeTime(post.created_at)}
                 {' · '}
                 <span className="inline-flex items-center gap-1">
-                  <MessageSquare className="h-3 w-3" /> {post.reply_count} replies
+                  <MessageSquare className="h-3 w-3" /> {post.reply_count} {post.reply_count === 1 ? 'reply' : 'replies'}
                 </span>
               </p>
             </div>

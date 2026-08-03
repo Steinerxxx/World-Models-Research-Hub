@@ -73,10 +73,10 @@ export function CommentSection({ paperId }: Props) {
         variant="ghost"
         size="sm"
         onClick={handleToggle}
-        className="text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 h-8 px-3"
+        className="text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 active:scale-95 transition-all duration-200 h-8 px-3 rounded-full"
       >
         <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
-        {isOpen ? 'Hide' : (comments.length > 0 ? `${comments.length} comments` : 'Comments')}
+        {isOpen ? 'Hide' : (comments.length > 0 ? `${comments.length} comment${comments.length !== 1 ? 's' : ''}` : 'Comments')}
       </Button>
 
       {isOpen && (
@@ -105,10 +105,10 @@ export function CommentSection({ paperId }: Props) {
                 {c.is_owner && (
                   <button
                     onClick={() => confirmDelete(c.id)}
-                    className="flex-shrink-0 text-muted-foreground/40 hover:text-destructive transition-colors"
+                    className="flex-shrink-0 p-1.5 rounded-full text-muted-foreground/30 hover:text-destructive hover:bg-destructive/10 active:scale-90 transition-all duration-200"
                     title="Delete comment"
                   >
-                    <X className="h-3.5 w-3.5" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>
@@ -116,20 +116,20 @@ export function CommentSection({ paperId }: Props) {
           )}
 
           {user ? (
-            <div className="flex gap-2 pt-1 border-t border-border/50">
+            <div className="flex items-center gap-2 pt-2.5 border-t border-border/50">
               <input
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) handleSubmit(); }}
                 placeholder="Write a comment..."
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/50"
+                className="flex-1 bg-muted/40 rounded-full px-3.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary/30 placeholder:text-muted-foreground/50 transition-all duration-200"
                 disabled={submitting}
               />
               <Button
-                size="sm"
+                size="icon"
                 onClick={handleSubmit}
                 disabled={!input.trim() || submitting}
-                className="h-7 px-2.5"
+                className="h-8 w-8 rounded-full active:scale-90 transition-transform duration-150 disabled:opacity-40"
               >
                 {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
               </Button>
